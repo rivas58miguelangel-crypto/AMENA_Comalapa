@@ -1,0 +1,384 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMENA | Ecosistema Digital de Reservas v10.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --amena-blue: #003366;
+            --amena-green: #2E7D32;
+            --amena-beige: #FCFBF7;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--amena-beige);
+            color: #1A1A1A;
+            scroll-behavior: smooth;
+        }
+
+        .step-panel {
+            display: none;
+            min-height: 85vh;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+
+        .step-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .progress-fill {
+            background-color: var(--amena-blue);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-back {
+            color: var(--amena-blue);
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            background: #eef2f7;
+            padding: 8px 16px;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .annex-link {
+            color: var(--amena-blue);
+            font-size: 10px;
+            font-weight: 800;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-main {
+            background-color: var(--amena-blue);
+            color: white;
+            padding: 20px;
+            border-radius: 24px;
+            font-weight: 800;
+            font-size: 14px;
+            width: 100%;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px -5px rgba(0, 51, 102, 0.2);
+        }
+
+        .card-data {
+            background: white;
+            border-radius: 32px;
+            border: 1px solid #F3F4F6;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        .cta-card {
+            background: white;
+            border: 2px solid #F3F4F6;
+            border-radius: 32px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .cta-card:hover {
+            border-color: var(--amena-blue);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body class="pb-24">
+
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b px-6 py-4">
+        <div class="max-w-md mx-auto flex justify-between items-center mb-4">
+            <div class="flex flex-col">
+                <b class="text-xl tracking-tighter uppercase text-[#003366]">AMENA</b>
+                <span class="text-[8px] uppercase tracking-[3px] text-gray-400 font-bold">Comalapa Digital</span>
+            </div>
+            <div class="text-[10px] font-bold text-[#003366]" id="stepTracker">BIENVENIDA</div>
+        </div>
+        <div class="max-w-md mx-auto bg-gray-100 h-1 rounded-full overflow-hidden">
+            <div class="progress-fill h-full w-[5%]" id="pFill"></div>
+        </div>
+    </nav>
+
+    <main class="max-w-md mx-auto px-6 py-8">
+
+        <section id="step0" class="step-panel active space-y-8">
+            <div class="text-center space-y-4">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl">⚖️</span>
+                </div>
+                <h1 class="text-3xl font-extrabold leading-tight text-[#003366]">Hola, Miguel Angel</h1>
+                <p class="text-sm text-gray-500 leading-relaxed px-4">
+                    Te saludamos desde **AMENA**. Este enlace es personalizado basado en tu interés registrado
+                    anteriormente.
+                </p>
+            </div>
+
+            <div class="card-data space-y-4">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Datos de tu
+                    solicitud</p>
+                <div class="flex justify-between items-center border-b pb-3">
+                    <span class="text-[9px] font-bold text-gray-400">ORIGEN</span>
+                    <b class="text-xs text-blue-900">CRM / Redes Sociales</b>
+                </div>
+                <div class="flex justify-between items-center border-b pb-3">
+                    <span class="text-[9px] font-bold text-gray-400">TELÉFONO</span>
+                    <b class="text-xs text-blue-900">+503 7XXX-XXXX</b>
+                </div>
+            </div>
+
+            <div class="p-6 bg-white border-2 rounded-[32px] space-y-4">
+                <div class="flex gap-4 items-start">
+                    <input type="checkbox" id="privacyConsent" class="mt-1 w-5 h-5 accent-blue-900">
+                    <label for="privacyConsent" class="text-[11px] text-gray-500 leading-snug">
+                        Acepto los términos de uso y el **Aviso de Privacidad** para mi proceso de inversión en AMENA.
+                    </label>
+                </div>
+                <button onclick="checkPrivacy()"
+                    class="w-full bg-blue-900 text-white py-5 rounded-2xl font-extrabold text-sm uppercase">
+                    COMENZAR EXPERIENCIA
+                </button>
+            </div>
+        </section>
+
+        <section id="step1" class="step-panel space-y-10">
+            <div class="nav-back" onclick="toStep(0)">← Regresar</div>
+            <div class="text-center">
+                <h2 class="text-[#003366] font-black text-[10px] tracking-[4px] uppercase mb-2">Paso 01</h2>
+                <h1 class="text-4xl font-extrabold leading-tight">Tu estilo de vida</h1>
+                <p class="text-sm text-gray-500 mt-4 px-4 leading-relaxed">Selecciona la tipología que define tu futuro.
+                </p>
+                <div class="mt-4"><span class="annex-link">Ver Master Plan de Categorías →</span></div>
+            </div>
+            <div class="space-y-4">
+                <button onclick="toStep(2, 'Casas')"
+                    class="w-full p-8 rounded-[40px] bg-white border-2 border-gray-100 text-left hover:border-[#003366] shadow-sm">
+                    <b class="text-xl block text-[#003366]">Residencial (Casas)</b>
+                    <span class="text-xs text-gray-400">Unidades con jardín privado.</span>
+                </button>
+                <button onclick="toStep(2, 'Apartamentos')"
+                    class="w-full p-8 rounded-[40px] bg-white border-2 border-gray-100 text-left hover:border-[#003366] shadow-sm">
+                    <b class="text-xl block text-[#003366]">Vertical (Apartamentos)</b>
+                    <span class="text-xs text-gray-400">Torres con vistas panorámicas.</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="step2" class="step-panel space-y-8">
+            <div class="nav-back" onclick="toStep(1)">← Regresar</div>
+            <div class="text-center">
+                <h2 class="text-[#003366] font-black text-[10px] tracking-[4px] uppercase mb-2">Paso 02</h2>
+                <h1 class="text-3xl font-extrabold" id="t2-title">Ubicación Espacial</h1>
+                <div class="mt-4"><span class="annex-link">Ver Análisis de Vistas y Vientos →</span></div>
+            </div>
+            <div id="gridLoc" class="grid grid-cols-6 gap-2"></div>
+        </section>
+
+        <section id="step3" class="step-panel space-y-8">
+            <div class="nav-back" onclick="toStep(2)">← Regresar</div>
+            <div class="text-center">
+                <h2 class="text-[#003366] font-black text-[10px] tracking-[4px] uppercase mb-2">Paso 03</h2>
+                <h1 class="text-3xl font-extrabold">Arquitectura</h1>
+                <div class="mt-4"><span class="annex-link">Ver Catálogo de Acabados Premium →</span></div>
+            </div>
+            <div id="modelList" class="space-y-6"></div>
+        </section>
+
+        <section id="step4" class="step-panel space-y-8">
+            <div class="nav-back" onclick="toStep(3)">← Regresar</div>
+            <div class="text-center">
+                <h2 class="text-[#003366] font-black text-[10px] tracking-[4px] uppercase mb-2">Paso 04</h2>
+                <h1 class="text-3xl font-extrabold" id="t4-title">Altura y Privacidad</h1>
+                <div class="mt-4"><span class="annex-link">Ver Diagrama de Asoleamiento →</span></div>
+            </div>
+            <div id="gridFloors" class="grid grid-cols-2 gap-4"></div>
+        </section>
+
+        <section id="step5" class="step-panel space-y-8">
+            <div class="nav-back" onclick="toStep(4)">← Regresar</div>
+            <div class="text-center">
+                <h2 class="text-[#003366] font-black text-[10px] tracking-[4px] uppercase mb-2">Paso 05</h2>
+                <h1 class="text-3xl font-extrabold">Selección de Unidad</h1>
+                <div class="mt-4"><span class="annex-link">Ver Plano de Planta Técnica →</span></div>
+            </div>
+            <div id="unitGrid" class="grid grid-cols-4 gap-2"></div>
+        </section>
+
+        <section id="step6" class="step-panel space-y-8">
+            <div class="nav-back" onclick="toStep(5)">← Regresar</div>
+            <div class="text-center">
+                <h1 class="text-2xl font-extrabold text-[#003366]">Revisión de la unidad escogida para proceder a la
+                    reserva</h1>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Continuación del paso
+                    cinco</p>
+            </div>
+            <div class="card-data p-8 bg-white border-2 rounded-[40px] space-y-5 shadow-xl">
+                <div class="flex justify-between border-b pb-3"><span
+                        class="text-[9px] font-bold text-gray-400">MODELO</span><b id="fModel" class="text-sm">--</b>
+                </div>
+                <div class="flex justify-between border-b pb-3"><span id="fLocLabel"
+                        class="text-[9px] font-bold text-gray-400">TORRE</span><b id="fLocVal" class="text-sm">--</b>
+                </div>
+                <div class="flex justify-between border-b pb-3"><span id="fSubLabel"
+                        class="text-[9px] font-bold text-gray-400">PISO</span><b id="fSubVal" class="text-sm">--</b>
+                </div>
+                <div class="flex justify-between border-b pb-3"><span
+                        class="text-[9px] font-bold text-gray-400">UNIDAD</span><b id="fUnitVal" class="text-sm">--</b>
+                </div>
+                <div class="flex justify-between border-b pb-3"><span
+                        class="text-[9px] font-bold text-gray-400">INVERSIÓN</span><b id="fPrice"
+                        class="text-sm text-[#003366]">--</b></div>
+                <div class="bg-blue-50 p-4 rounded-2xl flex justify-between"><span
+                        class="text-[10px] font-bold text-blue-900">RESERVA</span><b class="text-xs text-blue-900">24
+                        HORAS</b></div>
+                <button onclick="toStep(7)" class="btn-main mt-4">CONCRETAR RESERVA</button>
+            </div>
+        </section>
+
+        <section id="step7" class="step-panel space-y-8">
+            <div class="nav-back" onclick="toStep(6)">← Regresar</div>
+            <div class="text-center">
+                <h2 class="text-[#003366] font-black text-[10px] tracking-[4px] uppercase mb-2">Paso 07</h2>
+                <h1 class="text-3xl font-extrabold">Pre-evaluación</h1>
+                <div class="mt-4"><span class="annex-link">Ver documentos necesarios para evaluación →</span></div>
+            </div>
+            <div class="bg-white p-8 rounded-[40px] border-2 space-y-4 shadow-sm">
+                <input type="text" placeholder="Nombre completo"
+                    class="w-full p-4 bg-gray-50 rounded-2xl border-none text-sm">
+                <input type="email" placeholder="Correo electrónico"
+                    class="w-full p-4 bg-gray-50 rounded-2xl border-none text-sm">
+                <input type="tel" placeholder="WhatsApp / Teléfono"
+                    class="w-full p-4 bg-gray-50 rounded-2xl border-none text-sm">
+                <button onclick="toStep(8)" class="btn-main">SOLICITAR BLOQUEO TEMPORAL</button>
+            </div>
+        </section>
+
+        <section id="step8" class="step-panel space-y-6">
+            <div class="nav-back" onclick="toStep(7)">← Regresar</div>
+            <div class="text-center mb-8">
+                <h2 class="text-[#003366] font-black text-[10px] tracking-[4px] uppercase mb-2">Paso 08</h2>
+                <h1 class="text-3xl font-extrabold text-[#003366]">Cómo avanzar</h1>
+                <div class="mt-4"><span class="annex-link">Información sobre canales de atención →</span></div>
+            </div>
+            <div class="space-y-4">
+                <div onclick="alert('Sofía iniciando canal...')"
+                    class="cta-card bg-[#2E7D32] text-white border-none shadow-xl">
+                    <span class="text-2xl">🤖</span>
+                    <div class="text-left"><b class="block text-sm">Conversar con Sofía (IA)</b>
+                        <p class="text-[10px] opacity-80 italic">Reserva inmediata o solicita hablar con un humano.</p>
+                    </div>
+                </div>
+                <div onclick="alert('Selector de fecha/hora...')" class="cta-card">
+                    <span class="text-2xl">📅</span>
+                    <div class="text-left"><b class="block text-sm">Agendar llamada programada</b>
+                        <p class="text-[10px] text-gray-400 italic">Tú eliges el momento del contacto.</p>
+                    </div>
+                </div>
+                <a href="tel:50312345678" class="cta-card">
+                    <span class="text-2xl">📞</span>
+                    <div class="text-left"><b class="block text-sm">Llamar ahora (desde tu teléfono)</b>
+                        <p class="text-[10px] text-gray-400 italic">Llamada directa a un asesor comercial.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let sel = { type: 'Casas', loc: null, model: null, sub: null, unit: null };
+
+        function toStep(step, type = null) {
+            if (type) sel.type = type;
+            document.querySelectorAll('.step-panel').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            document.getElementById('pFill').style.width = ((step + 1) * 11.1) + '%';
+            document.getElementById('stepTracker').innerText = step === 0 ? 'BIENVENIDA' : `PASO ${step} DE 8`;
+
+            if (step === 2) renderStep2();
+            if (step === 3) renderStep3();
+            if (step === 4) renderStep4();
+            if (step === 5) renderStep5();
+            if (step === 6) renderSummary();
+            window.scrollTo(0, 0);
+        }
+
+        function checkPrivacy() {
+            if (document.getElementById('privacyConsent').checked) { toStep(1); }
+            else { alert("Por favor, acepta el Aviso de Privacidad."); }
+        }
+
+        function renderStep2() {
+            const isC = sel.type === 'Casas';
+            document.getElementById('t2-title').innerText = isC ? 'Selección de Sector' : 'Selección de Torre';
+            const grid = document.getElementById('gridLoc'); grid.innerHTML = '';
+            for (let i = 1; i <= (isC ? 12 : 28); i++) {
+                grid.innerHTML += `<button onclick="sel.loc=${i}; toStep(3)" class="h-12 bg-white border rounded-2xl text-[10px] font-bold text-gray-400 hover:border-[#003366] transition">${(isC ? 'SEC' : 'T') + i}</button>`;
+            }
+        }
+
+        function renderStep3() {
+            const list = document.getElementById('modelList'); list.innerHTML = '';
+            const models = sel.type === 'Casas' ?
+                [{ n: 'Aura', p: '$79,750', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Aura-Fachada.jpg', a: '64 m²' }, { n: 'Calma', p: '$94,850', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Boreal-Fachada.jpg', a: '73 m²' }] :
+                [{ n: 'Amanecer', p: '$49,900', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Amanecer-Fachada.jpg', a: '38.80 m²' }, { n: 'Boreal', p: '$69,300', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Boreal-Fachada.jpg', a: '55 m²' }];
+            models.forEach(m => {
+                list.innerHTML += `<button onclick='sel.model=${JSON.stringify(m)}; toStep(4)' class="w-full bg-white rounded-[32px] overflow-hidden border text-left hover:border-[#003366] transition shadow-sm">
+                    <img src="${m.i}" class="w-full h-44 object-cover"><div class="p-6 flex justify-between items-center"><div><b class="text-lg block">Modelo ${m.n}</b><span class="text-xs text-gray-400">${m.a}</span></div><span class="text-[#003366] font-black">${m.p}</span></div></button>`;
+            });
+        }
+
+        function renderStep4() {
+            const isC = sel.type === 'Casas';
+            document.getElementById('t4-title').innerText = isC ? 'Sectorización' : 'Nivel de Elevación';
+            const grid = document.getElementById('gridFloors'); grid.innerHTML = '';
+            const count = isC ? 8 : 6;
+            for (let i = 1; i <= count; i++) {
+                grid.innerHTML += `<button onclick="sel.sub=${i}; toStep(5)" class="p-6 bg-white border rounded-3xl text-xs font-bold text-gray-400 hover:border-[#003366] transition">${isC ? 'Sub-Sector' : 'Piso'} ${i}</button>`;
+            }
+        }
+
+        function renderStep5() {
+            const grid = document.getElementById('unitGrid'); grid.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                grid.innerHTML += `<button onclick="sel.unit=${i}; toStep(6)" class="h-12 bg-white border rounded-xl text-[10px] font-bold text-gray-400 hover:border-[#003366] transition">${(i < 10 ? '0' : '') + i}</button>`;
+            }
+        }
+
+        function renderSummary() {
+            const isC = sel.type === 'Casas';
+            document.getElementById('fModel').innerText = sel.model.n;
+            document.getElementById('fLocLabel').innerText = isC ? 'SECTOR' : 'TORRE';
+            document.getElementById('fLocVal').innerText = (isC ? 'Sector ' : 'Torre ') + sel.loc;
+            document.getElementById('fSubLabel').innerText = isC ? 'SUB-SECTOR' : 'PISO';
+            document.getElementById('fSubVal').innerText = (isC ? 'División ' : 'Piso ') + sel.sub;
+            document.getElementById('fUnitVal').innerText = 'Unidad ' + (sel.unit < 10 ? '0' : '') + sel.unit;
+            document.getElementById('fPrice').innerText = sel.model.p;
+        }
+    </script>
+</body>
+
+</html>

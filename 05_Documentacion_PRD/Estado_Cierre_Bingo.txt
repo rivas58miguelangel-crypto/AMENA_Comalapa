@@ -1,0 +1,19 @@
+===========================================================
+ESTADO DEL PROYECTO AMENA - CIERRE DE SESIÓN 29/03/2026
+===========================================================
+ESTRUCTURA LOGRADA:
+- Paso 0: Bridge Page (Personalización, Justificación y Privacidad).
+- Paso 1: Categorización (Casas vs Apartamentos).
+- Paso 2: Selección Espacial (Torre/Sector).
+- Paso 3: Selección de Modelo Arquitectónico.
+- Paso 4: Configuración de Nivel (Piso o Sub-sector).
+- Paso 5: Selección de Unidad Específica.
+- Paso 6: Revisión Técnica y de Inversión (Continuación Paso 5).
+- Paso 7: Pre-evaluación Financiera (Captura de Correo y Datos).
+- Paso 8: Cierre Multicanal (IA Sofía, Llamada Programada, Citas).
+
+OBSERVACIONES PARA MAÑANA:
+- Inyectar datos reales del inventario.
+- Desarrollar las páginas/links de "Anexos de Información" (Dossiers).
+- Pulido de animaciones y refinamiento gráfico final.
+===========================================================
