@@ -2,81 +2,804 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMENA | Visualizador de Inversión v13.5</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
-        rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AMENA · Visualizador Digital v3</title>
     <style>
         :root {
-            --amena-blue: #003366;
-            --amena-green: #2E7D32;
-            --amena-beige: #FCFBF7;
+            --amena-navy: #254F66;
+            --amena-blue: #254F66;
+            --amena-house: #254F66;
+            --amena-house-strong: #1E475C;
+            --amena-house-soft: #B7C9C4;
+            --amena-apartment: #D8862E;
+            --amena-apartment-strong: #C97824;
+            --amena-apartment-soft: #DDD5C9;
+            --amena-stone: #B4ADA4;
+            --amena-stone-2: #E6E0D7;
+            --amena-header: #ADA7A1;
+            --amena-surface: #FAF7F1;
+            --amena-bg: #F0ECE5;
+            --amena-panel: #B7C8C3;
+            --amena-panel-soft: #EDF2EF;
+            --amena-text: #2F3746;
+            --amena-muted: #667085;
+            --amena-border: #D5D6D8;
+            --amena-success: #2CAB5F;
+            --amena-warning: #D9A728;
+            --amena-orange: #D7872E;
+            --shadow-soft: 0 14px 38px rgba(17, 31, 57, 0.08);
+            --shadow-press: 0 10px 24px rgba(35, 79, 102, 0.18);
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 18px;
+            --radius-sm: 14px;
+            --transition: 240ms cubic-bezier(.2, .8, .2, 1);
+            --max-app: 460px;
+            --flow-accent: var(--amena-apartment);
+            --flow-accent-strong: var(--amena-apartment-strong);
+            --flow-accent-soft: var(--amena-stone-2);
+            --flow-button: var(--amena-apartment-strong);
+            --flow-button-hover: #7C7267;
+            --flow-button-shadow: rgba(110, 98, 84, .26);
+        }
+
+        body.theme-apartments {
+            --flow-accent: var(--amena-apartment);
+            --flow-accent-strong: var(--amena-apartment-strong);
+            --flow-accent-soft: #EEE3D6;
+            --flow-button: var(--amena-apartment);
+            --flow-button-hover: #C9771D;
+            --flow-button-shadow: rgba(215, 135, 46, .28);
+        }
+
+        body.theme-houses {
+            --flow-accent: var(--amena-house);
+            --flow-accent-strong: var(--amena-house-strong);
+            --flow-accent-soft: var(--amena-house-soft);
+            --flow-button: var(--amena-house);
+            --flow-button-hover: var(--amena-house-strong);
+            --flow-button-shadow: rgba(35, 79, 102, .26);
+        }
+
+
+        body.theme-apartments .step-chip {
+            color: var(--amena-apartment-strong);
+            border-color: color-mix(in srgb, var(--amena-apartment) 28%, white);
+        }
+
+        body.theme-houses .step-chip {
+            color: var(--amena-house-strong);
+            border-color: color-mix(in srgb, var(--amena-house-strong) 18%, white);
+        }
+
+        body.theme-apartments .progress-fill {
+            background: linear-gradient(90deg, #B97A31 0%, var(--amena-apartment) 62%, #EDB36F 100%);
+            background-size: 180% 100%;
+        }
+
+        body.theme-houses .progress-fill {
+            background: linear-gradient(90deg, var(--amena-house) 0%, #2C6D86 62%, #65A7B8 100%);
+            background-size: 180% 100%;
+        }
+
+        body.theme-apartments .headline,
+        body.theme-apartments .card-title,
+        body.theme-apartments .section-kicker {
+            color: #B66F20;
+        }
+
+        body.theme-apartments .summary-box {
+            background: linear-gradient(180deg, #FFF9F2 0%, #F8EBDD 100%);
+            border-color: color-mix(in srgb, var(--amena-apartment) 42%, white);
+            box-shadow: 0 16px 34px rgba(215, 135, 46, .14);
+        }
+
+        body.theme-apartments .selection-shell {
+            background: linear-gradient(180deg, #FCF7F0 0%, #F6EBDD 100%);
+            border-color: color-mix(in srgb, var(--amena-apartment) 40%, white);
+            box-shadow: 0 16px 34px rgba(215, 135, 46, .12);
+        }
+
+        body.theme-apartments .inline-link {
+            border-color: color-mix(in srgb, var(--amena-apartment) 38%, white);
+            background: linear-gradient(180deg, #FFF9F3 0%, #F7ECDF 100%);
+        }
+
+        body.theme-apartments .inline-link:hover,
+        body.theme-apartments .inline-link:focus-visible {
+            background: #FFF6EC;
+            border-color: var(--amena-apartment);
+            box-shadow: 0 14px 30px rgba(215, 135, 46, .14);
+        }
+
+        body.theme-apartments .inline-link span:last-child {
+            color: var(--amena-apartment-strong);
+        }
+
+        body.theme-apartments .card.interactive:hover,
+        body.theme-apartments .card.interactive:focus-visible {
+            border-color: var(--amena-apartment);
+            box-shadow: 0 24px 42px rgba(215, 135, 46, .16);
+        }
+
+        body.theme-apartments .card.selected {
+            border-color: var(--amena-apartment);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--amena-apartment) 28%, transparent), 0 18px 38px rgba(215, 135, 46, .18);
+            background: linear-gradient(180deg, #FFF9F2 0%, #F6E7D7 100%);
+        }
+
+        body.theme-apartments .btn-secondary {
+            border-color: color-mix(in srgb, var(--amena-apartment) 36%, white);
+            background: linear-gradient(180deg, #FFF9F3 0%, #F7ECDF 100%);
+            color: #A5651E;
+        }
+
+        body.theme-apartments .btn-secondary:hover,
+        body.theme-apartments .btn-secondary:focus-visible {
+            border-color: var(--amena-apartment);
+            background: linear-gradient(180deg, #FFF6EC 0%, #F5E3CF 100%);
+        }
+
+        body.theme-apartments .step-chip {
+            background: #FFF7ED;
+            color: var(--amena-apartment-strong);
+            border-color: color-mix(in srgb, var(--amena-apartment) 42%, white);
+            box-shadow: 0 10px 18px rgba(215, 135, 46, .10);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--amena-beige);
-            color: #1A1A1A;
+            margin: 0;
+            font-family: "Plus Jakarta Sans", "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(180deg, #efebe4 0%, #e7e1d8 100%);
+            color: var(--amena-text);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
             overflow-x: hidden;
         }
 
-        .step-panel {
-            display: none;
-            min-height: 85vh;
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
         }
 
-        .step-panel.active {
-            display: block;
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        a {
+            color: inherit;
         }
 
-        .card-amena {
-            background: white;
-            border-radius: 40px;
-            border: 1px solid rgba(0, 51, 102, 0.05);
-            box-shadow: 0 20px 40px -15px rgba(0, 51, 102, 0.08);
-            transition: all 0.4s ease;
+        .app-shell {
+            min-height: 100vh;
+            padding: 16px 12px 30px;
+        }
+
+        .phone-frame {
+            max-width: var(--max-app);
+            margin: 0 auto;
+            background: linear-gradient(180deg, #f7f4ee 0%, #f1ece4 100%);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 48px rgba(31, 46, 74, 0.09);
+            border-radius: 34px;
             overflow: hidden;
-            cursor: pointer;
         }
 
-        .card-amena:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 60px -20px rgba(0, 51, 102, 0.15);
-            border-color: var(--amena-blue);
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: linear-gradient(180deg, var(--amena-header) 0%, #a8a29d 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, .16);
+            padding: 20px 20px 14px;
         }
 
-        .btn-premium {
-            background: var(--amena-blue);
-            color: white;
-            padding: 22px;
-            border-radius: 24px;
-            font-weight: 800;
-            transition: all 0.3s;
-            box-shadow: 0 10px 25px -5px rgba(0, 51, 102, 0.3);
+        .topbar-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-mark {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            color: #F3EFEA;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-mark svg {
             width: 100%;
-            border: none;
+            height: 100%;
+            display: block;
+        }
+
+        .brand-logo {
+            font-size: clamp(1.95rem, 4vw, 2.35rem);
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            color: #F7F3EE;
+            white-space: nowrap;
+        }
+
+        .brand-sub {
+            margin-top: 4px;
+            color: rgba(255, 255, 255, .78);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .step-chip {
+            flex-shrink: 0;
+            padding: 11px 14px;
+            background: rgba(248, 244, 239, .78);
+            color: var(--flow-accent-strong);
+            border: 1px solid color-mix(in srgb, var(--flow-accent-strong) 18%, white);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            text-align: center;
+            min-width: 124px;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 11px;
+            border-radius: 999px;
+            background: rgba(243, 239, 233, .82);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 10%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--amena-house) 0%, var(--flow-accent) 78%, color-mix(in srgb, var(--flow-accent) 70%, white) 100%);
+            background-size: 180% 100%;
+            animation: progressGlow 2.4s linear infinite;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+            transition: width 380ms cubic-bezier(.2, .8, .2, 1);
+        }
+
+        .screen {
+            padding: 20px 20px 30px;
+            min-height: calc(100vh - 96px);
+            animation: fadeUp .28s ease-out;
+        }
+
+        .back-row {
+            margin-top: 2px;
+            margin-bottom: 14px;
+            min-height: 24px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 0;
+            background: transparent;
+            color: #657085;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 6px 0;
+            cursor: pointer;
+            transition: color var(--transition), transform var(--transition);
+        }
+
+        .back-button:hover,
+        .back-button:focus-visible {
+            color: var(--amena-navy);
+            outline: none;
+            transform: translateX(-2px);
+        }
+
+        .headline {
+            margin: 0 0 6px;
+            color: var(--amena-navy);
+            font-size: clamp(2rem, 5vw, 2.35rem);
+            line-height: 1.08;
+            letter-spacing: -0.04em;
+            font-weight: 900;
+            overflow-wrap: anywhere;
+        }
+
+        .subheadline {
+            margin: 0 0 20px;
+            color: var(--amena-text);
+            font-size: 18px;
+            line-height: 1.33;
+            overflow-wrap: anywhere;
+        }
+
+        .stack {
+            display: grid;
+            gap: 16px;
+        }
+
+        .stack-sm {
+            display: grid;
+            gap: 12px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .grid-1 {
+            display: grid;
+            gap: 14px;
+        }
+
+        .selection-shell {
+            display: grid;
+            gap: 14px;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(180deg, color-mix(in srgb, var(--flow-accent-soft) 88%, white) 0%, rgba(255, 255, 255, .97) 100%);
+            border: 1px solid color-mix(in srgb, var(--flow-accent-strong) 18%, white);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .section-kicker {
+            margin: 0;
+            color: var(--amena-navy);
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .tower-button {
+            width: 100%;
+            padding: 0;
+            background: transparent;
+            text-align: left;
+            border: 0;
+        }
+
+        .tower-lines {
+            display: grid;
+            gap: 4px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .99) 0%, color-mix(in srgb, var(--flow-accent-soft) 44%, white) 100%);
+            border: 1.5px solid color-mix(in srgb, var(--flow-accent-strong) 16%, white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            transition:
+                transform var(--transition),
+                box-shadow var(--transition),
+                border-color var(--transition),
+                background-color var(--transition);
+            position: relative;
+            min-width: 0;
+        }
+
+        .card.interactive {
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card.interactive::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(23, 63, 122, .00), rgba(23, 63, 122, .02));
+            opacity: 0;
+            transition: opacity var(--transition);
+            pointer-events: none;
+        }
+
+        .card.interactive:hover,
+        .card.interactive:focus-visible {
+            border-color: var(--flow-accent-strong);
+            transform: translateY(-3px);
+            box-shadow: 0 24px 42px rgba(52, 63, 79, 0.14);
+            outline: none;
+        }
+
+        .card.interactive:hover::after,
+        .card.interactive:focus-visible::after {
+            opacity: 1;
+        }
+
+        .card.interactive:active {
+            transform: scale(.992);
+            box-shadow: var(--shadow-press);
+        }
+
+        .card.selected {
+            border-color: var(--amena-navy);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--amena-navy) 18%, transparent), 0 18px 38px rgba(52, 63, 79, .12);
+            background: linear-gradient(180deg, #ffffff 0%, var(--flow-accent-soft) 100%);
+            animation: selectedPulse .42s ease-out;
+        }
+
+        .card-body {
+            padding: 18px 18px 16px;
+        }
+
+        .card-title {
+            margin: 0 0 6px;
+            color: var(--amena-navy);
+            font-size: 20px;
+            line-height: 1.16;
+            letter-spacing: -0.02em;
+            font-weight: 900;
+            overflow-wrap: anywhere;
+        }
+
+        .card-text,
+        .card-subtext,
+        .summary-line,
+        .muted-note,
+        .helper,
+        .bullet-list li,
+        .subsector-models li {
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+
+        .card-text {
+            margin: 0;
+            color: var(--amena-text);
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        .card-subtext {
+            margin: 0;
+            color: var(--amena-muted);
+            font-size: 13px;
+            line-height: 1.3;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .02em;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.15;
+            max-width: 100%;
+        }
+
+        .badge.info {
+            background: rgba(35, 79, 102, .10);
+            color: var(--amena-navy);
+        }
+
+        .badge.success {
+            background: var(--amena-success);
+            color: white;
+        }
+
+        .badge.warning {
+            background: var(--amena-warning);
+            color: white;
+        }
+
+        .summary-box {
+            padding: 16px 18px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(180deg, color-mix(in srgb, var(--flow-accent-soft) 82%, white) 0%, rgba(255, 255, 255, .97) 100%);
+            border: 1.5px solid color-mix(in srgb, var(--flow-accent-strong) 18%, white);
+            color: var(--amena-navy);
+            font-size: 16px;
+            line-height: 1.45;
+            font-weight: 900;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .summary-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 4px;
+            align-items: center;
+        }
+
+        .summary-wrap .dot {
+            color: #92a2b8;
+            font-weight: 700;
+        }
+
+        .helper {
+            margin: 0;
+            color: var(--amena-muted);
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .inline-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: space-between;
+            border: 1.5px solid color-mix(in srgb, var(--flow-accent-strong) 18%, white);
+            background: linear-gradient(180deg, color-mix(in srgb, var(--flow-accent-soft) 76%, white) 0%, #fbfaf7 100%);
+            color: var(--amena-navy);
+            border-radius: var(--radius-md);
+            padding: 17px 18px;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .inline-link:hover,
+        .inline-link:focus-visible {
+            background: #fbfdff;
+            border-color: var(--flow-accent-strong);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .inline-link span:last-child {
+            color: color-mix(in srgb, var(--flow-accent-strong) 70%, #5d687a);
+            white-space: nowrap;
+            margin-left: 16px;
+        }
+
+        .actions {
+            display: grid;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            appearance: none;
+            width: 100%;
+            border-radius: 22px;
+            border: 0;
+            min-height: 72px;
+            padding: 18px 20px;
+            font-weight: 900;
+            font-size: 16px;
+            letter-spacing: .02em;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition), border-color var(--transition), color var(--transition);
+            overflow-wrap: anywhere;
+            box-shadow: 0 12px 28px rgba(24, 48, 94, 0.14);
+        }
+
+        .btn:active {
+            transform: scale(.992);
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--flow-button) 0%, color-mix(in srgb, var(--flow-button) 82%, black) 100%);
+            color: white;
+            animation: buttonBreathe 2.8s ease-in-out infinite;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus-visible {
+            background: linear-gradient(180deg, var(--flow-button-hover) 0%, color-mix(in srgb, var(--flow-button-hover) 80%, black) 100%);
+            box-shadow: 0 18px 32px var(--flow-button-shadow);
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .97) 0%, color-mix(in srgb, var(--flow-accent-soft) 72%, white) 100%);
+            color: var(--amena-navy);
+            border: 1.5px solid color-mix(in srgb, var(--flow-accent-strong) 20%, white);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:focus-visible {
+            border-color: color-mix(in srgb, var(--flow-accent-strong) 44%, white);
+            background: color-mix(in srgb, var(--flow-accent-soft) 28%, white);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .btn-accent {
+            background: linear-gradient(180deg, #d8862e 0%, #c97824 100%);
+            color: white;
+        }
+
+        .btn-accent:hover,
+        .btn-accent:focus-visible {
+            background: linear-gradient(180deg, #df8f39 0%, #cf7c28 100%);
+            outline: none;
+        }
+
+        .field-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .field-label {
+            color: var(--amena-navy);
+            font-size: 14px;
+            font-weight: 900;
+            overflow-wrap: anywhere;
+        }
+
+        .field-control,
+        .field-select {
+            width: 100%;
+            border: 1.5px solid var(--amena-border);
+            border-radius: var(--radius-md);
+            padding: 18px 16px;
+            min-height: 66px;
+            background: white;
+            color: var(--amena-text);
+            font-size: 17px;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .field-control:focus,
+        .field-select:focus {
+            border-color: var(--flow-accent-strong);
+            box-shadow: 0 0 0 4px rgba(44, 95, 177, .10), var(--shadow-soft);
+        }
+
+        .check-row {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 18px 16px;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--amena-border);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .97), rgba(246, 241, 233, .99));
+            box-shadow: var(--shadow-soft);
+        }
+
+        .check-row input {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--amena-navy);
+            margin-top: 1px;
+            flex: 0 0 auto;
+        }
+
+        .hero-card {
+            padding: 18px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, color-mix(in srgb, var(--flow-accent-soft) 78%, white) 0%, rgba(255, 255, 255, .96) 100%);
+            border: 1.5px solid color-mix(in srgb, var(--flow-accent-strong) 20%, white);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .bullet-list {
+            display: grid;
+            gap: 8px;
+            margin: 12px 0 0;
+            padding-left: 22px;
+            color: var(--amena-text);
+            font-size: 15px;
+            line-height: 1.45;
+        }
+
+        .subsector-models {
+            display: grid;
+            gap: 8px;
+            margin: 8px 0 0;
+            padding-left: 18px;
+            color: var(--amena-text);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .card-meta {
+            display: grid;
+            gap: 4px;
+        }
+
+        .cta-text {
+            font-size: 18px;
+            line-height: 1.3;
+            font-weight: 900;
+            color: var(--amena-navy);
+            margin: 0 0 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .centered {
+            text-align: center;
+        }
+
+        .foot-link {
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .foot-link button,
+        .foot-link a {
+            border: 0;
+            background: transparent;
+            color: var(--amena-navy);
+            font-size: 14px;
+            font-weight: 900;
+            text-decoration: underline;
+            text-underline-offset: 5px;
             cursor: pointer;
         }
 
-        .btn-premium:hover {
-            background: var(--amena-green);
-            transform: scale(1.02);
+        .note-box {
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, .68);
+            border: 1px dashed #c6ceda;
+            border-radius: 18px;
+            color: var(--amena-muted);
+            font-size: 13px;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         .modal-overlay {
-            display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 51, 102, 0.4);
-            backdrop-filter: blur(15px);
-            z-index: 999;
+            background: rgba(20, 32, 55, 0.46);
+            backdrop-filter: blur(8px);
+            display: none;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 16px;
+            z-index: 100;
         }
 
         .modal-overlay.active {
@@ -84,190 +807,1566 @@
         }
 
         .modal-card {
-            background: white;
-            border-radius: 48px;
-            width: 100%;
-            max-width: 450px;
-            padding: 48px;
-            position: relative;
-            animation: zoomIn 0.4s;
+            width: min(100%, 430px);
+            max-height: min(88vh, 780px);
+            overflow: auto;
+            background: #fff;
+            border-radius: 28px;
+            border: 1px solid rgba(220, 226, 235, 1);
+            box-shadow: 0 32px 80px rgba(18, 31, 58, .22);
+            padding: 20px;
+            animation: zoomIn .2s ease-out;
         }
 
-        .progress-fill {
-            background: linear-gradient(90deg, var(--amena-blue), var(--amena-green));
-            transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);
+        .modal-top {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            margin: 0;
+            color: var(--amena-navy);
+            font-size: 24px;
+            line-height: 1.1;
+            font-weight: 900;
+            overflow-wrap: anywhere;
+        }
+
+        .icon-close {
+            border: 0;
+            background: #f1f5fb;
+            color: var(--amena-navy);
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            font-size: 20px;
+            cursor: pointer;
+            flex: 0 0 auto;
+            transition: transform var(--transition), background-color var(--transition);
+        }
+
+        .icon-close:hover,
+        .icon-close:focus-visible {
+            background: #e6eefb;
+            transform: rotate(90deg);
+            outline: none;
+        }
+
+        .modal-placeholder {
+            display: grid;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .placeholder-visual {
+            min-height: 180px;
+            border-radius: 22px;
+            border: 1.5px dashed #c4cfdf;
+            background:
+                linear-gradient(135deg, rgba(23, 63, 122, .06), rgba(215, 134, 42, .04)),
+                repeating-linear-gradient(45deg, rgba(23, 63, 122, .03) 0 10px, rgba(23, 63, 122, .01) 10px 20px);
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            color: var(--amena-navy);
+            font-weight: 800;
+            text-align: center;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px) scale(.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+
+        .card.disabled {
+            opacity: .68;
+            cursor: not-allowed;
+            box-shadow: none;
+            background: linear-gradient(180deg, #fbfbfa 0%, #f4f1ec 100%);
+        }
+
+        .card.disabled:hover {
+            transform: none;
+        }
+
+        .unit-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 18px;
+        }
+
+        @keyframes selectedPulse {
+            0% {
+                transform: translateY(0) scale(.985);
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes buttonBreathe {
+
+            0%,
+            100% {
+                box-shadow: 0 12px 28px var(--flow-button-shadow);
+            }
+
+            50% {
+                box-shadow: 0 18px 34px var(--flow-button-shadow);
+            }
+        }
+
+        @keyframes progressGlow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @media (max-width: 390px) {
+
+            .screen,
+            .topbar {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .grid-2 {
+                gap: 12px;
+            }
+
+            .card-body {
+                padding: 16px;
+            }
+
+            .headline {
+                font-size: 1.9rem;
+            }
+
+            .subheadline {
+                font-size: 17px;
+            }
+
+            .step-chip {
+                min-width: 112px;
+                font-size: 11px;
+            }
+
+            .btn {
+                min-height: 66px;
+            }
         }
     </style>
 </head>
 
-<body class="pb-24">
-    <div id="infoModal" class="modal-overlay" onclick="closeModal()">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <button class="absolute top-8 right-8 text-gray-300 text-xl" onclick="closeModal()">✕</button>
-            <div id="modalContent" class="space-y-4"></div>
+<body>
+    <div class="app-shell">
+        <div class="phone-frame">
+            <header class="topbar">
+                <div class="topbar-row">
+                    <div class="brand-row">
+                        <div class="brand-mark" aria-hidden="true">
+                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="20" cy="20" r="12" stroke="currentColor" stroke-width="6" />
+                                <circle cx="44" cy="20" r="12" stroke="currentColor" stroke-width="6" />
+                                <circle cx="20" cy="44" r="12" stroke="currentColor" stroke-width="6" />
+                                <circle cx="44" cy="44" r="12" stroke="currentColor" stroke-width="6" />
+                            </svg>
+                        </div>
+                        <div class="brand">
+                            <div class="brand-logo">AMENA</div>
+                            <div class="brand-sub">COMALAPA DIGITAL</div>
+                        </div>
+                    </div>
+                    <div id="stepChip" class="step-chip">PASO 1 DE 14</div>
+                </div>
+                <div class="progress-track" aria-hidden="true">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </header>
+
+            <main id="app" class="screen" aria-live="polite"></main>
         </div>
     </div>
-    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 py-5">
-        <div class="max-w-md mx-auto flex justify-between items-center mb-4">
-            <div class="flex flex-col">
-                <b class="text-2xl tracking-tighter uppercase text-[#003366]">AMENA</b>
-                <span class="text-[9px] uppercase tracking-[4px] text-gray-400 font-bold">Comalapa Digital</span>
+
+    <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-top">
+                <h2 id="modalTitle" class="modal-title">Información</h2>
+                <button class="icon-close" type="button" aria-label="Cerrar" onclick="closeModal()">×</button>
             </div>
-            <div class="text-[10px] font-black text-[#003366] bg-blue-50 px-3 py-1 rounded-full uppercase"
-                id="stepTracker">Bienvenida</div>
+            <div id="modalBody"></div>
         </div>
-        <div class="max-w-md mx-auto bg-gray-100 h-2 rounded-full overflow-hidden">
-            <div class="progress-fill h-full w-[10%]" id="pFill"></div>
-        </div>
-    </nav>
-    <main class="max-w-md mx-auto px-6 py-10">
-        <section id="step0" class="step-panel active space-y-10">
-            <div class="text-center space-y-4">
-                <div
-                    class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6 transform rotate-12">
-                    <span class="text-3xl">⚖️</span></div>
-                <h1 class="text-4xl font-extrabold leading-tight text-[#003366]">Hola, <span
-                        class="text-green-700">Miguel Angel</span></h1>
-                <p class="text-sm text-gray-500 leading-relaxed px-4">Bienvenido a la plataforma de inversión de
-                    <b>AMENA</b>.</p>
-                <button onclick="openModal('privacy')"
-                    class="text-[11px] font-bold text-blue-600 underline underline-offset-4">Ver Aviso de
-                    Privacidad</button>
-            </div>
-            <div class="card-amena p-10 space-y-6 border-t-4 border-t-green-600">
-                <div class="flex gap-4 items-start">
-                    <input type="checkbox" id="privacyConsent"
-                        class="w-6 h-6 rounded accent-green-600 cursor-pointer mt-1">
-                    <label for="privacyConsent" class="text-xs text-gray-600 leading-relaxed">Acepto los términos y el
-                        tratamiento de mis datos personales en AMENA.</label>
-                </div>
-                <button onclick="checkPrivacy()" class="btn-premium uppercase tracking-widest">COMENZAR
-                    EXPERIENCIA</button>
-            </div>
-        </section>
-        <section id="step1" class="step-panel space-y-10">
-            <div onclick="toStep(0)"
-                class="text-[10px] font-black text-gray-400 cursor-pointer uppercase tracking-widest">← Regresar</div>
-            <div class="text-center space-y-2">
-                <h2 class="text-xs font-black text-green-600 uppercase tracking-widest">Paso 01</h2>
-                <h1 class="text-3xl font-extrabold text-[#003366]">Tu Futuro Hogar</h1>
-                <button onclick="openModal('masterplan')" class="text-[11px] font-bold text-blue-600 underline">Ver
-                    Master Plan Maestro</button>
-            </div>
-            <div class="grid gap-6">
-                <div onclick="toStep(2, 'Casas')" class="card-amena p-8 group">
-                    <b class="text-xl text-[#003366] group-hover:text-green-700 transition-colors">Residencial
-                        (Casas)</b>
-                    <p class="text-xs text-gray-400 mt-2">Unidades con jardín privado y áreas recreativas.</p>
-                </div>
-                <div onclick="toStep(2, 'Apartamentos')" class="card-amena p-8 group">
-                    <b class="text-xl text-[#003366] group-hover:text-green-700 transition-colors">Vertical
-                        (Apartamentos)</b>
-                    <p class="text-xs text-gray-400 mt-2">Torres de lujo con vistas al corredor verde.</p>
-                </div>
-            </div>
-        </section>
-        <section id="step2" class="step-panel space-y-8">
-            <div onclick="toStep(1)"
-                class="text-[10px] font-black text-gray-400 cursor-pointer uppercase tracking-widest">← Regresar</div>
-            <h1 class="text-3xl font-extrabold text-[#003366] text-center" id="t2-title">Ubicación</h1>
-            <div class="grid grid-cols-6 gap-3" id="gridLoc"></div>
-        </section>
-        <section id="step3" class="step-panel space-y-8">
-            <div onclick="toStep(2)"
-                class="text-[10px] font-black text-gray-400 cursor-pointer uppercase tracking-widest">← Regresar</div>
-            <h1 class="text-3xl font-extrabold text-[#003366] text-center">Arquitectura</h1>
-            <div id="modelList" class="space-y-8"></div>
-        </section>
-        <section id="step4" class="step-panel space-y-8">
-            <div onclick="toStep(3)"
-                class="text-[10px] font-black text-gray-400 cursor-pointer uppercase tracking-widest">← Regresar</div>
-            <h1 class="text-3xl font-extrabold text-[#003366] text-center">Nivel</h1>
-            <div class="grid grid-cols-2 gap-4" id="gridFloors"></div>
-        </section>
-        <section id="step5" class="step-panel space-y-8">
-            <div onclick="toStep(4)"
-                class="text-[10px] font-black text-gray-400 cursor-pointer uppercase tracking-widest">← Regresar</div>
-            <div id="unitGrid" class="grid grid-cols-4 gap-2"></div>
-        </section>
-        <section id="step6" class="step-panel space-y-8">
-            <div class="card-amena p-10 space-y-6">
-                <h2 class="text-2xl font-extrabold text-[#003366] border-b pb-4">Tu Inversión</h2>
-                <div class="flex justify-between text-sm"><span>Modelo</span><b id="fModel" class="text-blue-900">--</b>
-                </div>
-                <div class="flex justify-between text-sm"><span>Monto Total</span><b class="text-green-700 text-lg"
-                        id="fPrice">--</b></div>
-                <button onclick="toStep(8)" class="btn-premium">RESERVAR AHORA</button>
-            </div>
-        </section>
-        <section id="step8" class="step-panel text-center space-y-8">
-            <h1 class="text-4xl font-extrabold text-[#003366]">¡Perfecto!</h1>
-            <p class="text-sm text-gray-500 px-6">Un asesor especializado se pondrá en contacto contigo.</p>
-            <button onclick="alert('Sofía conectando...')" class="btn-premium bg-green-700">HABLAR CON SOFÍA
-                (IA)</button>
-        </section>
-    </main>
+    </div>
+
     <script>
-        let sel = { type: 'Casas', loc: null, model: null, sub: null, unit: null };
-        function toStep(step, type = null) {
-            if (type) sel.type = type;
-            document.querySelectorAll('.step-panel').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-            document.getElementById('pFill').style.width = ((step + 1) * 11.1) + '%';
-            document.getElementById('stepTracker').innerText = step === 0 ? 'Bienvenida' : `Paso ${step} de 8`;
-            if (step === 2) renderLoc();
-            if (step === 3) renderModels();
-            if (step === 4) renderFloors();
-            if (step === 5) renderUnits();
-            if (step === 6) renderSummary();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        function checkPrivacy() {
-            if (document.getElementById('privacyConsent').checked) toStep(1);
-            else alert("Por favor, acepta el aviso de privacidad.");
-        }
-        function renderLoc() {
-            const isC = sel.type === 'Casas';
-            document.getElementById('t2-title').innerText = isC ? 'Selecciona Sector' : 'Selecciona Torre';
-            const grid = document.getElementById('gridLoc'); grid.innerHTML = '';
-            for (let i = 1; i <= (isC ? 12 : 28); i++) {
-                grid.innerHTML += `<button onclick="sel.loc=${i}; toStep(3)" class="h-14 bg-white border-2 rounded-2xl font-black text-gray-400 hover:border-blue-900 hover:text-blue-900 transition-all">${(isC ? 'S' : 'T') + i}</button>`;
+        const mockData = {
+            lead: {
+                id: 'lead-001',
+                nombre: 'Miguel',
+                canal_origen: 'Facebook',
+                fecha_origen: '03/04/2026',
+                telefono: '7060-0000',
+                email: 'miguel@example.com'
+            },
+            apartments: {
+                sectors: [
+                    {
+                        id: '01', name: 'Sector 01', desc: 'Alta demanda', towers: [
+                            {
+                                id: 'T01', models: {
+                                    'Amanecer': {
+                                        area: '38.8 m²', price: '$49,900', levels: {
+                                            '01': [
+                                                { unit: 'Apt 01', status: 'Disponible' },
+                                                { unit: 'Apt 02', status: 'Pre reservada' },
+                                                { unit: 'Apt 03', status: 'Disponible' },
+                                                { unit: 'Apt 04', status: 'Disponible' },
+                                                { unit: 'Apt 05', status: 'Pre reservada' },
+                                                { unit: 'Apt 06', status: 'Disponible' }
+                                            ],
+                                            '02': [
+                                                { unit: 'Apt 07', status: 'Disponible' },
+                                                { unit: 'Apt 08', status: 'Disponible' }
+                                            ],
+                                            '03': [
+                                                { unit: 'Apt 09', status: 'Pre reservada' },
+                                                { unit: 'Apt 10', status: 'Disponible' }
+                                            ],
+                                            '04': [
+                                                { unit: 'Apt 11', status: 'Disponible' }
+                                            ],
+                                            '05': [
+                                                { unit: 'Apt 12', status: 'Disponible' }
+                                            ],
+                                            '06': [
+                                                { unit: 'Apt 13', status: 'Pre reservada' },
+                                                { unit: 'Apt 14', status: 'Disponible' }
+                                            ]
+                                        }
+                                    },
+                                    'Boreal': {
+                                        area: '55 m²', price: '$69,300', levels: {
+                                            '01': [
+                                                { unit: 'Bpt 01', status: 'Disponible' },
+                                                { unit: 'Bpt 02', status: 'Disponible' }
+                                            ],
+                                            '02': [
+                                                { unit: 'Bpt 03', status: 'Pre reservada' },
+                                                { unit: 'Bpt 04', status: 'Disponible' }
+                                            ]
+                                        }
+                                    },
+                                    'Cénit': {
+                                        area: '64 m²', price: '$79,900', levels: {
+                                            '01': [
+                                                { unit: 'Cpt 01', status: 'Disponible' },
+                                                { unit: 'Cpt 02', status: 'Disponible' }
+                                            ]
+                                        }
+                                    },
+                                    'Destello': {
+                                        area: '72 m²', price: '$89,500', levels: {
+                                            '02': [
+                                                { unit: 'Dpt 01', status: 'Disponible' }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                id: 'T02', models: {
+                                    'Amanecer': {
+                                        area: '38.8 m²', price: '$49,900', levels: {
+                                            '01': [
+                                                { unit: 'Apt 21', status: 'Pre reservada' },
+                                                { unit: 'Apt 22', status: 'Disponible' }
+                                            ]
+                                        }
+                                    },
+                                    'Cénit': {
+                                        area: '64 m²', price: '$79,900', levels: {
+                                            '01': [
+                                                { unit: 'Cpt 21', status: 'Disponible' },
+                                                { unit: 'Cpt 22', status: 'Disponible' }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                id: 'T03', models: {
+                                    'Destello': {
+                                        area: '72 m²', price: '$89,500', levels: {
+                                            '01': [
+                                                { unit: 'Dpt 31', status: 'Disponible' },
+                                                { unit: 'Dpt 32', status: 'Pre reservada' }
+                                            ]
+                                        }
+                                    },
+                                    'Boreal': {
+                                        area: '55 m²', price: '$69,300', levels: {
+                                            '01': [
+                                                { unit: 'Bpt 31', status: 'Disponible' }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                id: 'T04', models: {
+                                    'Amanecer': {
+                                        area: '38.8 m²', price: '$49,900', levels: {
+                                            '01': [
+                                                { unit: 'Apt 41', status: 'Disponible' },
+                                                { unit: 'Apt 42', status: 'Disponible' }
+                                            ]
+                                        }
+                                    },
+                                    'Cénit': {
+                                        area: '64 m²', price: '$79,900', levels: {
+                                            '01': [
+                                                { unit: 'Cpt 41', status: 'Pre reservada' },
+                                                { unit: 'Cpt 42', status: 'Disponible' }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    { id: '02', name: 'Sector 02', desc: 'Cerca de amenidades', towers: [] },
+                    { id: '03', name: 'Sector 03', desc: 'Mejor vista', towers: [] },
+                    { id: '04', name: 'Sector 04', desc: 'Acceso rápido', towers: [] },
+                    { id: '05', name: 'Sector 05', desc: 'Ambiente familiar', towers: [] },
+                    { id: '06', name: 'Sector 06', desc: 'Opciones premium', towers: [] }
+                ]
+            },
+            houses: {
+                sectors: [
+                    {
+                        id: '01', name: 'Sector 01', desc: 'Alta demanda', subsectors: [
+                            {
+                                id: 'A', name: 'Subsector A', models: {
+                                    'Aura': {
+                                        available: 2, reserved: 1, area: '64 m²', price: '$79,750', houses: [
+                                            { unit: 'Casa A-01', status: 'Disponible' },
+                                            { unit: 'Casa A-02', status: 'Pre reservada' },
+                                            { unit: 'Casa A-03', status: 'Disponible' }
+                                        ]
+                                    },
+                                    'Brisa': {
+                                        available: 2, reserved: 0, area: '68 m²', price: '$84,900', houses: [
+                                            { unit: 'Casa B-01', status: 'Disponible' },
+                                            { unit: 'Casa B-02', status: 'Disponible' }
+                                        ]
+                                    },
+                                    'Calma': {
+                                        available: 1, reserved: 1, area: '73 m²', price: '$94,850', houses: [
+                                            { unit: 'Casa C-01', status: 'Disponible' },
+                                            { unit: 'Casa C-02', status: 'Pre reservada' }
+                                        ]
+                                    },
+                                    'Bruma': {
+                                        available: 1, reserved: 0, area: '80 m²', price: '$104,900', houses: [
+                                            { unit: 'Casa D-01', status: 'Disponible' }
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                id: 'B', name: 'Subsector B', models: {
+                                    'Aura': {
+                                        available: 1, reserved: 1, area: '64 m²', price: '$79,750', houses: [
+                                            { unit: 'Casa A-11', status: 'Disponible' },
+                                            { unit: 'Casa A-12', status: 'Pre reservada' }
+                                        ]
+                                    },
+                                    'Brisa': {
+                                        available: 2, reserved: 1, area: '68 m²', price: '$84,900', houses: [
+                                            { unit: 'Casa B-11', status: 'Disponible' },
+                                            { unit: 'Casa B-12', status: 'Disponible' },
+                                            { unit: 'Casa B-13', status: 'Pre reservada' }
+                                        ]
+                                    },
+                                    'Calma': {
+                                        available: 1, reserved: 0, area: '73 m²', price: '$94,850', houses: [
+                                            { unit: 'Casa C-11', status: 'Disponible' }
+                                        ]
+                                    },
+                                    'Bruma': {
+                                        available: 0, reserved: 1, area: '80 m²', price: '$104,900', houses: [
+                                            { unit: 'Casa D-11', status: 'Pre reservada' }
+                                        ]
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    { id: '02', name: 'Sector 02', desc: 'Cerca de amenidades', subsectors: [] },
+                    { id: '03', name: 'Sector 03', desc: 'Mejor vista', subsectors: [] },
+                    { id: '04', name: 'Sector 04', desc: 'Acceso rápido', subsectors: [] }
+                ]
+            },
+            seller: {
+                name: 'Carlos Mejía',
+                whatsapp: '+503 7000-0000'
             }
-        }
-        function renderModels() {
-            const list = document.getElementById('modelList'); list.innerHTML = '';
-            const data = sel.type === 'Casas' ?
-                [{ n: 'Aura', p: '$79,750', a: '64 m²', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Aura-Fachada.jpg' }, { n: 'Calma', p: '$94,850', a: '73 m²', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Boreal-Fachada.jpg' }] :
-                [{ n: 'Amanecer', p: '$49,900', a: '38.8 m²', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Amanecer-Fachada.jpg' }, { n: 'Boreal', p: '$69,300', a: '55 m²', i: 'https://amena.com.sv/wp-content/uploads/2024/02/Boreal-Fachada.jpg' }];
-            data.forEach(m => {
-                list.innerHTML += `<div onclick='sel.model=${JSON.stringify(m)}; toStep(4)' class="card-amena group"><div class="relative h-56 overflow-hidden"><img src="${m.i}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"></div><div class="p-8 flex justify-between items-center"><div><b class="text-xl block text-blue-900">${m.n}</b><span class="text-xs text-gray-400">${m.a}</span></div><b class="text-2xl text-green-700">${m.p}</b></div></div>`;
+        };
+
+        const apartmentSeedTowers = JSON.parse(JSON.stringify(mockData.apartments.sectors[0].towers));
+        mockData.apartments.sectors = mockData.apartments.sectors.map((sector, sectorIndex) => {
+            if (sector.towers && sector.towers.length) return sector;
+            const clonedTowers = JSON.parse(JSON.stringify(apartmentSeedTowers)).map((tower, towerIndex) => ({
+                ...tower,
+                id: `T${sectorIndex + 1}${towerIndex + 1}`
+            }));
+            return { ...sector, towers: clonedTowers };
+        });
+
+
+        function normalizeApartmentUnits() {
+            mockData.apartments.sectors.forEach(sector => {
+                sector.towers.forEach(tower => {
+                    Object.values(tower.models).forEach(model => {
+                        Object.entries(model.levels).forEach(([levelKey, units]) => {
+                            model.levels[levelKey] = units.map(item => {
+                                const digits = String(item.unit).match(/(\d+)/g);
+                                const numeric = digits ? digits.join('').slice(-2).padStart(2, '0') : '01';
+                                return { ...item, unit: `Apt ${numeric}` };
+                            });
+                        });
+                    });
+                });
             });
         }
-        function renderFloors() {
-            const grid = document.getElementById('gridFloors'); grid.innerHTML = '';
-            for (let i = 1; i <= 6; i++) {
-                grid.innerHTML += `<button onclick="sel.sub=${i}; toStep(5)" class="p-8 bg-white border-2 rounded-[32px] font-bold text-gray-400 hover:border-blue-900 hover:text-blue-900 transition-all">Nivel ${i}</button>`;
+
+        normalizeApartmentUnits();
+
+        const houseSeedSubsectors = JSON.parse(JSON.stringify(mockData.houses.sectors[0].subsectors));
+        mockData.houses.sectors = mockData.houses.sectors.map((sector, sectorIndex) => {
+            if (sector.subsectors && sector.subsectors.length) return sector;
+            const clonedSubsectors = JSON.parse(JSON.stringify(houseSeedSubsectors)).map((subsector, subIndex) => ({
+                ...subsector,
+                id: `${String.fromCharCode(65 + subIndex)}${sectorIndex + 1}`,
+                name: `Subsector ${String.fromCharCode(65 + subIndex)}`
+            }));
+            return { ...sector, subsectors: clonedSubsectors };
+        });
+
+        const flowConfig = {
+            apartments: [
+                { key: 'welcome', title: 'Bienvenido al visualizador digital' },
+                { key: 'housingType', title: 'Tu Futuro Hogar' },
+                { key: 'sector', title: 'Selecciona Sector' },
+                { key: 'tower', title: 'Selecciona Torre' },
+                { key: 'apartmentModel', title: 'Selecciona Modelo de Apartamento' },
+                { key: 'level', title: 'Selecciona Nivel' },
+                { key: 'apartment', title: 'Selecciona Apartamento' },
+                { key: 'review', title: 'Tu Pre Reserva' },
+                { key: 'preReserveConfirmation', title: 'Confirmación de pre reserva' },
+                { key: 'ctaSelection', title: 'Tu siguiente paso con AMENA' },
+                { key: 'ctaConversation', title: 'Conversa con nuestro agente digital' },
+                { key: 'ctaCall', title: 'Agenda recibir una llamada de nuestro agente digital' },
+                { key: 'ctaVisit', title: 'Agenda una cita al proyecto o a nuestra oficina de ventas' },
+                { key: 'finalConfirmation', title: 'Proceso finalizado correctamente' }
+            ],
+            houses: [
+                { key: 'welcome', title: 'Bienvenido al visualizador digital' },
+                { key: 'housingType', title: 'Tu Futuro Hogar' },
+                { key: 'sector', title: 'Selecciona Sector' },
+                { key: 'subsector', title: 'Selecciona Sub sector' },
+                { key: 'houseModel', title: 'Selecciona Modelo de Casa' },
+                { key: 'house', title: 'Selecciona Casa de tu preferencia' },
+                { key: 'review', title: 'Tu Pre Reserva' },
+                { key: 'preReserveConfirmation', title: 'Confirmación de pre reserva' },
+                { key: 'ctaSelection', title: 'Tu siguiente paso con AMENA' },
+                { key: 'ctaConversation', title: 'Conversa con nuestro agente digital' },
+                { key: 'ctaCall', title: 'Agenda recibir una llamada de nuestro agente digital' },
+                { key: 'ctaVisit', title: 'Agenda una cita al proyecto o a nuestra oficina de ventas' },
+                { key: 'finalConfirmation', title: 'Proceso finalizado correctamente' }
+            ]
+        };
+
+        const stepDescriptions = {
+            welcome: 'Conoce mejor el proyecto, revisa disponibilidad y avanza hacia una pre reserva con mayor claridad.',
+            housingType: 'Selecciona el tipo de vivienda que deseas explorar dentro del proyecto.',
+            sector: 'Elige el sector en el que deseas explorar disponibilidad.',
+            tower: 'Estas son las torres que actualmente cuentan con apartamentos disponibles o pre reservados dentro del sector elegido.',
+            apartmentModel: 'Revisa el área y el valor referencial de los modelos disponibles antes de continuar.',
+            level: 'Mostramos únicamente niveles con apartamentos disponibles o pre reservados para el modelo seleccionado.',
+            apartment: 'Mostramos únicamente apartamentos disponibles o pre reservados en este nivel.',
+            subsector: 'Selecciona el sub sector que mejor se adapte a la alternativa que estás evaluando.',
+            houseModel: 'Revisa el área y el valor referencial de los modelos de casa disponibles antes de continuar.',
+            house: 'Mostramos únicamente casas disponibles o pre reservadas para el modelo seleccionado.',
+            review: 'Revisa cuidadosamente la información de la unidad seleccionada antes de confirmar tu pre reserva.',
+            preReserveConfirmation: 'Tu solicitud ya fue registrada. Ahora puedes continuar con los siguientes pasos de acompañamiento.',
+            ctaSelection: 'Ya registramos tu pre reserva. Ahora elige cómo deseas continuar para recibir atención y acompañamiento.',
+            ctaConversation: 'Por texto o voz, podrás aclarar cualquier duda, de cualquier índole que sea.',
+            ctaCall: 'A tu teléfono móvil en el día y hora de tu preferencia.',
+            ctaVisit: 'En el momento disponible que mejor te convenga.',
+            finalConfirmation: 'El proceso ha finalizado exitosamente. Gracias por tu interés en AMENA.'
+        };
+
+        const modalContent = {
+            privacy: {
+                title: 'Aviso de Privacidad',
+                body: '<p class="helper">Tus datos se utilizan exclusivamente para gestionar tu interés en AMENA y acompañarte durante este proceso comercial.</p><div class="modal-placeholder"><div class="placeholder-visual">Espacio preparado para contenido legal completo, tablas o documento integrado.</div></div>'
+            },
+            masterplan: {
+                title: 'Ver Master Plan Maestro',
+                body: '<p class="helper">Contenido informativo del Master Plan pendiente de carga final.</p><div class="modal-placeholder"><div class="placeholder-visual">Aquí podrá mostrarse una imagen, tabla o explicación detallada del proyecto.</div></div>'
+            },
+            sectors: {
+                title: 'Ver sectores del proyecto',
+                body: '<p class="helper">Contenido informativo pendiente de carga para sectores del proyecto.</p><div class="modal-placeholder"><div class="placeholder-visual">Overlay preparado para mapa, tabla o imagen explicativa.</div></div>'
+            },
+            towers: {
+                title: 'Ver torres disponibles en este sector',
+                body: '<p class="helper">Contenido informativo pendiente de carga para torres disponibles.</p><div class="modal-placeholder"><div class="placeholder-visual">Aquí podrá mostrarse una distribución visual por torre.</div></div>'
+            },
+            modelDistribution: {
+                title: 'Vea los detalles de cada uno de los modelos de apartamentos disponibles',
+                body: '<p class="helper">Contenido informativo pendiente de carga para los detalles de los modelos de apartamentos disponibles.</p><div class="modal-placeholder"><div class="placeholder-visual">Aquí podrá mostrarse el detalle de área, precio, distribución y atributos clave de cada modelo.</div></div>'
+            },
+            levels: {
+                title: 'Ver niveles disponibles en esta torre',
+                body: '<p class="helper">Contenido informativo pendiente de carga para niveles disponibles.</p><div class="modal-placeholder"><div class="placeholder-visual">Aquí podrá mostrarse una tabla con disponibilidad por nivel.</div></div>'
+            },
+            apartments: {
+                title: 'Ver apartamentos disponibles en este nivel',
+                body: '<p class="helper">Contenido informativo pendiente de carga para apartamentos disponibles en este nivel.</p><div class="modal-placeholder"><div class="placeholder-visual">Overlay preparado para listado, plano o matriz de disponibilidad.</div></div>'
+            },
+            subsectors: {
+                title: 'Ver sub sectores en este sector',
+                body: '<p class="helper">Contenido informativo pendiente de carga para sub sectores.</p><div class="modal-placeholder"><div class="placeholder-visual">Aquí podrá mostrarse una tabla o mapa con sub sectores.</div></div>'
+            },
+            houseModels: {
+                title: 'Ver modelos de casa disponibles',
+                body: '<p class="helper">Contenido informativo pendiente de carga para modelos de casa disponibles.</p><div class="modal-placeholder"><div class="placeholder-visual">Overlay preparado para modelos, áreas, precios e imágenes.</div></div>'
+            },
+            houses: {
+                title: 'Ver casas disponibles en esta zona',
+                body: '<p class="helper">Contenido informativo pendiente de carga para casas disponibles en esta zona.</p><div class="modal-placeholder"><div class="placeholder-visual">Aquí podrá mostrarse una imagen o tabla por casa.</div></div>'
+            }
+        };
+
+        const APP_VERSION = 'amena-v12';
+
+        const defaultState = {
+            appVersion: APP_VERSION,
+            flow: 'apartments',
+            stepIndex: 0,
+            selectedType: '',
+            sectorId: '',
+            towerId: '',
+            apartmentModelName: '',
+            levelId: '',
+            apartmentUnit: '',
+            subSectorId: '',
+            houseModelName: '',
+            houseUnit: '',
+            reservationStatus: 'Disponible',
+            reservationValidity: '7 días',
+            selectedCTA: '',
+            callPhone: mockData.lead.telefono,
+            callDate: '2026-04-10',
+            callTime: '10:30',
+            visitType: 'proyecto',
+            visitDate: '2026-04-12',
+            visitTime: '14:00'
+        };
+
+        let state = loadState();
+        const app = document.getElementById('app');
+        const stepChip = document.getElementById('stepChip');
+        const progressFill = document.getElementById('progressFill');
+
+        function loadState() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('amena-visualizer-state') || 'null');
+                if (!saved || saved.appVersion !== APP_VERSION) {
+                    localStorage.removeItem('amena-visualizer-state');
+                    return structuredClone(defaultState);
+                }
+                return { ...structuredClone(defaultState), ...saved };
+            } catch (_) {
+                return structuredClone(defaultState);
             }
         }
-        function renderUnits() {
-            const grid = document.getElementById('unitGrid'); grid.innerHTML = '';
-            for (let i = 1; i <= 12; i++) {
-                grid.innerHTML += `<button onclick="sel.unit=${i}; toStep(6)" class="h-14 bg-white border-2 rounded-xl font-bold text-gray-400 hover:border-blue-900 hover:text-blue-900">0${i}</button>`;
+
+        function saveState() {
+            localStorage.setItem('amena-visualizer-state', JSON.stringify(state));
+        }
+
+        function structuredClone(obj) {
+            return JSON.parse(JSON.stringify(obj));
+        }
+
+        function getFlowSteps() {
+            return flowConfig[state.flow] || flowConfig.apartments;
+        }
+
+        function getCurrentStep() {
+            return getFlowSteps()[state.stepIndex];
+        }
+
+        function setFlow(flow) {
+            state.flow = flow;
+            state.selectedType = flow === 'apartments' ? 'Apartamentos' : 'Casas';
+            state.sectorId = '';
+            state.towerId = '';
+            state.apartmentModelName = '';
+            state.levelId = '';
+            state.apartmentUnit = '';
+            state.subSectorId = '';
+            state.houseModelName = '';
+            state.houseUnit = '';
+            state.selectedCTA = '';
+            state.finalAction = '';
+            saveState();
+            goToStep(2);
+        }
+
+        function updateHeader() {
+            const total = getFlowSteps().length;
+            const current = state.stepIndex + 1;
+            stepChip.textContent = `PASO ${current} DE ${total}`;
+            progressFill.style.width = `${(current / total) * 100}%`;
+        }
+
+        function goToStep(index) {
+            const steps = getFlowSteps();
+            state.stepIndex = Math.max(0, Math.min(index, steps.length - 1));
+            saveState();
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleBack() {
+            if (state.stepIndex === 0) {
+                if (window.history.length > 1) {
+                    window.history.back();
+                }
+                return;
             }
+            goToStep(state.stepIndex - 1);
         }
-        function renderSummary() {
-            document.getElementById('fModel').innerText = sel.model.n;
-            document.getElementById('fPrice').innerText = sel.model.p;
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
         }
-        function openModal(type) {
-            const content = {
-                'privacy': '<h2 class="text-2xl font-extrabold text-blue-900 mb-4">Privacidad</h2><p class="text-sm text-gray-500">Tus datos están protegidos por la Ley de El Salvador. AMENA garantiza el uso exclusivo para fines comerciales de tu interés.</p>',
-                'masterplan': '<h2 class="text-2xl font-extrabold text-blue-900 mb-4">Master Plan</h2><p class="text-sm text-gray-500">14 hectáreas de corredor verde, ciclovías y áreas sociales premium diseñadas para tu bienestar.</p>'
+
+        function formatTime24to12(timeStr) {
+            if (!timeStr) return '';
+            const [h, mm] = timeStr.split(':').map(Number);
+            const suffix = h >= 12 ? 'p. m.' : 'a. m.';
+            const normalized = h % 12 || 12;
+            return `${normalized}:${String(mm).padStart(2, '0')} ${suffix}`;
+        }
+
+        function statusClass(status) {
+            return status === 'Disponible' ? 'success' : 'warning';
+        }
+
+        function getApartmentSector() {
+            return mockData.apartments.sectors.find(s => s.id === state.sectorId);
+        }
+        function getSelectedTower() {
+            return getApartmentSector()?.towers.find(t => t.id === state.towerId);
+        }
+        function getSelectedApartmentModel() {
+            return getSelectedTower()?.models[state.apartmentModelName];
+        }
+        function getSelectedApartmentUnit() {
+            return getSelectedApartmentModel()?.levels[state.levelId]?.find(u => u.unit === state.apartmentUnit);
+        }
+
+        function getHouseSector() {
+            return mockData.houses.sectors.find(s => s.id === state.sectorId);
+        }
+        function getSelectedSubsector() {
+            return getHouseSector()?.subsectors.find(s => s.id === state.subSectorId);
+        }
+        function getSelectedHouseModel() {
+            return getSelectedSubsector()?.models[state.houseModelName];
+        }
+        function getSelectedHouseUnit() {
+            return getSelectedHouseModel()?.houses.find(h => h.unit === state.houseUnit);
+        }
+
+        function getApartmentSummaryText() {
+            const parts = ['Tipo: Apartamentos'];
+            if (state.sectorId) parts.push(`Sector: ${state.sectorId}`);
+            if (state.towerId) parts.push(`Torre: ${state.towerId}`);
+            if (state.apartmentModelName) parts.push(`Modelo: ${state.apartmentModelName}`);
+            if (state.levelId) parts.push(`Nivel: ${state.levelId}`);
+            return parts;
+        }
+
+        function getHouseSummaryText() {
+            const parts = ['Tipo: Casas'];
+            if (state.sectorId) parts.push(`Sector: ${state.sectorId}`);
+            if (state.subSectorId) parts.push(`Subsector: ${getSelectedSubsector()?.name || state.subSectorId}`);
+            if (state.houseModelName) parts.push(`Modelo: ${state.houseModelName}`);
+            return parts;
+        }
+
+        function renderSummaryBox(parts) {
+            return `
+        <div class="summary-box">
+          <div class="summary-wrap">
+            ${parts.map((p, index) => `<span>${p}</span>${index < parts.length - 1 ? '<span class="dot">·</span>' : ''}`).join('')}
+          </div>
+        </div>
+      `;
+        }
+
+        function renderBackButton() {
+            return `
+        <div class="back-row">
+          <button type="button" class="back-button" onclick="handleBack()">← REGRESAR</button>
+        </div>
+      `;
+        }
+
+        function computeTowerModelSummary(tower) {
+            const modelNames = Object.keys(tower.models);
+            return modelNames.map(name => {
+                let available = 0;
+                let reserved = 0;
+                const levels = tower.models[name].levels;
+                Object.values(levels).forEach(list => list.forEach(item => {
+                    if (item.status === 'Disponible') available += 1;
+                    if (item.status === 'Pre reservada') reserved += 1;
+                }));
+                return `${name}: ${available} disponibles · ${reserved} pre reserva`;
+            });
+        }
+
+        function computeTowerBadge(tower) {
+            let available = 0;
+            let reserved = 0;
+            Object.values(tower.models).forEach(model => {
+                Object.values(model.levels).forEach(levels => levels.forEach(item => {
+                    if (item.status === 'Disponible') available += 1;
+                    if (item.status === 'Pre reservada') reserved += 1;
+                }));
+            });
+            return available > 0 ? { text: 'Disponibles', kind: 'success' } : { text: 'Pre reserva', kind: 'warning' };
+        }
+
+        function renderWelcome() {
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Bienvenido al visualizador digital</h1>
+            <p class="subheadline">Conoce mejor el proyecto, revisa disponibilidad y avanza hacia una pre reserva con mayor claridad.</p>
+          </div>
+
+          <div class="hero-card stack-sm">
+            <h2 class="headline" style="font-size:2rem;margin-bottom:2px;">Hola, ${mockData.lead.nombre}</h2>
+            <p class="subheadline" style="font-size:18px; margin-bottom:4px;">Hemos registrado tu interés en AMENA y te compartimos este visualizador digital para ayudarte a conocer mejor el proyecto, revisar disponibilidad y, si lo deseas, avanzar hacia una pre reserva.</p>
+            <p class="card-text" style="font-weight:800;color:var(--amena-navy);">Canal de origen: ${mockData.lead.canal_origen}</p>
+            <p class="card-text" style="font-weight:800;color:var(--amena-navy);">Fecha de registro: ${mockData.lead.fecha_origen}</p>
+            <button class="foot-link" style="margin-top:0;text-align:left;justify-self:start;background:none;border:0;padding:0;" onclick="openModal('privacy')"><span style="color:var(--amena-navy);font-weight:900;text-decoration:underline;text-underline-offset:4px;">Ver Aviso de Privacidad</span></button>
+          </div>
+
+          <label class="check-row">
+            <input id="privacyConsent" type="checkbox" ${state.privacyAccepted ? 'checked' : ''} onchange="state.privacyAccepted = this.checked; saveState();" />
+            <span class="card-text">Acepto los términos y el tratamiento de mis datos personales en AMENA.</span>
+          </label>
+
+          <div class="actions">
+            <button type="button" class="btn btn-primary" onclick="startJourney()">COMENZAR RECORRIDO</button>
+          </div>
+
+          <div class="foot-link">
+            <a href="#" onclick="event.preventDefault(); alert('Acceso interno al back office.');">App ADMIN</a>
+          </div>
+        </section>
+      `;
+        }
+
+        function startJourney() {
+            const accepted = document.getElementById('privacyConsent')?.checked;
+            if (!accepted) {
+                alert('Por favor, acepta el aviso de privacidad.');
+                return;
+            }
+            state.privacyAccepted = true;
+            goToStep(1);
+        }
+
+        function renderHousingType() {
+            const isApt = state.flow === 'apartments';
+            const isHouse = state.flow === 'houses';
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Tu Futuro Hogar</h1>
+            <p class="subheadline">Selecciona el tipo de vivienda que deseas explorar dentro del proyecto.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('masterplan')"><span>Ver Master Plan Maestro</span><span>Abrir →</span></button>
+          <div class="grid-1">
+            <div class="card interactive" onclick="setFlow('houses')" style="background:${isHouse ? 'linear-gradient(180deg, color-mix(in srgb, var(--amena-house-soft) 92%, white) 0%, #ffffff 100%)' : 'linear-gradient(180deg, #f7fbfc 0%, #ffffff 100%)'}; border-color:${isHouse ? 'var(--amena-house-strong)' : 'rgba(31, 79, 102, 0.22)'}; box-shadow:${isHouse ? '0 0 0 2px rgba(31,79,102,.10), 0 16px 30px rgba(0,0,0,.05)' : '0 10px 24px rgba(0,0,0,.04)'};">
+              <div class="card-body">
+                <h3 class="card-title" style="color: var(--amena-house-strong);">Residencial (Casas)</h3>
+                <p class="card-text" style="color: var(--amena-house-strong); opacity: .95;">Unidades con jardín privado y áreas recreativas.</p>
+              </div>
+            </div>
+            <div class="card interactive" onclick="setFlow('apartments')" style="background:${isApt ? 'linear-gradient(180deg, color-mix(in srgb, var(--amena-apartment-soft) 92%, white) 0%, #ffffff 100%)' : 'linear-gradient(180deg, #fffaf4 0%, #ffffff 100%)'}; border-color:${isApt ? 'var(--amena-apartment-strong)' : 'rgba(217,132,43,0.24)'}; box-shadow:${isApt ? '0 0 0 2px rgba(217,132,43,.12), 0 16px 30px rgba(0,0,0,.05)' : '0 10px 24px rgba(0,0,0,.04)'};">
+              <div class="card-body">
+                <h3 class="card-title" style="color: var(--amena-apartment-strong);">Vertical (Apartamentos)</h3>
+                <p class="card-text" style="color: color-mix(in srgb, var(--amena-apartment-strong) 85%, #334155); opacity: .96;">Torres con opciones de inversión y vistas privilegiadas.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+        }
+
+        function renderApartmentSector() {
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Sector</h1>
+            <p class="subheadline">Elige el sector en el que deseas explorar disponibilidad de apartamentos.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('sectors')"><span>Ver sectores del proyecto</span><span>Abrir →</span></button>
+          ${renderSummaryBox(['Tipo de vivienda: Apartamentos'])}
+          <div class="grid-2">
+            ${mockData.apartments.sectors.map(sector => `
+              <div class="card interactive ${state.sectorId === sector.id ? 'selected' : ''}" onclick="selectApartmentSector('${sector.id}')">
+                <div class="card-body">
+                  <h3 class="card-title">${sector.name}</h3>
+                  <p class="card-text">${sector.desc}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectApartmentSector(id) {
+            state.sectorId = id;
+            state.towerId = '';
+            state.apartmentModelName = '';
+            state.levelId = '';
+            state.apartmentUnit = '';
+            saveState();
+            goToStep(3);
+        }
+
+        function renderApartmentTower() {
+            const sector = getApartmentSector();
+            const towers = (sector?.towers || []).filter(tower => {
+                const badge = computeTowerBadge(tower);
+                return badge.text !== 'Sin inventario';
+            });
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Torre</h1>
+            <p class="subheadline">Estas son las torres que actualmente cuentan con apartamentos disponibles o pre reservados dentro del sector elegido.</p>
+          </div>
+          ${renderSummaryBox(getApartmentSummaryText())}
+          <div class="selection-shell">
+            <p class="section-kicker">Torres con disponibilidad en este sector</p>
+            <div class="grid-2">
+              ${towers.map(tower => {
+                const badge = computeTowerBadge(tower);
+                const lines = computeTowerModelSummary(tower);
+                return `
+                  <button type="button" class="tower-button" onclick="selectTower('${tower.id}')">
+                    <div class="card interactive ${state.towerId === tower.id ? 'selected' : ''}">
+                      <div class="card-body">
+                        <div class="status-row">
+                          <h3 class="card-title" style="margin-bottom:0;">${tower.id}</h3>
+                          <span class="badge ${badge.kind}">${badge.text}</span>
+                        </div>
+                        <div class="tower-lines">
+                          ${lines.map(line => `<p class="card-text">${line}</p>`).join('')}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                `;
+            }).join('')}
+            </div>
+          </div>
+          <p class="helper">La pre reserva tiene vigencia temporal y podría extenderse de común acuerdo entre el cliente interesado y la Gerencia de Ventas de AMENA.</p>
+        </section>
+      `;
+        }
+
+        function selectTower(id) {
+            state.towerId = id;
+            state.apartmentModelName = '';
+            state.levelId = '';
+            state.apartmentUnit = '';
+            saveState();
+            goToStep(4);
+        }
+
+        function renderApartmentModel() {
+            const tower = getSelectedTower();
+            const models = tower ? Object.entries(tower.models) : [];
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Modelo de Apartamento</h1>
+            <p class="subheadline">Revisa el área y el valor referencial de los modelos disponibles antes de continuar.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('modelDistribution')"><span>Vea los detalles de cada uno de los modelos de apartamentos disponibles</span><span>Abrir →</span></button>
+          ${renderSummaryBox(getApartmentSummaryText())}
+          <div class="grid-2">
+            ${models.map(([name, model]) => `
+              <div class="card interactive ${state.apartmentModelName === name ? 'selected' : ''}" onclick="selectApartmentModel('${name}')">
+                <div class="card-body">
+                  <h3 class="card-title">${name}</h3>
+                  <p class="card-text">${model.area} · Desde ${model.price.replace('$', '$')}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectApartmentModel(name) {
+            state.apartmentModelName = name;
+            state.levelId = '';
+            state.apartmentUnit = '';
+            saveState();
+            goToStep(5);
+        }
+
+        function renderApartmentLevel() {
+            const model = getSelectedApartmentModel();
+            const levels = model ? Object.keys(model.levels) : [];
+            const subtitles = {
+                '01': 'Apartamentos disponibles en este nivel',
+                '02': 'Apartamentos disponibles en este nivel',
+                '03': 'Apartamentos disponibles en este nivel',
+                '04': 'Apartamentos disponibles en este nivel',
+                '05': 'Apartamentos disponibles en este nivel',
+                '06': 'Apartamentos disponibles en este nivel'
             };
-            document.getElementById('modalContent').innerHTML = content[type];
-            document.getElementById('infoModal').classList.add('active');
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Nivel</h1>
+            <p class="subheadline">Mostramos únicamente niveles con apartamentos disponibles o pre reservados para el modelo seleccionado.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('levels')"><span>Ver niveles disponibles en esta torre</span><span>Abrir →</span></button>
+          ${renderSummaryBox(getApartmentSummaryText())}
+          <div class="grid-2">
+            ${levels.map(level => `
+              <div class="card interactive ${state.levelId === level ? 'selected' : ''}" onclick="selectApartmentLevel('${level}')">
+                <div class="card-body">
+                  <h3 class="card-title">Nivel ${level}</h3>
+                  <p class="card-text">${subtitles[level] || 'Disponibilidad vigente'}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
         }
-        function closeModal() { document.getElementById('infoModal').classList.remove('active'); }
+
+        function selectApartmentLevel(level) {
+            state.levelId = level;
+            state.apartmentUnit = '';
+            saveState();
+            goToStep(6);
+        }
+
+        function renderApartmentSelection() {
+            const units = getSelectedApartmentModel()?.levels[state.levelId] || [];
+            const selectedApartment = units.find(item => item.unit === state.apartmentUnit);
+            if (selectedApartment && selectedApartment.status !== 'Disponible') {
+                state.apartmentUnit = '';
+                state.reservationStatus = 'Disponible';
+                saveState();
+            }
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Apartamento</h1>
+            <p class="subheadline">Mostramos únicamente apartamentos disponibles o pre reservados en este nivel.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('apartments')"><span>Ver apartamentos disponibles en este nivel</span><span>Abrir →</span></button>
+          ${renderSummaryBox(getApartmentSummaryText())}
+          <div class="grid-2">
+            ${units.map(item => `
+              <div class="card ${item.status === 'Disponible' ? 'interactive' : 'disabled'} ${state.apartmentUnit === item.unit ? 'selected' : ''}" ${item.status === 'Disponible' ? `onclick="selectApartmentUnit('${item.unit}', '${item.status}')"` : ''}>
+                <div class="card-body">
+                  <div class="status-row">
+                    <h3 class="card-title unit-title" style="margin-bottom:0;">${item.unit}</h3>
+                    <span class="badge ${statusClass(item.status)}">${item.status === 'Pre reservada' ? 'Pre reserva' : 'Disponible'}</span>
+                  </div>
+                  <p class="card-text">${item.status}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectApartmentUnit(unit, status) {
+            if (status !== 'Disponible') return;
+            state.apartmentUnit = unit;
+            state.reservationStatus = status;
+            saveState();
+            goToStep(7);
+        }
+
+        function renderHouseSector() {
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Sector</h1>
+            <p class="subheadline">Elige el sector en el que deseas explorar disponibilidad de casas.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('sectors')"><span>Ver sectores del proyecto</span><span>Abrir →</span></button>
+          ${renderSummaryBox(['Tipo de vivienda: Casas'])}
+          <div class="grid-2">
+            ${mockData.houses.sectors.map(sector => `
+              <div class="card interactive ${state.sectorId === sector.id ? 'selected' : ''}" onclick="selectHouseSector('${sector.id}')">
+                <div class="card-body">
+                  <h3 class="card-title">${sector.name}</h3>
+                  <p class="card-text">${sector.desc}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectHouseSector(id) {
+            state.sectorId = id;
+            state.subSectorId = '';
+            state.houseModelName = '';
+            state.houseUnit = '';
+            saveState();
+            goToStep(3);
+        }
+
+        function renderHouseSubsector() {
+            const subsectors = getHouseSector()?.subsectors || [];
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Subsector</h1>
+            <p class="subheadline">Selecciona el sub sector que mejor se adapte a la alternativa que estás evaluando.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('subsectors')"><span>Ver sub sectores en este sector</span><span>Abrir →</span></button>
+          ${renderSummaryBox(getHouseSummaryText())}
+          <div class="grid-1">
+            ${subsectors.map(sub => `
+              <div class="card interactive ${state.subSectorId === sub.id ? 'selected' : ''}" onclick="selectSubsector('${sub.id}')">
+                <div class="card-body">
+                  <h3 class="card-title">${sub.name}</h3>
+                  <ul class="subsector-models">
+                    ${Object.entries(sub.models).map(([name, item]) => `<li><strong>${name}</strong> · disponibles: ${item.available} · pre reservadas: ${item.reserved}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectSubsector(id) {
+            state.subSectorId = id;
+            state.houseModelName = '';
+            state.houseUnit = '';
+            saveState();
+            goToStep(4);
+        }
+
+        function renderHouseModel() {
+            const models = getSelectedSubsector() ? Object.entries(getSelectedSubsector().models) : [];
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Modelo de Casa</h1>
+            <p class="subheadline">Revisa el área y el valor referencial de los modelos de casa disponibles antes de continuar.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('houseModels')"><span>Ver modelos de casa disponibles</span><span>Abrir →</span></button>
+          ${renderSummaryBox(getHouseSummaryText())}
+          <div class="grid-2">
+            ${models.map(([name, model]) => `
+              <div class="card interactive ${state.houseModelName === name ? 'selected' : ''}" onclick="selectHouseModel('${name}')">
+                <div class="card-body">
+                  <h3 class="card-title">${name}</h3>
+                  <p class="card-text">${model.area} · ${model.price}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectHouseModel(name) {
+            state.houseModelName = name;
+            state.houseUnit = '';
+            saveState();
+            goToStep(5);
+        }
+
+        function renderHouseSelection() {
+            const houses = getSelectedHouseModel()?.houses || [];
+            const selectedHouse = houses.find(item => item.unit === state.houseUnit);
+            if (selectedHouse && selectedHouse.status !== 'Disponible') {
+                state.houseUnit = '';
+                state.reservationStatus = 'Disponible';
+                saveState();
+            }
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Selecciona Casa de tu preferencia</h1>
+            <p class="subheadline">Mostramos únicamente casas disponibles o pre reservadas para el modelo seleccionado.</p>
+          </div>
+          <button class="inline-link" type="button" onclick="openModal('houses')"><span>Ver casas disponibles en esta zona</span><span>Abrir →</span></button>
+          ${renderSummaryBox(getHouseSummaryText())}
+          <div class="grid-2">
+            ${houses.map(item => `
+              <div class="card ${item.status === 'Disponible' ? 'interactive' : 'disabled'} ${state.houseUnit === item.unit ? 'selected' : ''}" ${item.status === 'Disponible' ? `onclick="selectHouseUnit('${item.unit}', '${item.status}')"` : ''}>
+                <div class="card-body">
+                  <div class="status-row">
+                    <h3 class="card-title unit-title" style="margin-bottom:0;">${item.unit}</h3>
+                    <span class="badge ${statusClass(item.status)}">${item.status === 'Pre reservada' ? 'Pre reserva' : 'Disponibles'}</span>
+                  </div>
+                  <p class="card-text">${item.status}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectHouseUnit(unit, status) {
+            if (status !== 'Disponible') return;
+            state.houseUnit = unit;
+            state.reservationStatus = status;
+            saveState();
+            goToStep(6);
+        }
+
+        function renderReview() {
+            if (state.flow === 'apartments') {
+                const model = getSelectedApartmentModel();
+                return `
+          ${renderBackButton()}
+          <section class="stack">
+            <div class="stack-sm">
+              <h1 class="headline">Tu Pre Reserva</h1>
+              <p class="subheadline">Revisa cuidadosamente la información de la unidad seleccionada antes de confirmar tu pre reserva.</p>
+            </div>
+            ${renderSummaryBox(getApartmentSummaryText())}
+            <div class="card">
+              <div class="card-body">
+                <h3 class="card-title">Detalles de tu unidad seleccionada</h3>
+                <ul class="bullet-list">
+                  <li>Tipo de vivienda: Apartamento</li>
+                  <li>Sector: ${state.sectorId}</li>
+                  <li>Torre: ${state.towerId}</li>
+                  <li>Modelo: ${state.apartmentModelName}</li>
+                  <li>Nivel: ${state.levelId}</li>
+                  <li>Unidad: ${state.apartmentUnit}</li>
+                  <li>Área: ${model?.area || '--'}</li>
+                  <li>Precio referencial: ${model?.price || '--'}</li>
+                  <li>Estado actual: ${state.reservationStatus}</li>
+                  <li>Vigencia estimada de la pre reserva: ${state.reservationValidity}</li>
+                </ul>
+                <p class="helper" style="margin-top:10px;color:var(--amena-blue);font-weight:800;">Vas muy bien. Revisa con seguridad cada detalle antes de confirmar tu pre reserva.</p>
+              </div>
+            </div>
+            <div class="actions">
+              <button type="button" class="btn btn-primary" onclick="goToStep(8)">CONFIRMAR PRE RESERVA</button>
+              <button type="button" class="btn btn-secondary" onclick="goBackToLastSelection()">EDITAR SELECCIÓN</button>
+            </div>
+          </section>
+        `;
+            }
+            const model = getSelectedHouseModel();
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Tu Pre Reserva</h1>
+            <p class="subheadline">Revisa cuidadosamente la información de la unidad seleccionada antes de confirmar tu pre reserva.</p>
+          </div>
+          ${renderSummaryBox(getHouseSummaryText())}
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title">Detalles de tu unidad seleccionada</h3>
+              <ul class="bullet-list">
+                <li>Tipo de vivienda: Casa</li>
+                <li>Sector: ${state.sectorId}</li>
+                <li>Sub sector: ${state.subSectorId}</li>
+                <li>Modelo: ${state.houseModelName}</li>
+                <li>Unidad: ${state.houseUnit}</li>
+                <li>Área: ${model?.area || '--'}</li>
+                <li>Precio referencial: ${model?.price || '--'}</li>
+                <li>Estado actual: ${state.reservationStatus}</li>
+                <li>Vigencia estimada de la pre reserva: ${state.reservationValidity}</li>
+              </ul>
+              <p class="helper" style="margin-top:10px;color:var(--amena-blue);font-weight:800;">Vas muy bien. Revisa con seguridad cada detalle antes de confirmar tu pre reserva.</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" onclick="goToStep(7)">CONFIRMAR PRE RESERVA</button>
+            <button type="button" class="btn btn-secondary" onclick="goBackToLastSelection()">EDITAR SELECCIÓN</button>
+          </div>
+        </section>
+      `;
+        }
+
+        function goBackToLastSelection() {
+            if (state.flow === 'apartments') goToStep(6);
+            else goToStep(5);
+        }
+
+        function renderPreReserveConfirmation() {
+            const summary = state.flow === 'apartments'
+                ? `Apartamento reservado: ${state.apartmentUnit}`
+                : `Casa reservada: ${state.houseUnit}`;
+            const lines = state.flow === 'apartments'
+                ? [`Sector: ${state.sectorId}`, `Torre: ${state.towerId}`, `Modelo: ${state.apartmentModelName}`, `Nivel: ${state.levelId}`, `Vigencia estimada: ${state.reservationValidity} calendario`]
+                : [`Sector: ${state.sectorId}`, `Sub sector: ${state.subSectorId}`, `Modelo: ${state.houseModelName}`, `Vigencia estimada: ${state.reservationValidity} calendario`];
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Confirmación de pre reserva</h1>
+            <p class="subheadline">Tu solicitud ya fue registrada. Ahora puedes continuar con los siguientes pasos de acompañamiento.</p>
+          </div>
+          ${renderSummaryBox(state.flow === 'apartments' ? getApartmentSummaryText() : getHouseSummaryText())}
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title">Tu pre reserva ha sido registrada</h3>
+              <ul class="bullet-list">
+                <li>${summary}</li>
+                ${lines.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+              <p class="helper" style="margin-top:10px;color:var(--amena-blue);font-weight:800;">Continúa al siguiente paso para elegir cómo deseas avanzar con AMENA.</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" onclick="goToStep(${state.flow === 'apartments' ? 9 : 8})">CONTINUAR</button>
+          </div>
+        </section>
+      `;
+        }
+
+        function renderCTASelection() {
+            const ctas = [
+                'Conversa con nuestro agente digital dentro de esta página, por texto o voz, podrás aclarar cualquier duda, de cualquier índole que sea.',
+                'Agenda recibir una llamada de nuestro agente digital a tu teléfono móvil en el día y hora de tu preferencia.',
+                'Agenda una cita al proyecto o a nuestra oficina de ventas en el momento disponible que mejor te convenga.'
+            ];
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Tu siguiente paso con AMENA</h1>
+            <p class="subheadline">Ya registramos tu pre reserva. Ahora elige cómo deseas continuar para recibir atención y acompañamiento.</p>
+          </div>
+          <div class="grid-1">
+            ${ctas.map((text, index) => `
+              <div class="card interactive ${state.selectedCTA === String(index + 1) ? 'selected' : ''}" onclick="selectCTA('${index + 1}')">
+                <div class="card-body">
+                  <p class="cta-text">${text}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+        }
+
+        function selectCTA(ctaId) {
+            state.selectedCTA = ctaId;
+            saveState();
+            if (ctaId === '1') goToStep(state.flow === 'apartments' ? 10 : 9);
+            if (ctaId === '2') goToStep(state.flow === 'apartments' ? 11 : 10);
+            if (ctaId === '3') goToStep(state.flow === 'apartments' ? 12 : 11);
+        }
+
+        function reservationSummaryForCTA() {
+            if (state.flow === 'apartments') {
+                return `Pre reserva registrada · Apartamento ${state.apartmentUnit} · Torre ${state.towerId}`;
+            }
+            return `Pre reserva registrada · Casa ${state.houseUnit} · Sub sector ${state.subSectorId}`;
+        }
+
+        function renderCTAConversation() {
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Conversa con nuestro agente digital</h1>
+            <p class="subheadline">Por texto o voz, podrás aclarar cualquier duda, de cualquier índole que sea.</p>
+          </div>
+          ${renderSummaryBox([reservationSummaryForCTA()])}
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">Ya registramos tu pre reserva. Ahora puedes iniciar una conversación por texto o voz para aclarar cualquier duda y seguir avanzando dentro de esta misma página.</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" onclick="alert('Aquí se integrará el widget del agente digital por texto o voz.');">INICIAR CONVERSACIÓN POR TEXTO O VOZ</button>
+          </div>
+        </section>
+      `;
+        }
+
+        function renderCTACall() {
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Agenda recibir una llamada de nuestro agente digital</h1>
+            <p class="subheadline">A tu teléfono móvil en el día y hora de tu preferencia.</p>
+          </div>
+          ${renderSummaryBox([reservationSummaryForCTA()])}
+          <div class="stack-sm">
+            <label class="field-group">
+              <span class="field-label">Número de teléfono móvil</span>
+              <input class="field-control" type="tel" value="${state.callPhone}" oninput="state.callPhone = this.value; saveState();" />
+            </label>
+            <label class="field-group">
+              <span class="field-label">Fecha deseada</span>
+              <input class="field-control" type="date" value="${state.callDate}" oninput="state.callDate = this.value; saveState();" />
+            </label>
+            <label class="field-group">
+              <span class="field-label">Hora deseada</span>
+              <input class="field-control" type="time" value="${state.callTime}" oninput="state.callTime = this.value; saveState();" />
+            </label>
+          </div>
+          <p class="helper">Recibirás la llamada en el número que registres. Si necesitas cambiar la fecha u hora después, podrás hacerlo escribiendo al WhatsApp de AMENA.</p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" onclick="completeFlow('llamada')">CONFIRMAR LLAMADA</button>
+          </div>
+        </section>
+      `;
+        }
+
+        function renderCTAVisit() {
+            const projectSelected = state.visitType === 'proyecto';
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Agenda una cita al proyecto o a nuestra oficina de ventas</h1>
+            <p class="subheadline">En el momento disponible que mejor te convenga.</p>
+          </div>
+          ${renderSummaryBox([reservationSummaryForCTA()])}
+          <div class="grid-1">
+            <div class="card interactive ${projectSelected ? 'selected' : ''}" onclick="state.visitType='proyecto'; saveState(); render();">
+              <div class="card-body">
+                <h3 class="card-title">Visita al proyecto de construcción</h3>
+                <p class="card-text">Vendedor asignado: ${mockData.seller.name} · Horarios disponibles</p>
+              </div>
+            </div>
+            <div class="card interactive ${!projectSelected ? 'selected' : ''}" onclick="state.visitType='oficina'; saveState(); render();">
+              <div class="card-body">
+                <h3 class="card-title">Cita en oficina de ventas de San Salvador</h3>
+                <p class="card-text">Horarios disponibles en oficina</p>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <label class="field-group">
+              <span class="field-label">Fecha seleccionada</span>
+              <input class="field-control" type="date" value="${state.visitDate}" oninput="state.visitDate = this.value; saveState();" />
+            </label>
+            <label class="field-group">
+              <span class="field-label">Hora seleccionada</span>
+              <input class="field-control" type="time" value="${state.visitTime}" oninput="state.visitTime = this.value; saveState();" />
+            </label>
+          </div>
+          <p class="helper">Recibirás un mensaje de WhatsApp confirmando que tu cita ha sido recibida y ya está asegurada. También recibirás otro mensaje 24 horas antes como recordatorio.</p>
+          <p class="helper">Si deseas suspender o reprogramar tu cita, escribe al WhatsApp de AMENA: ${mockData.seller.whatsapp}. Un agente digital te ayudará a realizar el cambio solicitado.</p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" onclick="completeFlow('cita')">CONFIRMAR CITA</button>
+          </div>
+        </section>
+      `;
+        }
+
+        function completeFlow(kind) {
+            state.finalAction = kind;
+            saveState();
+            goToStep(getFlowSteps().length - 1);
+        }
+
+        function renderFinalConfirmation() {
+            const actionLabel = state.finalAction === 'cita'
+                ? 'Cita presencial registrada'
+                : state.finalAction === 'llamada'
+                    ? 'Llamada agendada correctamente'
+                    : 'Conversación digital registrada';
+            const summary = state.flow === 'apartments'
+                ? ['Tipo: Apartamentos', `Sector: ${state.sectorId}`, `Torre: ${state.towerId}`, `Modelo: ${state.apartmentModelName}`, `Nivel: ${state.levelId}`, `Unidad: ${state.apartmentUnit}`, `Acción: ${actionLabel}`]
+                : ['Tipo: Casas', `Sector: ${state.sectorId}`, `Sub sector: ${state.subSectorId}`, `Modelo: ${state.houseModelName}`, `Unidad: ${state.houseUnit}`, `Acción: ${actionLabel}`];
+            return `
+        ${renderBackButton()}
+        <section class="stack">
+          <div class="stack-sm">
+            <h1 class="headline">Proceso finalizado correctamente</h1>
+            <p class="subheadline">Tu información ha sido registrada exitosamente. Gracias por avanzar en este recorrido con AMENA.</p>
+          </div>
+          ${renderSummaryBox(summary)}
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title">Resumen final</h3>
+              <ul class="bullet-list">
+                <li>La pre reserva ha quedado registrada en el sistema.</li>
+                <li>La acción comercial seleccionada ha sido registrada correctamente.</li>
+                <li>Un miembro del equipo de AMENA continuará el acompañamiento correspondiente.</li>
+                <li>Gracias por tu interés en AMENA.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      `;
+        }
+
+        function goToReview() {
+            goToStep(state.flow === 'apartments' ? 7 : 6);
+        }
+
+        function resetJourney() {
+            state = structuredClone(defaultState);
+            saveState();
+            render();
+        }
+
+        function renderCurrentScreen() {
+            const stepKey = getCurrentStep().key;
+            if (stepKey === 'welcome') return renderWelcome();
+            if (stepKey === 'housingType') return renderHousingType();
+            if (state.flow === 'apartments') {
+                if (stepKey === 'sector') return renderApartmentSector();
+                if (stepKey === 'tower') return renderApartmentTower();
+                if (stepKey === 'apartmentModel') return renderApartmentModel();
+                if (stepKey === 'level') return renderApartmentLevel();
+                if (stepKey === 'apartment') return renderApartmentSelection();
+            } else {
+                if (stepKey === 'sector') return renderHouseSector();
+                if (stepKey === 'subsector') return renderHouseSubsector();
+                if (stepKey === 'houseModel') return renderHouseModel();
+                if (stepKey === 'house') return renderHouseSelection();
+            }
+            if (stepKey === 'review') return renderReview();
+            if (stepKey === 'preReserveConfirmation') return renderPreReserveConfirmation();
+            if (stepKey === 'ctaSelection') return renderCTASelection();
+            if (stepKey === 'ctaConversation') return renderCTAConversation();
+            if (stepKey === 'ctaCall') return renderCTACall();
+            if (stepKey === 'ctaVisit') return renderCTAVisit();
+            if (stepKey === 'finalConfirmation') return renderFinalConfirmation();
+            return `<section class="stack"><h1 class="headline">Pantalla en construcción</h1></section>`;
+        }
+
+        function render() {
+            updateHeader();
+            document.body.classList.remove('theme-apartments', 'theme-houses');
+            document.body.classList.add(state.flow === 'houses' ? 'theme-houses' : 'theme-apartments');
+            app.innerHTML = renderCurrentScreen();
+        }
+
+        function openModal(type) {
+            const payload = modalContent[type] || { title: 'Información', body: '<p class="helper">Contenido pendiente de carga.</p>' };
+            document.getElementById('modalTitle').textContent = payload.title;
+            document.getElementById('modalBody').innerHTML = payload.body;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', closeModal);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeModal();
+        });
+
+        render();
+
+        window.handleBack = handleBack;
+        window.goToStep = goToStep;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.startJourney = startJourney;
+        window.setFlow = setFlow;
+        window.selectApartmentSector = selectApartmentSector;
+        window.selectTower = selectTower;
+        window.selectApartmentModel = selectApartmentModel;
+        window.selectApartmentLevel = selectApartmentLevel;
+        window.selectApartmentUnit = selectApartmentUnit;
+        window.selectHouseSector = selectHouseSector;
+        window.selectSubsector = selectSubsector;
+        window.selectHouseModel = selectHouseModel;
+        window.selectHouseUnit = selectHouseUnit;
+        window.goBackToLastSelection = goBackToLastSelection;
+        window.selectCTA = selectCTA;
+        window.completeFlow = completeFlow;
+        window.goToReview = goToReview;
+        window.resetJourney = resetJourney;
+        window.state = state;
+        window.saveState = saveState;
     </script>
 </body>
 
