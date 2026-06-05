@@ -89,7 +89,7 @@ const mapOperationalRecord = (row: RawOperationalRecord): OperationalRecord => {
     id: textValue(row.id, newRecordId()),
     type,
     title: textValue(row.title, 'Registro operacional'),
-    clientName: textValue(row.clientName ?? row.client_name, 'Cliente sin nombre'),
+    clientName: textValue(row.clientName ?? row.client_name ?? row.customer_name, 'Cliente sin nombre'),
     status: normalizeStatus(row.status),
     createdAt: textValue(row.createdAt ?? row.created_at, new Date().toISOString()),
     updatedAt: textValue(row.updatedAt ?? row.updated_at, undefined),
