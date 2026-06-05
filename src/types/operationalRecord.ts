@@ -1,0 +1,53 @@
+export type OperationalRecordType = 'interaction' | 'document' | 'payment';
+
+export type OperationalRecordStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'observed'
+  | 'overdue';
+
+export interface OperationalRecordBase {
+  id: string;
+  type: OperationalRecordType;
+  title: string;
+  clientName: string;
+  status: OperationalRecordStatus;
+  createdAt: string;
+  updatedAt?: string;
+  notes?: string;
+}
+
+export interface InteractionRecord extends OperationalRecordBase {
+  type: 'interaction';
+  channel: 'whatsapp' | 'email' | 'call' | 'meeting' | 'system';
+  priority?: 'low' | 'medium' | 'high';
+}
+
+export interface DocumentRecord extends OperationalRecordBase {
+  type: 'document';
+  documentName: string;
+  documentStatus: 'expected' | 'received' | 'observed' | 'approved';
+  dueDate?: string;
+}
+
+export interface PaymentRecord extends OperationalRecordBase {
+  type: 'payment';
+  amount: number;
+  currency: string;
+  dueDate?: string;
+  paidAt?: string;
+}
+
+export type OperationalRecord = InteractionRecord | DocumentRecord | PaymentRecord;
+
+export interface OperationalSummary {
+  total: number;
+  interactions: number;
+  documents: number;
+  payments: number;
+  pending: number;
+  overdue: number;
+  source: 'supabase' | 'demo';
+}
+
