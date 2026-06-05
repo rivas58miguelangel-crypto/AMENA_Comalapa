@@ -22,6 +22,10 @@ export interface InteractionRecord extends OperationalRecordBase {
   type: 'interaction';
   channel: 'whatsapp' | 'email' | 'call' | 'meeting' | 'system';
   priority?: 'low' | 'medium' | 'high';
+  reservationId?: string;
+  createdBy?: string;
+  interactionType?: string;
+  nextStep?: string;
 }
 
 export interface DocumentRecord extends OperationalRecordBase {
@@ -51,3 +55,22 @@ export interface OperationalSummary {
   source: 'supabase' | 'demo';
 }
 
+export interface CreateHumanInteractionRecordInput {
+  reservation_id: string;
+  customer_name: string;
+  title: string;
+  description: string;
+  channel: InteractionRecord['channel'];
+  created_by: string;
+  interaction_type: string;
+  priority: NonNullable<InteractionRecord['priority']>;
+  next_step: string;
+  created_at?: string;
+}
+
+export interface CreateHumanInteractionRecordResult {
+  record: InteractionRecord;
+  source: 'supabase' | 'demo';
+  saved: boolean;
+  error?: string;
+}

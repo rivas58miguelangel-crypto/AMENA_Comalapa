@@ -1,5 +1,7 @@
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 import type {
+  CreateHumanInteractionRecordInput,
+  CreateHumanInteractionRecordResult,
   DocumentRecord,
   InteractionRecord,
   OperationalRecord,
@@ -11,6 +13,14 @@ import type {
 
 type RawOperationalRecord = Record<string, unknown>;
 
+const newRecordId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
 const demoOperationalRecords: OperationalRecord[] = [
   {
     id: 'demo-interaction-001',
@@ -21,6 +31,10 @@ const demoOperationalRecords: OperationalRecord[] = [
     createdAt: '2026-05-20T10:21:00.000Z',
     channel: 'whatsapp',
     priority: 'medium',
+    reservationId: 'AMENA-2026-000784',
+    createdBy: 'Sistema demo',
+    interactionType: 'seguimiento_financiero',
+    nextStep: 'Confirmar monto pendiente y enviar resumen familiar.',
     notes: 'Consulta sobre monto pendiente y copia a decisor secundario.',
   },
   {
@@ -72,7 +86,7 @@ const normalizeType = (value: unknown): OperationalRecordType => {
 const mapOperationalRecord = (row: RawOperationalRecord): OperationalRecord => {
   const type = normalizeType(row.type);
   const base = {
-    id: textValue(row.id, crypto.randomUUID()),
+    id: textValue(row.id, newRecordId()),
     type,
     title: textValue(row.title, 'Registro operacional'),
     clientName: textValue(row.clientName ?? row.client_name, 'Cliente sin nombre'),
@@ -108,8 +122,31 @@ const mapOperationalRecord = (row: RawOperationalRecord): OperationalRecord => {
     type,
     channel: textValue(row.channel, 'system') as InteractionRecord['channel'],
     priority: textValue(row.priority, undefined) as InteractionRecord['priority'],
+    reservationId: textValue(row.reservationId ?? row.reservation_id, undefined),
+    createdBy: textValue(row.createdBy ?? row.created_by, undefined),
+    interactionType: textValue(row.interactionType ?? row.interaction_type, undefined),
+    nextStep: textValue(row.nextStep ?? row.next_step, undefined),
   };
 };
+
+const buildHumanInteractionRecord = (
+  input: CreateHumanInteractionRecordInput,
+  id = newRecordId(),
+): InteractionRecord => ({
+  id,
+  type: 'interaction',
+  title: textValue(input.title, 'Interaccion humana operacional'),
+  clientName: textValue(input.customer_name, 'Cliente sin nombre'),
+  status: 'pending',
+  createdAt: textValue(input.created_at, new Date().toISOString()),
+  channel: input.channel,
+  priority: input.priority,
+  reservationId: input.reservation_id,
+  createdBy: input.created_by,
+  interactionType: input.interaction_type,
+  nextStep: input.next_step,
+  notes: input.description,
+});
 
 const buildSummary = (records: OperationalRecord[], source: OperationalSummary['source']): OperationalSummary => ({
   total: records.length,
@@ -155,3 +192,67 @@ export async function getOperationalSummary(): Promise<OperationalSummary> {
   }
 }
 
+export async function createHumanInteractionRecord(
+  input: CreateHumanInteractionRecordInput,
+): Promise<CreateHumanInteractionRecordResult> {
+  const fallbackRecord = buildHumanInteractionRecord(input);
+
+  if (!isSupabaseConfigured || !supabase) {
+    return {
+      record: fallbackRecord,
+      source: 'demo',
+      saved: false,
+    };
+  }
+
+  try {
+    const payload = {
+      type: 'interaction',
+      reservation_id: input.reservation_id,
+      customer_name: input.customer_name,
+      client_name: input.customer_name,
+      title: input.title,
+      description: input.description,
+      notes: input.description,
+      channel: input.channel,
+      created_by: input.created_by,
+      interaction_type: input.interaction_type,
+      priority: input.priority,
+      next_step: input.next_step,
+      status: 'pending',
+      created_at: input.created_at ?? new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
+      .from('operational_records')
+      .insert(payload)
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      return {
+        record: fallbackRecord,
+        source: 'demo',
+        saved: false,
+        error: error?.message,
+      };
+    }
+
+    return {
+      record: mapOperationalRecord(data as RawOperationalRecord) as InteractionRecord,
+      source: 'supabase',
+      saved: true,
+    };
+  } catch (error) {
+    return {
+      record: fallbackRecord,
+      source: 'demo',
+      saved: false,
+      error: error instanceof Error ? error.message : 'Unknown Supabase error',
+    };
+  }
+}
+
+// Punto de conexion UI futuro: Seguimientos Operativos puede llamar a
+// createHumanInteractionRecord() desde un formulario liviano sin cambiar
+// navegacion ni datos demo.
