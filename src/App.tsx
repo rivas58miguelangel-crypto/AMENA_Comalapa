@@ -69,6 +69,244 @@ const martaSync = {
   demo: 94,
 };
 
+type BadgeTone = "slate" | "green" | "amber" | "red" | "blue" | "violet" | "dark";
+type ClientSignalColor = "green" | "amber" | "red" | "blue";
+type TrackingDetailKey = "compromisos" | "montos" | "atraso" | "responsable";
+
+type ClientBadge = {
+  label: string;
+  tone: BadgeTone;
+};
+
+type ClientAiSignal = {
+  title: string;
+  value: string;
+  color: ClientSignalColor;
+};
+
+type ClientTimelineItem = {
+  time: string;
+  title: string;
+  description: string;
+};
+
+type ClientCommunicationMessage = {
+  from: string;
+  time: string;
+  text: string;
+  tag: string;
+};
+
+type ClientCommunicationChannel = {
+  channel: string;
+  badge: string;
+  tone: BadgeTone;
+  inboxTitle: string;
+  messages: ClientCommunicationMessage[];
+  actions: string[];
+  recommendation: string;
+};
+
+type ClientMartaProposal = {
+  type: string;
+  title: string;
+  analysis: string;
+  proposal: string;
+};
+
+type ClientTrackingDetail = {
+  title: string;
+  columns: string[];
+  rows: string[][];
+};
+
+type ClientOperationalProfile = {
+  cliente: {
+    name: string;
+    initials: string;
+    amenaId: string;
+    badges: ClientBadge[];
+  };
+  unidadReservada: {
+    label: string;
+    detail: string;
+  };
+  vendedora: {
+    name: string;
+    code: string;
+    label: string;
+    detail: string;
+  };
+  pipeline: {
+    status: string;
+    detail: string;
+  };
+  riesgo: {
+    priority: string;
+    nextActions: string;
+    nextActionsDetail: string;
+  };
+  senalesIa: {
+    summary: string;
+    signals: ClientAiSignal[];
+  };
+  evidencias: {
+    title: string;
+    value: string;
+  }[];
+  timeline: ClientTimelineItem[];
+  comunicaciones: ClientCommunicationChannel[];
+  propuestasMarta: ClientMartaProposal[];
+  seguimientoOperacional: {
+    metrics: {
+      key: TrackingDetailKey;
+      title: string;
+      value: string;
+      note: string;
+    }[];
+    details: Record<TrackingDetailKey, ClientTrackingDetail>;
+    historyColumns: string[];
+    historyRows: string[][];
+  };
+};
+
+const clientOperationalProfile: ClientOperationalProfile = {
+  cliente: {
+    name: "Carlos Méndez",
+    initials: "CM",
+    amenaId: "AMENA-2026-000784",
+    badges: [
+      { label: "Expediente Activo", tone: "green" },
+      { label: "Prioridad Alta", tone: "amber" },
+      { label: "Marta Activa", tone: "violet" },
+    ],
+  },
+  unidadReservada: {
+    label: "Sector 01 · Torre 3 · Nivel 7 · A704",
+    detail: "Unidad preferida vinculada al flujo de reserva y al seguimiento comercial.",
+  },
+  vendedora: {
+    name: "María Fernanda",
+    code: "VND-034",
+    label: "María Fernanda · VND-034",
+    detail: "Responsable comercial directa del seguimiento, registro de información y aplicación criteriosa de recomendaciones de Marta.",
+  },
+  pipeline: {
+    status: "Formalización",
+    detail: "Etapa posterior a la pre-reserva: documentación, validación financiera, compromisos de pago y preparación de cierre.",
+  },
+  riesgo: {
+    priority: "Prioridad Alta",
+    nextActions: "Llamada financiera + contacto alterno",
+    nextActionsDetail: "Llamar antes de 5 PM para confirmar prima; si no responde, contactar a la esposa y enviar resumen por WhatsApp/email.",
+  },
+  senalesIa: {
+    summary: "Cliente con alta intención de compra. Marta detectó sensibilidad financiera moderada y recomienda intervención humana hoy mismo, asociando la llamada, la simulación bancaria y los compromisos al expediente operativo. La conversación debe confirmar monto, resolver dudas de crédito y dejar evidencia en el timeline.",
+    signals: [
+      { title: "Intención", value: "Alta", color: "green" },
+      { title: "Objeción", value: "Financiamiento", color: "amber" },
+      { title: "Riesgo", value: "72h", color: "red" },
+      { title: "Recomendación", value: "Llamada humana", color: "blue" },
+    ],
+  },
+  evidencias: [
+    { title: "WhatsApp", value: "Confirmación enviada" },
+    { title: "Email", value: "PDF abierto" },
+    { title: "Calendario", value: "Cita creada" },
+    { title: "Supabase", value: "Log insertado" },
+    { title: "CRM", value: "Pipeline actualizado" },
+  ],
+  timeline: [
+    { time: "10:04", title: "Reserva recibida desde app pública", description: "El Centro de Mando crea el expediente operacional vivo." },
+    { time: "10:05", title: "WhatsApp enviado", description: "Confirmación de reserva y próximos pasos." },
+    { time: "10:06", title: "Email enviado", description: "PDF, brochure y documentos asociados." },
+    { time: "10:08", title: "Marta analiza señales", description: "Riesgo financiero moderado detectado." },
+    { time: "10:12", title: "Cita financiera agendada", description: "Reunión mañana 3:30 PM." },
+  ],
+  comunicaciones: [
+    {
+      channel: "WhatsApp Operacional",
+      badge: "2 mensajes nuevos",
+      tone: "green",
+      inboxTitle: "Últimos mensajes recibidos",
+      messages: [
+        { from: "Carlos Méndez", time: "10:21 AM", text: "Gracias. ¿Me pueden confirmar cuánto tendría que pagar exactamente esta semana?", tag: "Consulta financiera" },
+        { from: "Carlos Méndez", time: "10:24 AM", text: "También quisiera que mi esposa reciba el detalle antes de la cita.", tag: "Decisor secundario" },
+      ],
+      actions: ["Enviar simulación bancaria", "Enviar recordatorio de cita", "Enviar checklist documental"],
+      recommendation: "Marta recomienda responder con tono tranquilo, confirmar monto pendiente y copiar a la esposa en el resumen por email.",
+    },
+    {
+      channel: "Email Operacional",
+      badge: "PDF abierto",
+      tone: "blue",
+      inboxTitle: "Últimos correos y actividad",
+      messages: [
+        { from: "Sistema AMENA", time: "10:06 AM", text: "Correo de confirmación enviado con brochure, condiciones y datos de contacto.", tag: "Enviado" },
+        { from: "Carlos Méndez", time: "10:18 AM", text: "El cliente abrió el PDF de condiciones y descargó el brochure del proyecto.", tag: "Apertura detectada" },
+      ],
+      actions: ["Enviar resumen financiero", "Enviar PDF de garantías", "Enviar avance de construcción"],
+      recommendation: "Marta recomienda enviar un correo ejecutivo con simulación, garantías y próximos pasos antes de la llamada humana.",
+    },
+  ],
+  propuestasMarta: [
+    { type: "WhatsApp", title: "Consulta sobre monto a pagar", analysis: "El cliente busca claridad financiera inmediata. Riesgo de ansiedad moderado.", proposal: "Confirmar monto pendiente, enviar simulación y copiar a la esposa por email." },
+    { type: "Email", title: "Resumen financiero familiar", analysis: "La esposa influye en la decisión. Conviene correo estructurado.", proposal: "Enviar resumen, PDF, documentos necesarios y próximos pasos." },
+    { type: "Documento", title: "Constancia laboral recibida", analysis: "Legible, pero con fecha antigua. Requiere validación financiera.", proposal: "Escalar a financiera antes de aprobar." },
+  ],
+  seguimientoOperacional: {
+    metrics: [
+      { key: "compromisos", title: "Compromisos activos", value: "7", note: "4 cliente · 3 internos" },
+      { key: "montos", title: "Monto pendiente", value: "$8,500", note: "Prima y gastos legales" },
+      { key: "atraso", title: "Días de atraso", value: "5", note: "Pago parcial" },
+      { key: "responsable", title: "Responsable", value: "VND-034", note: "María Fernanda" },
+    ],
+    details: {
+      compromisos: {
+        title: "Detalle de compromisos activos",
+        columns: ["Tipo", "Compromiso", "Monto", "Responsable", "Fecha límite", "Próxima acción"],
+        rows: [
+          ["Pago", "Completar prima inicial", "$5,000", "Cliente", "Antes 4 PM", "Enviar constancia y comprobante parcial"],
+          ["Cita", "Reunión financiera con esposa", "N/A", "Vendedora", "Mañana 3:30 PM", "Confirmar asistencia 2 horas antes"],
+          ["Documento", "Enviar constancia laboral", "N/A", "Cliente", "Hoy", "Reenviar checklist y carta modelo"],
+        ],
+      },
+      montos: {
+        title: "Detalle de montos pendientes",
+        columns: ["Concepto", "Monto", "Estado", "Justificación", "Sugerencia IA"],
+        rows: [
+          ["Prima inicial", "$5,000", "Atrasado", "Banco solicitó constancia laboral", "Simulación + llamada humana"],
+          ["Gastos legales", "$2,000", "Pendiente", "Cliente pidió desglose", "Enviar explicación clara"],
+          ["Reserva parcial", "$1,500", "En validación", "Comprobante incompleto", "Solicitar comprobante completo"],
+        ],
+      },
+      atraso: {
+        title: "Detalle de días de atraso",
+        columns: ["Tema", "Atraso", "Riesgo", "Impacto", "Acción"],
+        rows: [
+          ["Pago inicial", "5 días", "Medio-alto", "Puede comprometer vigencia de pre-reserva", "Contactar hoy"],
+          ["Constancia laboral", "1 día", "Medio", "Retrasa validación financiera", "Enviar carta modelo"],
+          ["Confirmación de cita", "0 días", "Bajo", "Debe confirmarse antes de la reunión", "Recordatorio 2 horas antes"],
+        ],
+      },
+      responsable: {
+        title: "Detalle de responsable comercial",
+        columns: ["Responsable", "Código", "Indicador", "Situación", "Siguiente paso"],
+        rows: [
+          ["María Fernanda", "VND-034", "91% uso Marta", "2 tareas vencidas", "Debe priorizar riesgo financiero"],
+          ["Financiera", "FIN-002", "Pendiente revisión", "Simulación bancaria", "Validar escenario antes de llamada"],
+        ],
+      },
+    },
+    historyColumns: ["Fecha", "Tipo", "Compromiso", "Monto", "Estado", "Justificación", "Nuevo compromiso", "Evidencia"],
+    historyRows: [
+      ["20 May", "Pago", "Completar prima inicial", "$5,000", "Atrasado", "Banco solicitó constancia laboral", "Enviar constancia y comprobante parcial antes 4 PM", "WA + PDF"],
+      ["20 May", "Cita", "Reunión financiera con esposa", "N/A", "Pendiente", "La esposa influye en la decisión final", "Confirmar asistencia 2 horas antes", "Calendario"],
+      ["19 May", "Documento", "Enviar DUI, NIT y constancia", "N/A", "Parcial", "Solo envió DUI", "Reenviar checklist documental", "Archivo"],
+    ],
+  },
+};
+
 function cls(...v) {
   return v.filter(Boolean).join(" ");
 }
@@ -309,6 +547,8 @@ function ExecutivePage() {
 }
 
 function ClientPage() {
+  const profile = clientOperationalProfile;
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -316,27 +556,25 @@ function ClientPage() {
         subtitle="Expediente vivo desde la reserva hasta la entrega: comunicaciones, documentos, pagos, citas, servicio, compromisos, evidencias y propuestas de Marta."
         icon={UserRound}
         sync={martaSync.client}
-        badges={[REPORT_DATE, "Carlos Méndez", "Formalización"]}
+        badges={[REPORT_DATE, profile.cliente.name, profile.pipeline.status]}
         syncNote="El 91% representa una estimación global de qué tanto la vendedora asignada está revisando, aprovechando y dando seguimiento a las recomendaciones de Marta en este expediente. No se busca obediencia ciega: se espera criterio humano, revisión y acción disciplinada."
       />
 
       <Card>
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex gap-5">
-            <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-slate-950 text-4xl font-black text-white">CM</div>
+            <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-slate-950 text-4xl font-black text-white">{profile.cliente.initials}</div>
             <div>
-              <h2 className="text-4xl font-black text-slate-950">Carlos Méndez</h2>
+              <h2 className="text-4xl font-black text-slate-950">{profile.cliente.name}</h2>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Badge tone="green">Expediente Activo</Badge>
-                <Badge tone="amber">Prioridad Alta</Badge>
-                <Badge tone="violet">Marta Activa</Badge>
+                {profile.cliente.badges.map((badge) => <Badge key={badge.label} tone={badge.tone}>{badge.label}</Badge>)}
               </div>
               <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-                <InfoCard title="AMENA ID" value="AMENA-2026-000784" detail="Identificador único del expediente comercial y operativo." />
-                <InfoCard title="Vendedora asignada" value="María Fernanda · VND-034" detail="Responsable comercial directa del seguimiento, registro de información y aplicación criteriosa de recomendaciones de Marta." />
-                <InfoCard title="Unidad" value="Sector 01 · Torre 3 · Nivel 7 · A704" detail="Unidad preferida vinculada al flujo de reserva y al seguimiento comercial." />
-                <InfoCard title="Pipeline" value="Formalización" detail="Etapa posterior a la pre-reserva: documentación, validación financiera, compromisos de pago y preparación de cierre." />
-                <InfoCard title="Próximas acciones" value="Llamada financiera + contacto alterno" detail="Llamar antes de 5 PM para confirmar prima; si no responde, contactar a la esposa y enviar resumen por WhatsApp/email." />
+                <InfoCard title="AMENA ID" value={profile.cliente.amenaId} detail="Identificador único del expediente comercial y operativo." />
+                <InfoCard title="Vendedora asignada" value={profile.vendedora.label} detail={profile.vendedora.detail} />
+                <InfoCard title="Unidad" value={profile.unidadReservada.label} detail={profile.unidadReservada.detail} />
+                <InfoCard title="Pipeline" value={profile.pipeline.status} detail={profile.pipeline.detail} />
+                <InfoCard title="Próximas acciones" value={profile.riesgo.nextActions} detail={profile.riesgo.nextActionsDetail} />
               </div>
             </div>
           </div>
@@ -352,28 +590,21 @@ function ClientPage() {
           </div>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-4">
-          <KpiCard title="Intención" value="Alta" color="green" />
-          <KpiCard title="Objeción" value="Financiamiento" color="amber" />
-          <KpiCard title="Riesgo" value="72h" color="red" />
-          <KpiCard title="Recomendación" value="Llamada humana" color="blue" />
+          {profile.senalesIa.signals.map((signal) => <KpiCard key={signal.title} title={signal.title} value={signal.value} color={signal.color} />)}
         </div>
         <div className="mt-5 rounded-2xl bg-white p-5 text-base font-semibold leading-8 text-slate-800">
-          Cliente con alta intención de compra. Marta detectó sensibilidad financiera moderada y recomienda intervención humana hoy mismo, asociando la llamada, la simulación bancaria y los compromisos al expediente operativo. La conversación debe confirmar monto, resolver dudas de crédito y dejar evidencia en el timeline.
+          {profile.senalesIa.summary}
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">
-        <EvidenceCard title="WhatsApp" value="Confirmación enviada" />
-        <EvidenceCard title="Email" value="PDF abierto" />
-        <EvidenceCard title="Calendario" value="Cita creada" />
-        <EvidenceCard title="Supabase" value="Log insertado" />
-        <EvidenceCard title="CRM" value="Pipeline actualizado" />
+        {profile.evidencias.map((evidence) => <EvidenceCard key={evidence.title} title={evidence.title} value={evidence.value} />)}
       </div>
 
-      <TimelineBlock />
-      <CommunicationsHub />
-      <MartaProposalReviewCenter />
-      <TrackingBlock />
+      <TimelineBlock items={profile.timeline} />
+      <CommunicationsHub channels={profile.comunicaciones} />
+      <MartaProposalReviewCenter proposals={profile.propuestasMarta} />
+      <TrackingBlock tracking={profile.seguimientoOperacional} />
     </div>
   );
 }
@@ -1173,16 +1404,16 @@ function EvidenceCard({ title, value }) {
   return <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><div className="text-lg font-black text-slate-950">{title}</div><div className="mt-3 rounded-full bg-emerald-100 px-4 py-2 text-base font-bold text-emerald-800 inline-flex">{value}</div></div>;
 }
 
-function TimelineBlock() {
-  return <Card><h2 className="text-3xl font-black text-slate-950">Timeline Operacional Total</h2><p className="mt-2 text-base font-semibold text-slate-700">Historial unificado de comunicaciones, tickets, pagos, seguimientos y eventos operacionales.</p><div className="mt-6 space-y-4"><TimelineItem time="10:04" title="Reserva recibida desde app pública" description="El Centro de Mando crea el expediente operacional vivo." /><TimelineItem time="10:05" title="WhatsApp enviado" description="Confirmación de reserva y próximos pasos." /><TimelineItem time="10:06" title="Email enviado" description="PDF, brochure y documentos asociados." /><TimelineItem time="10:08" title="Marta analiza señales" description="Riesgo financiero moderado detectado." /><TimelineItem time="10:12" title="Cita financiera agendada" description="Reunión mañana 3:30 PM." /></div></Card>;
+function TimelineBlock({ items }) {
+  return <Card><h2 className="text-3xl font-black text-slate-950">Timeline Operacional Total</h2><p className="mt-2 text-base font-semibold text-slate-700">Historial unificado de comunicaciones, tickets, pagos, seguimientos y eventos operacionales.</p><div className="mt-6 space-y-4">{items.map((item) => <TimelineItem key={`${item.time}-${item.title}`} time={item.time} title={item.title} description={item.description} />)}</div></Card>;
 }
 
 function TimelineItem({ time, title, description }) {
   return <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5"><div className="text-sm font-black text-slate-700 w-16">{time}</div><div><div className="text-lg font-black text-slate-950">{title}</div><div className="mt-1 text-base font-semibold text-slate-700 leading-7">{description}</div></div></div>;
 }
 
-function CommunicationsHub() {
-  return <Card><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Comunicaciones Operacionales</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Desde el perfil del cliente se pueden leer mensajes recibidos, revisar correos, enviar respuestas, usar plantillas, aprobar sugerencias de Marta y dejar evidencia automática en el timeline operacional.</p></div><div className="flex flex-wrap gap-2"><Badge tone="green">WhatsApp conectado</Badge><Badge tone="blue">Email conectado</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-2"><CommunicationChannel channel="WhatsApp Operacional" badge="2 mensajes nuevos" tone="green" inboxTitle="Últimos mensajes recibidos" messages={[{ from: "Carlos Méndez", time: "10:21 AM", text: "Gracias. ¿Me pueden confirmar cuánto tendría que pagar exactamente esta semana?", tag: "Consulta financiera" }, { from: "Carlos Méndez", time: "10:24 AM", text: "También quisiera que mi esposa reciba el detalle antes de la cita.", tag: "Decisor secundario" }]} actions={["Enviar simulación bancaria", "Enviar recordatorio de cita", "Enviar checklist documental"]} recommendation="Marta recomienda responder con tono tranquilo, confirmar monto pendiente y copiar a la esposa en el resumen por email." /><CommunicationChannel channel="Email Operacional" badge="PDF abierto" tone="blue" inboxTitle="Últimos correos y actividad" messages={[{ from: "Sistema AMENA", time: "10:06 AM", text: "Correo de confirmación enviado con brochure, condiciones y datos de contacto.", tag: "Enviado" }, { from: "Carlos Méndez", time: "10:18 AM", text: "El cliente abrió el PDF de condiciones y descargó el brochure del proyecto.", tag: "Apertura detectada" }]} actions={["Enviar resumen financiero", "Enviar PDF de garantías", "Enviar avance de construcción"]} recommendation="Marta recomienda enviar un correo ejecutivo con simulación, garantías y próximos pasos antes de la llamada humana." /></div></Card>;
+function CommunicationsHub({ channels }) {
+  return <Card><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Comunicaciones Operacionales</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Desde el perfil del cliente se pueden leer mensajes recibidos, revisar correos, enviar respuestas, usar plantillas, aprobar sugerencias de Marta y dejar evidencia automática en el timeline operacional.</p></div><div className="flex flex-wrap gap-2"><Badge tone="green">WhatsApp conectado</Badge><Badge tone="blue">Email conectado</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-2">{channels.map((channel) => <CommunicationChannel key={channel.channel} channel={channel.channel} badge={channel.badge} tone={channel.tone} inboxTitle={channel.inboxTitle} messages={channel.messages} actions={channel.actions} recommendation={channel.recommendation} />)}</div></Card>;
 }
 
 function CommunicationChannel({ channel, badge, tone, inboxTitle, messages, actions, recommendation }) {
@@ -1190,69 +1421,33 @@ function CommunicationChannel({ channel, badge, tone, inboxTitle, messages, acti
   return <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"><div><h3 className="text-2xl font-black text-slate-950">{channel}</h3><p className="mt-1 text-base font-semibold text-slate-700">Lectura, respuesta, envío y registro automático de evidencia.</p></div><Badge tone={tone}>{badge}</Badge></div><div className="mt-4 grid gap-3 md:grid-cols-3"><button className={`rounded-2xl px-4 py-3 text-sm font-black text-white ${mainButton}`}>Leer recibidos</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-slate-800">Enviar nuevo</button><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white hover:bg-violet-700">Revisar propuesta Marta</button></div><div className="mt-5 rounded-2xl bg-white p-4"><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">{inboxTitle}</div><div className="mt-4 space-y-3">{messages.map((message) => <div key={`${message.from}-${message.time}-${message.tag}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div className="font-black text-slate-950">{message.from}</div><div className="text-xs font-bold text-slate-600">{message.time}</div></div><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{message.text}</p><div className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700">{message.tag}</div></div>)}</div></div><div className="mt-4 rounded-2xl bg-white p-4"><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">Acciones rápidas</div><div className="mt-3 flex flex-wrap gap-2">{actions.map((action) => <button key={action} className="rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-800 hover:bg-slate-200">{action}</button>)}</div></div><div className="mt-4 rounded-2xl border border-violet-100 bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Sugerencia Marta:</span> {recommendation}</div></div>;
 }
 
-function MartaProposalReviewCenter() {
-  return <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm"><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Bandeja de Propuestas de Marta</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Marta analiza WhatsApp, correo o documentos; propone respuestas, próximos pasos y deja todo listo para que la vendedora revise, edite, apruebe y envíe.</p></div><div className="flex flex-wrap gap-2"><Badge tone="violet">4 propuestas pendientes</Badge><Badge tone="slate">Revisión humana requerida</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-3"><MartaProposalCard type="WhatsApp" title="Consulta sobre monto a pagar" analysis="El cliente busca claridad financiera inmediata. Riesgo de ansiedad moderado." proposal="Confirmar monto pendiente, enviar simulación y copiar a la esposa por email." /><MartaProposalCard type="Email" title="Resumen financiero familiar" analysis="La esposa influye en la decisión. Conviene correo estructurado." proposal="Enviar resumen, PDF, documentos necesarios y próximos pasos." /><MartaProposalCard type="Documento" title="Constancia laboral recibida" analysis="Legible, pero con fecha antigua. Requiere validación financiera." proposal="Escalar a financiera antes de aprobar." /></div></div>;
+function MartaProposalReviewCenter({ proposals }) {
+  return <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm"><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Bandeja de Propuestas de Marta</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Marta analiza WhatsApp, correo o documentos; propone respuestas, próximos pasos y deja todo listo para que la vendedora revise, edite, apruebe y envíe.</p></div><div className="flex flex-wrap gap-2"><Badge tone="violet">4 propuestas pendientes</Badge><Badge tone="slate">Revisión humana requerida</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-3">{proposals.map((proposal) => <MartaProposalCard key={`${proposal.type}-${proposal.title}`} type={proposal.type} title={proposal.title} analysis={proposal.analysis} proposal={proposal.proposal} />)}</div></div>;
 }
 
 function MartaProposalCard({ type, title, analysis, proposal }) {
   return <div className="rounded-3xl border border-violet-100 bg-white p-5 shadow-sm"><div className="text-sm uppercase tracking-[0.22em] text-violet-600 font-black">{type}</div><h3 className="mt-2 text-xl font-black text-slate-950">{title}</h3><div className="mt-4 rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Análisis Marta:</span> {analysis}</div><div className="mt-4 rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Propuesta:</span> {proposal}</div><div className="mt-5 flex flex-wrap gap-2"><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Revisar</button><button className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-800">Editar</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Aprobar</button></div></div>;
 }
 
-function TrackingBlock() {
-  const [activeDetail, setActiveDetail] = useState("compromisos");
-  const details = {
-    compromisos: {
-      title: "Detalle de compromisos activos",
-      rows: [
-        ["Pago", "Completar prima inicial", "$5,000", "Cliente", "Antes 4 PM", "Enviar constancia y comprobante parcial"],
-        ["Cita", "Reunión financiera con esposa", "N/A", "Vendedora", "Mañana 3:30 PM", "Confirmar asistencia 2 horas antes"],
-        ["Documento", "Enviar constancia laboral", "N/A", "Cliente", "Hoy", "Reenviar checklist y carta modelo"],
-      ],
-    },
-    montos: {
-      title: "Detalle de montos pendientes",
-      rows: [
-        ["Prima inicial", "$5,000", "Atrasado", "Banco solicitó constancia laboral", "Simulación + llamada humana"],
-        ["Gastos legales", "$2,000", "Pendiente", "Cliente pidió desglose", "Enviar explicación clara"],
-        ["Reserva parcial", "$1,500", "En validación", "Comprobante incompleto", "Solicitar comprobante completo"],
-      ],
-    },
-    atraso: {
-      title: "Detalle de días de atraso",
-      rows: [
-        ["Pago inicial", "5 días", "Medio-alto", "Puede comprometer vigencia de pre-reserva", "Contactar hoy"],
-        ["Constancia laboral", "1 día", "Medio", "Retrasa validación financiera", "Enviar carta modelo"],
-        ["Confirmación de cita", "0 días", "Bajo", "Debe confirmarse antes de la reunión", "Recordatorio 2 horas antes"],
-      ],
-    },
-    responsable: {
-      title: "Detalle de responsable comercial",
-      rows: [
-        ["María Fernanda", "VND-034", "91% uso Marta", "2 tareas vencidas", "Debe priorizar riesgo financiero"],
-        ["Financiera", "FIN-002", "Pendiente revisión", "Simulación bancaria", "Validar escenario antes de llamada"],
-      ],
-    },
-  };
-  const current = details[activeDetail];
+function TrackingBlock({ tracking }) {
+  const [activeDetail, setActiveDetail] = useState<TrackingDetailKey>("compromisos");
+  const current = tracking.details[activeDetail];
 
   return (
     <Card>
       <h2 className="text-3xl font-black text-slate-950">Seguimientos Operativos</h2>
       <p className="mt-2 max-w-5xl text-base font-semibold text-slate-700 leading-7">Mesa de control donde se cruzan compromisos adquiridos, pagos esperados, atrasos, justificaciones, notas de seguimiento, nuevos acuerdos, archivos asociados y responsable comercial.</p>
       <div className="mt-6 grid gap-4 md:grid-cols-4">
-        <MiniMetric title="Compromisos activos" value="7" note="4 cliente · 3 internos" onClick={() => setActiveDetail("compromisos")} active={activeDetail === "compromisos"} />
-        <MiniMetric title="Monto pendiente" value="$8,500" note="Prima y gastos legales" onClick={() => setActiveDetail("montos")} active={activeDetail === "montos"} />
-        <MiniMetric title="Días de atraso" value="5" note="Pago parcial" onClick={() => setActiveDetail("atraso")} active={activeDetail === "atraso"} />
-        <MiniMetric title="Responsable" value="VND-034" note="María Fernanda" onClick={() => setActiveDetail("responsable")} active={activeDetail === "responsable"} />
+        {tracking.metrics.map((metric) => <MiniMetric key={metric.key} title={metric.title} value={metric.value} note={metric.note} onClick={() => setActiveDetail(metric.key)} active={activeDetail === metric.key} />)}
       </div>
       <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
         <h3 className="text-2xl font-black text-slate-950">{current.title}</h3>
         <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Esta sección se despliega al hacer clic en los resúmenes superiores para no saturar la página con todos los detalles desde el inicio.</p>
         <div className="mt-5">
-          <SimpleTable columns={activeDetail === "compromisos" ? ["Tipo", "Compromiso", "Monto", "Responsable", "Fecha límite", "Próxima acción"] : activeDetail === "montos" ? ["Concepto", "Monto", "Estado", "Justificación", "Sugerencia IA"] : activeDetail === "atraso" ? ["Tema", "Atraso", "Riesgo", "Impacto", "Acción"] : ["Responsable", "Código", "Indicador", "Situación", "Siguiente paso"]} rows={current.rows} />
+          <SimpleTable columns={current.columns} rows={current.rows} />
         </div>
       </div>
-      <div className="mt-6"><SimpleTable columns={["Fecha", "Tipo", "Compromiso", "Monto", "Estado", "Justificación", "Nuevo compromiso", "Evidencia"]} rows={[["20 May", "Pago", "Completar prima inicial", "$5,000", "Atrasado", "Banco solicitó constancia laboral", "Enviar constancia y comprobante parcial antes 4 PM", "WA + PDF"], ["20 May", "Cita", "Reunión financiera con esposa", "N/A", "Pendiente", "La esposa influye en la decisión final", "Confirmar asistencia 2 horas antes", "Calendario"], ["19 May", "Documento", "Enviar DUI, NIT y constancia", "N/A", "Parcial", "Solo envió DUI", "Reenviar checklist documental", "Archivo"]]} /></div>
+      <div className="mt-6"><SimpleTable columns={tracking.historyColumns} rows={tracking.historyRows} /></div>
     </Card>
   );
 }
