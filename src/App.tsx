@@ -41,17 +41,17 @@ const REPORT_DATE = "Corte: 15 mayo 2026";
 
 const menu = [
   { id: "executive", label: "Centro Ejecutivo", icon: MonitorCog },
-  { id: "client", label: "Perfil Cliente", icon: UserRound },
-  { id: "construction", label: "Construcción", icon: HardHat },
+  { id: "client", label: "Expediente Vivo", icon: UserRound },
+  { id: "construction", label: "Inventario / Construcción", icon: HardHat },
   { id: "documents", label: "Documentos", icon: FileText },
-  { id: "payments", label: "Pagos", icon: CreditCard },
+  { id: "payments", label: "Finanzas / Pagos", icon: CreditCard },
   { id: "service", label: "Servicio Cliente", icon: Headphones },
-  { id: "sellers", label: "Vendedoras", icon: Users },
-  { id: "campaigns", label: "Canales y Campañas", icon: Megaphone },
-  { id: "campaignDelivery", label: "Envío de Campañas", icon: Send },
-  { id: "funnels", label: "Embudos de Ventas", icon: Layers3 },
-  { id: "dashboards", label: "Dashboards", icon: BarChart3 },
-  { id: "demo", label: "Sala Demo Operativa", icon: Smartphone },
+  { id: "sellers", label: "Ventas / Vendedoras", icon: Users },
+  { id: "campaigns", label: "Marketing / Canales", icon: Megaphone },
+  { id: "campaignDelivery", label: "Campañas", icon: Send },
+  { id: "funnels", label: "Embudos", icon: Layers3 },
+  { id: "dashboards", label: "Dashboard Inteligente", icon: BarChart3 },
+  { id: "demo", label: "Guía Demo", icon: Smartphone },
 ];
 
 const martaSync = {
