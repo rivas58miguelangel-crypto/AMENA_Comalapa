@@ -50,7 +50,7 @@ const menu = [
   { id: "campaigns", label: "Marketing / Canales", icon: Megaphone },
   { id: "campaignDelivery", label: "Campañas", icon: Send },
   { id: "funnels", label: "Embudos", icon: Layers3 },
-  { id: "dashboards", label: "Dashboard Inteligente", icon: BarChart3 },
+  { id: "dashboards", label: "Inteligencia Operativa", icon: BarChart3 },
   { id: "demo", label: "Guía Demo", icon: Smartphone },
 ];
 
@@ -174,7 +174,7 @@ const clientOperationalProfile: ClientOperationalProfile = {
   cliente: {
     name: "Carlos Méndez",
     initials: "CM",
-    amenaId: "AMENA-2026-000784",
+    amenaId: "HOP-2026-000784",
     badges: [
       { label: "Expediente Activo", tone: "green" },
       { label: "Prioridad Alta", tone: "amber" },
@@ -201,7 +201,7 @@ const clientOperationalProfile: ClientOperationalProfile = {
     nextActionsDetail: "Llamar antes de 5 PM para confirmar prima; si no responde, contactar a la esposa y enviar resumen por WhatsApp/email.",
   },
   senalesIa: {
-    summary: "Cliente con alta intención de compra. AMENA Intelligence detectó sensibilidad financiera moderada y sugiere intervención humana hoy mismo, asociando la llamada, la simulación bancaria y los compromisos al expediente operativo. La conversación debe confirmar monto, resolver dudas de crédito y dejar evidencia en el timeline.",
+    summary: "Cliente con alta intención de compra. H-Operia Intelligence detectó sensibilidad financiera moderada y sugiere intervención humana hoy mismo, asociando la llamada, la simulación bancaria y los compromisos al expediente operativo. La conversación debe confirmar monto, resolver dudas de crédito y dejar evidencia en el timeline.",
     signals: [
       { title: "Intención", value: "Alta", color: "green" },
       { title: "Objeción", value: "Financiamiento", color: "amber" },
@@ -213,14 +213,14 @@ const clientOperationalProfile: ClientOperationalProfile = {
     { title: "WhatsApp", value: "Confirmación enviada" },
     { title: "Email", value: "PDF abierto" },
     { title: "Calendario", value: "Cita creada" },
-    { title: "Supabase", value: "Log insertado" },
-    { title: "CRM", value: "Pipeline actualizado" },
+    { title: "Evidencia Operacional", value: "Log insertado" },
+    { title: "Operaciones Comerciales", value: "Pipeline actualizado" },
   ],
   timeline: [
-    { time: "10:04", title: "Reserva recibida desde app pública", description: "El Centro de Mando crea el expediente operacional vivo." },
+    { time: "10:04", title: "Reserva recibida desde Reservas AMENA", description: "El Centro de Mando crea el expediente operacional vivo." },
     { time: "10:05", title: "WhatsApp enviado", description: "Confirmación de reserva y próximos pasos." },
     { time: "10:06", title: "Email enviado", description: "PDF, brochure y documentos asociados." },
-    { time: "10:08", title: "AMENA Intelligence analiza señales", description: "Riesgo financiero moderado detectado." },
+    { time: "10:08", title: "H-Operia Intelligence analiza señales", description: "Riesgo financiero moderado detectado." },
     { time: "10:12", title: "Cita financiera agendada", description: "Reunión mañana 3:30 PM." },
   ],
   comunicaciones: [
@@ -234,7 +234,7 @@ const clientOperationalProfile: ClientOperationalProfile = {
         { from: "Carlos Méndez", time: "10:24 AM", text: "También quisiera que mi esposa reciba el detalle antes de la cita.", tag: "Decisor secundario" },
       ],
       actions: ["Enviar simulación bancaria", "Enviar recordatorio de cita", "Enviar checklist documental"],
-      recommendation: "AMENA Intelligence sugiere una respuesta tranquila; la vendedora revisa tono, monto pendiente y destinatarios antes de enviar.",
+      recommendation: "H-Operia Intelligence sugiere una respuesta tranquila; la vendedora revisa tono, monto pendiente y destinatarios antes de enviar.",
     },
     {
       channel: "Email Operacional",
@@ -242,11 +242,11 @@ const clientOperationalProfile: ClientOperationalProfile = {
       tone: "blue",
       inboxTitle: "Últimos correos y actividad",
       messages: [
-        { from: "Sistema AMENA", time: "10:06 AM", text: "Correo de confirmación enviado con brochure, condiciones y datos de contacto.", tag: "Enviado" },
+        { from: "H-Operia", time: "10:06 AM", text: "Correo de confirmación enviado con brochure, condiciones y datos de contacto.", tag: "Enviado" },
         { from: "Carlos Méndez", time: "10:18 AM", text: "El cliente abrió el PDF de condiciones y descargó el brochure del proyecto.", tag: "Apertura detectada" },
       ],
       actions: ["Enviar resumen financiero", "Enviar PDF de garantías", "Enviar avance de construcción"],
-      recommendation: "AMENA Intelligence sugiere preparar un correo ejecutivo con simulación, garantías y próximos pasos antes de la llamada humana.",
+      recommendation: "H-Operia Intelligence sugiere preparar un correo ejecutivo con simulación, garantías y próximos pasos antes de la llamada humana.",
     },
   ],
   propuestasMarta: [
@@ -333,7 +333,7 @@ function TopNav({ active, setActive }) {
     <div className="sticky top-0 z-50 rounded-[2rem] bg-slate-950 p-5 text-white shadow-2xl">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.35em] text-amber-300">AMENA</p>
+          <p className="text-xs font-black uppercase tracking-[0.35em] text-amber-300">H-Operia</p>
           <h2 className="text-3xl font-black">Centro de Mando</h2>
         </div>
         <Badge tone="dark">{martaSync[active]}% Integración</Badge>
@@ -365,7 +365,7 @@ function PageHeader({ title, subtitle, icon: Icon, sync = 80, badges = [], syncN
             <Icon size={30} />
           </div>
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.35em] text-amber-500">AMENA Enterprise</p>
+            <p className="text-sm font-black uppercase tracking-[0.35em] text-amber-500">Humanizar la operación inteligente</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">{title}</h1>
             <p className="mt-3 max-w-5xl text-lg font-semibold leading-8 text-slate-800">{subtitle}</p>
           </div>
@@ -379,7 +379,7 @@ function PageHeader({ title, subtitle, icon: Icon, sync = 80, badges = [], syncN
             <div className="h-3 rounded-full bg-emerald-300" style={{ width: `${sync}%` }} />
           </div>
           <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">
-            {syncNote || "Indica qué tanto este módulo conecta información real, señales operativas y criterio humano. Marta acompaña conversaciones; AMENA Intelligence analiza señales; el equipo humano revisa, decide y ejecuta."}
+            {syncNote || "Indica qué tanto este módulo conecta información real, señales operativas y criterio humano. Marta acompaña conversaciones; H-Operia Intelligence analiza señales; el equipo humano revisa, decide y ejecuta."}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {badges.map((b) => <Badge key={b} tone="dark">{b}</Badge>)}
@@ -421,7 +421,7 @@ function Metric({ title, value, note, tone = "slate", icon: Icon = Activity, onC
   );
 }
 
-function AiObservation({ title = "Observaciones estratégicas de AMENA Intelligence", children }) {
+function AiObservation({ title = "Observaciones estratégicas de H-Operia Intelligence", children }) {
   return (
     <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6">
       <div className="flex items-center gap-3">
@@ -506,22 +506,22 @@ function ExecutivePage() {
     <div className="space-y-5">
       <PageHeader
         title="Centro Ejecutivo"
-        subtitle="Vista semanal para Director General y Director Comercial: prioridades, riesgos, ingresos, acompañamiento del equipo, lectura de AMENA Intelligence y acciones concretas para decidir con criterio operativo."
+        subtitle="Vista semanal para Director General y Director Comercial: prioridades, riesgos, ingresos, acompañamiento del equipo, lectura de H-Operia Intelligence y acciones concretas para decidir con criterio operativo."
         icon={MonitorCog}
         sync={martaSync.executive}
         badges={[REPORT_DATE, "Tercera semana de mayo 2026", "Inteligencia estratégica"]}
-        syncNote="Este porcentaje resume qué tanto AMENA Intelligence cruza señales internas, riesgos, recomendaciones y patrones operativos para que la dirección revise, decida y ejecute con criterio humano."
+        syncNote="Este porcentaje resume qué tanto H-Operia Intelligence cruza señales internas, riesgos, recomendaciones y patrones operativos para que la dirección revise, decida y ejecute con criterio humano."
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Metric title="Ingresos recibidos" value="$184,500" note="Reserva a entrega · corte 15 mayo 2026" tone="green" icon={BadgeDollarSign} />
         <Metric title="Clientes críticos" value="17" note="Riesgo financiero/documental" tone="red" icon={AlertTriangle} />
-        <Metric title="Integración AMENA Intelligence" value="86%" note="Promedio operativo" tone="violet" icon={Bot} />
+        <Metric title="Integración H-Operia Intelligence" value="86%" note="Promedio operativo" tone="violet" icon={Bot} />
         <Metric title="Acciones hoy" value="43" note="Sugeridas para revisión directiva" tone="blue" icon={Target} />
       </div>
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <DetailStack
           title="Prioridades ejecutivas de la semana"
-          subtitle="Acciones que AMENA Intelligence recomienda revisar en comité comercial."
+          subtitle="Acciones que H-Operia Intelligence recomienda revisar en comité comercial."
           items={[
             { title: "Instagram genera volumen, pero formaliza 18% menos que referidos.", text: "Acción: revisar promesas de campaña, calidad de segmentación y consistencia entre anuncio, WhatsApp y seguimiento de vendedoras.", badge: "Marketing", tone: "blue" },
             { title: "Tres vendedoras necesitan más acompañamiento con propuestas asistidas.", text: "Acción: coordinar revisión diaria de propuestas antes de contactar clientes y dar seguimiento claro por vendedora.", badge: "Equipo ventas", tone: "amber" },
@@ -530,7 +530,7 @@ function ExecutivePage() {
           ]}
         />
         <AiObservation>
-          <p>La empresa ya no debe dirigir solo por percepción. AMENA Intelligence aporta contexto para que los equipos revisen respuestas, analicen documentos, registren compromisos y evalúen campañas por ingresos reales, no solo por leads.</p>
+          <p>La empresa ya no debe dirigir solo por percepción. H-Operia Intelligence aporta contexto para que los equipos revisen respuestas, analicen documentos, registren compromisos y evalúen campañas por ingresos reales, no solo por leads.</p>
           <p className="mt-3">El nivel de sincronización no mide “actividad decorativa”; muestra cuánta inteligencia operacional real se está usando para decidir mejor, dar seguimiento claro y evitar que cada equipo trabaje con información incompleta.</p>
         </AiObservation>
       </div>
@@ -554,11 +554,11 @@ function ClientPage() {
     <div className="space-y-5">
       <PageHeader
         title="Perfil Operacional del Cliente"
-        subtitle="Expediente vivo desde la reserva hasta la entrega: Marta acompaña conversaciones, AMENA Intelligence ordena señales y la vendedora revisa tono, prioridad y siguiente paso."
+        subtitle="Expediente vivo desde la reserva hasta la entrega: Marta acompaña conversaciones, H-Operia Intelligence ordena señales y la vendedora revisa tono, prioridad y siguiente paso."
         icon={UserRound}
         sync={martaSync.client}
         badges={[REPORT_DATE, profile.cliente.name, profile.pipeline.status]}
-        syncNote="Este porcentaje indica qué tan conectado está el expediente post-reserva: Marta acompaña dudas y conversaciones; AMENA Intelligence interpreta señales; la vendedora revisa y ejecuta el siguiente paso."
+        syncNote="Este porcentaje indica qué tan conectado está el expediente post-reserva: Marta acompaña dudas y conversaciones; H-Operia Intelligence interpreta señales; la vendedora revisa y ejecuta el siguiente paso."
       />
 
       <Card>
@@ -571,7 +571,7 @@ function ClientPage() {
                 {profile.cliente.badges.map((badge) => <Badge key={badge.label} tone={badge.tone}>{badge.label}</Badge>)}
               </div>
               <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-                <InfoCard title="AMENA ID" value={profile.cliente.amenaId} detail="Identificador único del expediente comercial y operativo." />
+                <InfoCard title="H-Operia ID" value={profile.cliente.amenaId} detail="Identificador único del expediente comercial y operativo." />
                 <InfoCard title="Vendedora asignada" value={profile.vendedora.label} detail={profile.vendedora.detail} />
                 <InfoCard title="Unidad" value={profile.unidadReservada.label} detail={profile.unidadReservada.detail} />
                 <InfoCard title="Pipeline" value={profile.pipeline.status} detail={profile.pipeline.detail} />
@@ -587,7 +587,7 @@ function ClientPage() {
           <div className="rounded-2xl bg-violet-600 p-3 text-white font-black">IA</div>
           <div>
             <h2 className="text-3xl font-black text-slate-950">Marta · Acompañamiento al Cliente</h2>
-            <p className="text-base font-semibold text-slate-700">Marta acompaña conversaciones, AMENA Intelligence interpreta señales y la vendedora valida el siguiente paso.</p>
+            <p className="text-base font-semibold text-slate-700">Marta acompaña conversaciones, H-Operia Intelligence interpreta señales y la vendedora valida el siguiente paso.</p>
           </div>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-4">
@@ -629,15 +629,15 @@ const constructionHierarchy = [
                 level: "Nivel 7",
                 progress: "74%",
                 units: [
-                  { unit: "A704", model: "Modelo A", status: "Instalaciones eléctricas en prueba", reservationId: "AMENA-RES-000784", owner: "Carlos Méndez", practicalAdvance: "Muros internos listos, instalaciones eléctricas en validación y ventanas ya colocadas.", directorNote: "Sirve para mostrar consistencia entre promesa comercial y avance real.", sellerNote: "Puede explicarse que la unidad está más avanzada que otras del mismo sector.", reservedClientNote: "Se recomienda enviar fotos internas y cronograma de próximos acabados al propietario de esta unidad.", newLeadNote: "Buena unidad para mostrar seguridad de avance al prospecto, sin revelar información privada del reservante.", nextEvidence: "Enviar set de fotografías + hito de próximas 2 semanas." },
-                  { unit: "A705", model: "Modelo A", status: "Ventanas instaladas", reservationId: "AMENA-RES-000785", owner: "Reservante privado", practicalAdvance: "Ventanas completas, pruebas de instalaciones pendientes y acabados aún no iniciados.", directorNote: "Unidad útil para comparar secuencia de obra con A704.", sellerNote: "Conviene explicar que no todas las unidades avanzan exactamente al mismo tiempo.", reservedClientNote: "Se puede enviar explicación comparativa corta con A704.", newLeadNote: "Útil para mostrar avance, pero sin prometer acabados inmediatos.", nextEvidence: "Enviar comparativo visual entre dos unidades del mismo nivel." },
+                  { unit: "A704", model: "Modelo A", status: "Instalaciones eléctricas en prueba", reservationId: "HOP-RES-000784", owner: "Carlos Méndez", practicalAdvance: "Muros internos listos, instalaciones eléctricas en validación y ventanas ya colocadas.", directorNote: "Sirve para mostrar consistencia entre promesa comercial y avance real.", sellerNote: "Puede explicarse que la unidad está más avanzada que otras del mismo sector.", reservedClientNote: "Se recomienda enviar fotos internas y cronograma de próximos acabados al propietario de esta unidad.", newLeadNote: "Buena unidad para mostrar seguridad de avance al prospecto, sin revelar información privada del reservante.", nextEvidence: "Enviar set de fotografías + hito de próximas 2 semanas." },
+                  { unit: "A705", model: "Modelo A", status: "Ventanas instaladas", reservationId: "HOP-RES-000785", owner: "Reservante privado", practicalAdvance: "Ventanas completas, pruebas de instalaciones pendientes y acabados aún no iniciados.", directorNote: "Unidad útil para comparar secuencia de obra con A704.", sellerNote: "Conviene explicar que no todas las unidades avanzan exactamente al mismo tiempo.", reservedClientNote: "Se puede enviar explicación comparativa corta con A704.", newLeadNote: "Útil para mostrar avance, pero sin prometer acabados inmediatos.", nextEvidence: "Enviar comparativo visual entre dos unidades del mismo nivel." },
                 ],
               },
               {
                 level: "Nivel 8",
                 progress: "69%",
                 units: [
-                  { unit: "A804", model: "Modelo A", status: "Muros y ductos listos", reservationId: "AMENA-RES-000812", owner: "Reservante privado", practicalAdvance: "Ductos e instalaciones preparadas; aún no inicia validación final.", directorNote: "Refuerza visión de avance consistente por encima del nivel 7.", sellerNote: "Se puede usar para explicar orden lógico de ejecución.", reservedClientNote: "Mensaje de tranquilidad: la secuencia está dentro del plan.", newLeadNote: "No mostrar como unidad terminada; mostrarla como avance sólido.", nextEvidence: "Enviar reporte visual simple con lenguaje no técnico." },
+                  { unit: "A804", model: "Modelo A", status: "Muros y ductos listos", reservationId: "HOP-RES-000812", owner: "Reservante privado", practicalAdvance: "Ductos e instalaciones preparadas; aún no inicia validación final.", directorNote: "Refuerza visión de avance consistente por encima del nivel 7.", sellerNote: "Se puede usar para explicar orden lógico de ejecución.", reservedClientNote: "Mensaje de tranquilidad: la secuencia está dentro del plan.", newLeadNote: "No mostrar como unidad terminada; mostrarla como avance sólido.", nextEvidence: "Enviar reporte visual simple con lenguaje no técnico." },
                 ],
               },
             ],
@@ -647,7 +647,7 @@ const constructionHierarchy = [
             progress: "42%",
             commercialRisk: "Genera ansiedad comparativa frente a Torre 3 por ventanas aún no instaladas.",
             levels: [
-              { level: "Nivel 6", progress: "45%", units: [ { unit: "B602", model: "Modelo B", status: "Obra gris avanzada", reservationId: "AMENA-RES-000901", owner: "Reservante privado", practicalAdvance: "Estructura sólida; ventanas pendientes por lote del proveedor.", directorNote: "Importante coordinar narrativa única entre construcción y ventas.", sellerNote: "Nunca decir solo ‘va atrasado’; explicar secuencia técnica.", reservedClientNote: "Mensaje ideal: la fase actual es correcta y evita retrabajos.", newLeadNote: "Mostrar con prudencia; acompañar siempre con explicación.", nextEvidence: "Enviar bitácora de secuencia técnica y fecha de próxima actualización." } ] },
+              { level: "Nivel 6", progress: "45%", units: [ { unit: "B602", model: "Modelo B", status: "Obra gris avanzada", reservationId: "HOP-RES-000901", owner: "Reservante privado", practicalAdvance: "Estructura sólida; ventanas pendientes por lote del proveedor.", directorNote: "Importante coordinar narrativa única entre construcción y ventas.", sellerNote: "Nunca decir solo ‘va atrasado’; explicar secuencia técnica.", reservedClientNote: "Mensaje ideal: la fase actual es correcta y evita retrabajos.", newLeadNote: "Mostrar con prudencia; acompañar siempre con explicación.", nextEvidence: "Enviar bitácora de secuencia técnica y fecha de próxima actualización." } ] },
             ],
           },
         ],
@@ -663,7 +663,7 @@ const constructionHierarchy = [
         overview: "Sector de casas con interés comercial alto. Conviene mostrar manzanas, lotes y avance de urbanización.",
         progress: "58%",
         towers: [
-          { tower: "Manzana 3", progress: "61%", commercialRisk: "Los clientes preguntan por calles internas, acometidas y avance de casa modelo.", levels: [ { level: "Lotes", progress: "61%", units: [ { unit: "Lote 14", model: "Casa Aura", status: "Fundaciones y acometidas listas", reservationId: "AMENA-RES-CASA-014", owner: "Reservante privado", practicalAdvance: "Fundaciones terminadas, acometidas preparadas y urbanización de acceso en ejecución.", directorNote: "Permite mostrar avance real de casas sin usar lógica de torres.", sellerNote: "Explicar avances de casa y avances de urbanización por separado.", reservedClientNote: "Enviar informe particular de su lote, fotos de fundación y fecha de siguiente hito.", newLeadNote: "Mostrar casa modelo y avance de urbanización general, sin exponer datos del comprador.", nextEvidence: "Fotos de lote + plano de manzana + hito de urbanización." } ] } ] },
+          { tower: "Manzana 3", progress: "61%", commercialRisk: "Los clientes preguntan por calles internas, acometidas y avance de casa modelo.", levels: [ { level: "Lotes", progress: "61%", units: [ { unit: "Lote 14", model: "Casa Aura", status: "Fundaciones y acometidas listas", reservationId: "HOP-RES-CASA-014", owner: "Reservante privado", practicalAdvance: "Fundaciones terminadas, acometidas preparadas y urbanización de acceso en ejecución.", directorNote: "Permite mostrar avance real de casas sin usar lógica de torres.", sellerNote: "Explicar avances de casa y avances de urbanización por separado.", reservedClientNote: "Enviar informe particular de su lote, fotos de fundación y fecha de siguiente hito.", newLeadNote: "Mostrar casa modelo y avance de urbanización general, sin exponer datos del comprador.", nextEvidence: "Fotos de lote + plano de manzana + hito de urbanización." } ] } ] },
         ],
       },
     ],
@@ -672,7 +672,7 @@ const constructionHierarchy = [
 
 function ConstructionPage() {
   const [mode, setMode] = useState("explore");
-  const [reservationQuery, setReservationQuery] = useState("AMENA-RES-000784");
+  const [reservationQuery, setReservationQuery] = useState("HOP-RES-000784");
   const [selectedType, setSelectedType] = useState(constructionHierarchy[0].type);
   const currentType = useMemo(() => constructionHierarchy.find((t) => t.type === selectedType) || constructionHierarchy[0], [selectedType]);
   const [selectedSector, setSelectedSector] = useState(currentType.sectors[0].sector);
@@ -737,7 +737,7 @@ function ConstructionPage() {
           <h3 className="text-3xl font-black text-slate-950">Informe privado por ID de reserva</h3>
           <p className="mt-2 text-base font-semibold leading-7 text-slate-700">La vendedora ingresa el ID de reserva y obtiene el informe específico que corresponde al propietario de esa unidad habitacional. Esta información no debe mezclarse con la exploración pública de nuevos interesados.</p>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
-            <input value={reservationQuery} onChange={(e) => setReservationQuery(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Ej. AMENA-RES-000784" />
+            <input value={reservationQuery} onChange={(e) => setReservationQuery(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Ej. HOP-RES-000784" />
             <button className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><Search size={18} className="mr-2 inline" />Buscar informe</button>
           </div>
           <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
@@ -752,7 +752,7 @@ function ConstructionPage() {
               <BitacoraItem title="Resumen para propietario" text={currentUnit.reservedClientNote} />
               <BitacoraItem title="Evidencia recomendada" text={currentUnit.nextEvidence} />
               <BitacoraItem title="Estado actual" text={currentUnit.practicalAdvance} />
-              <BitacoraItem title="Canales de envío" text="WhatsApp, email o ambos, dejando evidencia en CRM y timeline del cliente." />
+              <BitacoraItem title="Canales de envío" text="WhatsApp, email o ambos, dejando evidencia en el expediente operacional y timeline del cliente." />
             </div>
           </div>
         </Card>
@@ -854,7 +854,7 @@ function DocumentsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Documentos del Cliente" subtitle="Gestión documental desde visión general hasta microdetalle: Marta acompaña solicitudes y aclaraciones; AMENA Intelligence analiza fricciones, vencimientos y prioridades; el equipo valida cada acción." icon={FileText} sync={martaSync.documents} badges={[REPORT_DATE, "Lectura AMENA Intelligence", "Checklist operativo"]} syncNote="Este porcentaje combina el acompañamiento de Marta en solicitudes y aclaraciones documentales con la lectura de AMENA Intelligence para que ventas, financiera y legal revisen, decidan y ejecuten próximos pasos." />
+      <PageHeader title="Documentos del Cliente" subtitle="Gestión documental desde visión general hasta microdetalle: Marta acompaña solicitudes y aclaraciones; H-Operia Intelligence analiza fricciones, vencimientos y prioridades; el equipo valida cada acción." icon={FileText} sync={martaSync.documents} badges={[REPORT_DATE, "Lectura H-Operia Intelligence", "Checklist operativo"]} syncNote="Este porcentaje combina el acompañamiento de Marta en solicitudes y aclaraciones documentales con la lectura de H-Operia Intelligence para que ventas, financiera y legal revisen, decidan y ejecuten próximos pasos." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="A la espera" value="147" note="35 reservas con documentos pendientes" tone="slate" icon={ClipboardCheck} onClick={() => setActiveDoc("espera")} active={activeDoc === "espera"} />
         <Metric title="Recibidos" value="96" note="PDF/JPG cargados al expediente" tone="blue" icon={UploadCloud} onClick={() => setActiveDoc("recibidos")} active={activeDoc === "recibidos"} />
@@ -865,10 +865,10 @@ function DocumentsPage() {
         <h3 className="text-3xl font-black text-slate-950">Matriz documental operativa</h3>
         <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Primera capa: visión por tipo de documento, volumen, mora, observación y acción concreta.</p>
         <div className="mt-5">
-          <SimpleTable columns={["Documento", "Cantidad / estado", "Formato", "Observación AMENA Intelligence", "Acción vendedora", "Evidencia"]} rows={[
+          <SimpleTable columns={["Documento", "Cantidad / estado", "Formato", "Observación H-Operia Intelligence", "Acción vendedora", "Evidencia"]} rows={[
             ["DUI", "15 recibidos / 4 pendientes", "PDF/JPG", "Legibles en 13 casos; 2 imágenes borrosas", "Solicitar reenvío solo a casos observados", "Archivo"],
             ["Constancias laborales", "18 pendientes / mora promedio 6 días", "PDF", "Retraso recurrente por tiempos internos de empresas", "Enviar carta modelo para solicitar constancia en RRHH", "Propuesta asistida"],
-            ["Comprobante de reserva", "31 recibidos / 3 en revisión", "PDF/Imagen", "2 comprobantes no muestran referencia bancaria", "Pedir comprobante completo", "Supabase"],
+            ["Comprobante de reserva", "31 recibidos / 3 en revisión", "PDF/Imagen", "2 comprobantes no muestran referencia bancaria", "Pedir comprobante completo", "Evidencia Operacional"],
             ["Estados de cuenta", "22 esperados / 9 recibidos", "PDF", "Algunos clientes no entienden qué meses enviar", "Enviar checklist con ejemplo visual", "WhatsApp"],
           ]} />
         </div>
@@ -884,11 +884,11 @@ function DocumentsPage() {
           { title: "Acción masiva", text: "Enviar carta modelo editable para que el cliente la entregue en su puesto de trabajo y reduzca fricción con RRHH.", badge: "Sugerencia para revisión humana", tone: "violet" },
         ]} />
         <DetailStack title="Detalle" subtitle="Seguimiento por cliente." items={[
-          { title: "Carlos Méndez", text: "DUI recibido, constancia laboral pendiente y comprobante parcial. AMENA Intelligence sugiere llamada breve; Marta puede apoyar el checklist por WhatsApp.", badge: "Prioridad alta", tone: "red" },
+          { title: "Carlos Méndez", text: "DUI recibido, constancia laboral pendiente y comprobante parcial. H-Operia Intelligence sugiere llamada breve; Marta puede apoyar el checklist por WhatsApp.", badge: "Prioridad alta", tone: "red" },
           { title: "Ana López", text: "Documentos completos, pendiente validación financiera. No requiere presión comercial en este momento.", badge: "Validar", tone: "blue" },
         ]} />
         <AiObservation>
-          <p>La gestión documental debe enseñar al equipo dónde se atasca el cliente. Marta acompaña la solicitud; AMENA Intelligence explica fricción, prioridad, texto sugerido, escalamiento e impacto sobre la formalización.</p>
+          <p>La gestión documental debe enseñar al equipo dónde se atasca el cliente. Marta acompaña la solicitud; H-Operia Intelligence explica fricción, prioridad, texto sugerido, escalamiento e impacto sobre la formalización.</p>
         </AiObservation>
       </div>
     </div>
@@ -898,7 +898,7 @@ function DocumentsPage() {
 function PaymentsPage() {
   return (
     <div className="space-y-5">
-      <PageHeader title="Pagos y Compromisos" subtitle="Control del período desde la reserva hasta la entrega: ingresos recibidos, pendientes, atrasos, justificaciones, compromisos, evidencia y prioridades financieras sugeridas por AMENA Intelligence." icon={CreditCard} sync={martaSync.payments} badges={[REPORT_DATE, "Reserva a entrega", "Revisión humana"]} syncNote="Este porcentaje muestra qué tanto AMENA Intelligence cruza pagos, compromisos, atrasos, justificaciones y evidencias para sugerir prioridades de seguimiento financiero que el equipo revisa, decide y ejecuta." />
+      <PageHeader title="Pagos y Compromisos" subtitle="Control del período desde la reserva hasta la entrega: ingresos recibidos, pendientes, atrasos, justificaciones, compromisos, evidencia y prioridades financieras sugeridas por H-Operia Intelligence." icon={CreditCard} sync={martaSync.payments} badges={[REPORT_DATE, "Reserva a entrega", "Revisión humana"]} syncNote="Este porcentaje muestra qué tanto H-Operia Intelligence cruza pagos, compromisos, atrasos, justificaciones y evidencias para sugerir prioridades de seguimiento financiero que el equipo revisa, decide y ejecuta." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Ingresos recibidos" value="$184,500" note="Etapa reserva-entrega · corte 15 mayo 2026" tone="green" icon={WalletCards} />
         <Metric title="Pendiente" value="$58,200" note="Primas y gastos" tone="amber" icon={Clock} />
@@ -946,7 +946,7 @@ function ServicePage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Servicio al Cliente" subtitle="Tickets, incidencias, garantías, acuerdos, tiempos de atención, reclamos, consultas, escalaciones y aprendizaje operativo para directores y vendedoras." icon={Headphones} sync={martaSync.service} badges={[REPORT_DATE, "Tiempos de atención", "Escalaciones"]} syncNote="Este porcentaje combina el apoyo de Marta en respuestas y seguimiento al cliente con la lectura de AMENA Intelligence para ordenar tickets, escalaciones y aprendizajes repetidos." />
+      <PageHeader title="Servicio al Cliente" subtitle="Tickets, incidencias, garantías, acuerdos, tiempos de atención, reclamos, consultas, escalaciones y aprendizaje operativo para directores y vendedoras." icon={Headphones} sync={martaSync.service} badges={[REPORT_DATE, "Tiempos de atención", "Escalaciones"]} syncNote="Este porcentaje combina el apoyo de Marta en respuestas y seguimiento al cliente con la lectura de H-Operia Intelligence para ordenar tickets, escalaciones y aprendizajes repetidos." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Tickets abiertos" value="34" note="7 críticos" tone="amber" icon={Headphones} onClick={() => setActiveService("tickets")} active={activeService === "tickets"} />
         <Metric title="Tiempo de atención" value="1h 12m" note="Promedio; meta máxima 4h" tone="green" icon={Clock} onClick={() => setActiveService("tiempo")} active={activeService === "tiempo"} />
@@ -968,9 +968,9 @@ function ServicePage() {
           ["ESC-044", "Torre 5", "Diferencia visual vs Torre 3", "Construcción", "Preparar explicación técnica para ventas"],
           ["ESC-047", "Garantía", "Consulta legal repetida", "Legal", "Crear respuesta estándar validada"],
         ]} />
-        <AiObservation title="Aprendizajes operativos de AMENA Intelligence">
+        <AiObservation title="Aprendizajes operativos de H-Operia Intelligence">
           <p>Los tickets no deben verse solo como reclamos. Son señales de aprendizaje. Si varios clientes preguntan lo mismo, la empresa debe convertirlo en guion, PDF, respuesta estándar o mejora del reporte semanal.</p>
-          <p className="mt-3">AMENA Intelligence recomienda explicar internamente cada escalación con pedagogía: qué pasó, por qué importa, cómo responder y qué debe aprender ventas para la próxima conversación.</p>
+          <p className="mt-3">H-Operia Intelligence recomienda explicar internamente cada escalación con pedagogía: qué pasó, por qué importa, cómo responder y qué debe aprender ventas para la próxima conversación.</p>
         </AiObservation>
       </div>
     </div>
@@ -980,7 +980,7 @@ function ServicePage() {
 function SellersPage() {
   return (
     <div className="space-y-5">
-      <PageHeader title="Gestión de Vendedoras" subtitle="Mapa de apoyo comercial por vendedora: seguimiento, uso del acompañamiento Marta, formularios completados, calidad de información capturada y sugerencias para fortalecer al equipo." icon={Users} sync={martaSync.sellers} badges={[REPORT_DATE, "General → vendedora → formulario", "Acompañamiento"]} syncNote="Este porcentaje mide cómo AMENA Intelligence usa formularios, señales comerciales, seguimientos y resultados para detectar necesidades de apoyo, elevar capacidades humanas y dejar la decisión en manos del equipo comercial." />
+      <PageHeader title="Gestión de Vendedoras" subtitle="Mapa de apoyo comercial por vendedora: seguimiento, uso del acompañamiento Marta, formularios completados, calidad de información capturada y sugerencias para fortalecer al equipo." icon={Users} sync={martaSync.sellers} badges={[REPORT_DATE, "General → vendedora → formulario", "Acompañamiento"]} syncNote="Este porcentaje mide cómo H-Operia Intelligence usa formularios, señales comerciales, seguimientos y resultados para detectar necesidades de apoyo, elevar capacidades humanas y dejar la decisión en manos del equipo comercial." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Vendedoras" value="8" note="Equipo activo" tone="blue" icon={Users} />
         <Metric title="Uso del acompañamiento Marta" value="76%" note="Promedio equipo" tone="violet" icon={Bot} />
@@ -1008,13 +1008,13 @@ function SellersPage() {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <InfoCard title="Fortaleza" value="Seguimiento claro y constante" detail="Registra acuerdos, llama dentro de ventanas recomendadas y revisa propuestas asistidas." />
             <InfoCard title="Riesgo" value="Carga operativa alta" detail="Tiene 28 clientes activos y 4 con sensibilidad financiera." />
-            <InfoCard title="Sugerencia AMENA Intelligence" value="Priorizar casos financieros" detail="Atender primero clientes con compromisos en 72h." />
+            <InfoCard title="Sugerencia H-Operia Intelligence" value="Priorizar casos financieros" detail="Atender primero clientes con compromisos en 72h." />
             <InfoCard title="Seguimiento vendedora" value="En proceso" detail="Campo para que la vendedora confirme qué hizo con la sugerencia asistida." />
           </div>
         </Card>
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Formularios operativos de vendedoras</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">La información no termina en la reserva. Cada contacto posterior genera datos personales, familiares, económicos y comerciales que deben alimentar el expediente y AMENA Intelligence.</p>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">La información no termina en la reserva. Cada contacto posterior genera datos personales, familiares, económicos y comerciales que deben alimentar el expediente y H-Operia Intelligence.</p>
           <div className="mt-5 space-y-3">
             <FormItem title="Formulario de llamada de pago" fields="Monto conversado, objeción real, decisor familiar, fecha prometida, tono emocional, evidencia." />
             <FormItem title="Formulario de información familiar" fields="Quién decide, preocupaciones del cónyuge, hijos, prioridades de ubicación, temor principal." />
@@ -1025,7 +1025,7 @@ function SellersPage() {
       </div>
       <AiObservation>
         <p>La página de vendedoras debe funcionar como mapa de acompañamiento: qué hacen bien, dónde necesitan apoyo, qué información falta capturar y cómo eso ayuda a clientes, financiera, construcción y dirección comercial.</p>
-        <p className="mt-3">AMENA Intelligence ayuda a observar hábitos: registrar información, usar recomendaciones, completar llamadas, documentar objeciones y convertir conversaciones dispersas en inteligencia accionable.</p>
+        <p className="mt-3">H-Operia Intelligence ayuda a observar hábitos: registrar información, usar recomendaciones, completar llamadas, documentar objeciones y convertir conversaciones dispersas en inteligencia accionable.</p>
       </AiObservation>
     </div>
   );
@@ -1038,7 +1038,7 @@ function CampaignsPage() {
       amount: "$62,000",
       summary: "Mayor volumen de leads, pero formalización más débil que referidos.",
       campaigns: {
-        modeloA: { title: "Campaña Instagram · Modelo A", result: "Alta atracción / formalización baja", diagnosis: "El anuncio promete vida premium, pero el flujo posterior no filtra capacidad financiera ni urgencia real.", action: "Agregar pregunta de presupuesto, CTA a simulación y retargeting a clientes que abrieron PDF.", marta: "AMENA Intelligence detecta una señal temprana: volumen alto que puede saturar vendedoras si no se filtra intención y capacidad desde el primer contacto." },
+        modeloA: { title: "Campaña Instagram · Modelo A", result: "Alta atracción / formalización baja", diagnosis: "El anuncio promete vida premium, pero el flujo posterior no filtra capacidad financiera ni urgencia real.", action: "Agregar pregunta de presupuesto, CTA a simulación y retargeting a clientes que abrieron PDF.", marta: "H-Operia Intelligence detecta una señal temprana: volumen alto que puede saturar vendedoras si no se filtra intención y capacidad desde el primer contacto." },
         torre3: { title: "Campaña Instagram · Torre 3 Avance Visible", result: "Buen interés / dudas por comparación", diagnosis: "La pintura exterior genera confianza, pero también preguntas sobre diferencias con otras torres.", action: "Usar reporte de construcción como soporte de campaña y preparar respuestas comparativas.", marta: "Conviene unir marketing con construcción para no prometer visualmente más de lo que ventas puede explicar." },
       },
     },
@@ -1072,7 +1072,7 @@ function CampaignsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Canales y Campañas" subtitle="Radiografía por canal y campaña: AMENA Intelligence analiza promesas, calidad de lead, conversión y señales tempranas para que Marketing y Ventas decidan qué ajustar." icon={Megaphone} sync={martaSync.campaigns} badges={[REPORT_DATE, "Canales → campañas → análisis", "Recomendaciones"]} syncNote="Este porcentaje refleja qué tanto AMENA Intelligence analiza canales, campañas, promesas, calidad de lead, conversión y señales tempranas para orientar decisiones comerciales revisadas por el equipo humano." />
+      <PageHeader title="Canales y Campañas" subtitle="Radiografía por canal y campaña: H-Operia Intelligence analiza promesas, calidad de lead, conversión y señales tempranas para que Marketing y Ventas decidan qué ajustar." icon={Megaphone} sync={martaSync.campaigns} badges={[REPORT_DATE, "Canales → campañas → análisis", "Recomendaciones"]} syncNote="Este porcentaje refleja qué tanto H-Operia Intelligence analiza canales, campañas, promesas, calidad de lead, conversión y señales tempranas para orientar decisiones comerciales revisadas por el equipo humano." />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <Metric title="Instagram" value="$62,000" note="Mayor volumen" tone="green" icon={BadgeDollarSign} onClick={() => selectChannel("instagram")} active={selectedChannel === "instagram"} />
         <Metric title="Referidos" value="$51,000" note="Mejor calidad" tone="blue" icon={Users} onClick={() => selectChannel("referrals")} active={selectedChannel === "referrals"} />
@@ -1090,7 +1090,7 @@ function CampaignsPage() {
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h3 className="text-3xl font-black text-slate-950">Campañas dentro del canal · {selectedChannelData.channel}</h3>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">{selectedChannelData.summary} Selecciona una campaña para abrir diagnóstico, lectura de AMENA Intelligence y acciones que el equipo puede revisar y ejecutar.</p>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">{selectedChannelData.summary} Selecciona una campaña para abrir diagnóstico, lectura de H-Operia Intelligence y acciones que el equipo puede revisar y ejecutar.</p>
           </div>
           <Badge tone="blue">Canal → campañas → lupa operativa</Badge>
         </div>
@@ -1098,10 +1098,10 @@ function CampaignsPage() {
           {Object.entries(selectedChannelData.campaigns).map(([key, campaign]) => <DrillButton key={key} active={selectedCampaign === key} onClick={() => setSelectedCampaign(key)}>{campaign.title}</DrillButton>)}
         </div>
         <div className="mt-5"><CampaignCard title={currentCampaign.title} result={currentCampaign.result} diagnosis={currentCampaign.diagnosis} action={currentCampaign.action} /></div>
-        <div className="mt-5 rounded-3xl border border-violet-100 bg-violet-50 p-5 text-base font-semibold leading-8 text-slate-800"><span className="font-black text-slate-950">Comentario de AMENA Intelligence:</span> {currentCampaign.marta}</div>
+        <div className="mt-5 rounded-3xl border border-violet-100 bg-violet-50 p-5 text-base font-semibold leading-8 text-slate-800"><span className="font-black text-slate-950">Comentario de H-Operia Intelligence:</span> {currentCampaign.marta}</div>
       </Card>
       <AiObservation>
-        <p>AMENA Intelligence recomienda analizar campañas como sistemas completos: promesa del anuncio, calidad del lead, respuesta inicial, conversación con vendedora, documentación, pagos e ingresos reales.</p>
+        <p>H-Operia Intelligence recomienda analizar campañas como sistemas completos: promesa del anuncio, calidad del lead, respuesta inicial, conversación con vendedora, documentación, pagos e ingresos reales.</p>
         <p className="mt-3">Una señal temprana puede ser una campaña que genera muchos leads baratos pero consume tiempo, satura vendedoras y no formaliza. Ese riesgo operativo debe verse en esta página.</p>
       </AiObservation>
     </div>
@@ -1112,23 +1112,23 @@ function CampaignDeliveryPage() {
   const [selectedChannel, setSelectedChannel] = useState("whatsapp");
   return (
     <div className="space-y-5">
-      <PageHeader title="Envío de Campañas Promocionales" subtitle="Módulo para cargar prospectos, preparar mensajes asistidos y activar campañas por WhatsApp, correo o voz. Las respuestas entran al CRM y pasan a seguimiento humano." icon={Send} sync={martaSync.campaignDelivery} badges={[REPORT_DATE, "Excel → WhatsApp / Email / Voz", "Entrada a CRM"]} syncNote="Este porcentaje mide qué tan conectadas están la base de datos, los canales de envío, las respuestas, el CRM y las tareas posteriores para convertir campañas en seguimiento comercial revisado por el equipo." />
+      <PageHeader title="Envío de Campañas Promocionales" subtitle="Módulo para cargar prospectos, preparar mensajes asistidos y activar campañas por WhatsApp, correo o voz. Las respuestas entran al expediente operacional y pasan a seguimiento humano." icon={Send} sync={martaSync.campaignDelivery} badges={[REPORT_DATE, "Excel → WhatsApp / Email / Voz", "Entrada operacional"]} syncNote="Este porcentaje mide qué tan conectadas están la base de datos, los canales de envío, las respuestas, el expediente operacional y las tareas posteriores para convertir campañas en seguimiento comercial revisado por el equipo." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Prospectos cargados" value="1,250" note="Archivo Excel validado" tone="blue" icon={UploadCloud} />
         <Metric title="Listos para envío" value="1,118" note="132 requieren limpieza" tone="green" icon={CheckCircle2} />
         <Metric title="Canales activos" value="3" note="WhatsApp, email y voz" tone="violet" icon={Layers3} />
-        <Metric title="Respuestas esperadas" value="18%" note="Estimación AMENA Intelligence" tone="amber" icon={Bot} />
+        <Metric title="Respuestas esperadas" value="18%" note="Estimación H-Operia Intelligence" tone="amber" icon={Bot} />
       </div>
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Carga de base de datos</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Se carga un Excel con nombre, teléfono, correo, fuente, interés, presupuesto estimado y notas. AMENA Intelligence valida duplicados, campos faltantes y señales de baja calidad antes de que el equipo apruebe el envío.</p>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Se carga un Excel con nombre, teléfono, correo, fuente, interés, presupuesto estimado y notas. H-Operia Intelligence valida duplicados, campos faltantes y señales de baja calidad antes de que el equipo apruebe el envío.</p>
           <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
             <UploadCloud className="mx-auto text-slate-600" size={42} />
             <h4 className="mt-4 text-2xl font-black text-slate-950">Subir archivo Excel</h4>
             <p className="mt-2 text-base font-semibold text-slate-700">Clientes potenciales · XLSX / CSV · Validación previa al envío.</p>
           </div>
-          <div className="mt-5"><SimpleTable columns={["Campo", "Estado", "Comentario AMENA Intelligence"]} rows={[["Teléfono", "94% válido", "Normalizar formato +503"], ["Correo", "87% válido", "132 registros sin correo"], ["Interés", "72% clasificado", "Falta categorizar 350 prospectos"], ["Fuente", "Completa", "Lista para atribución de campaña"]]} /></div>
+          <div className="mt-5"><SimpleTable columns={["Campo", "Estado", "Comentario H-Operia Intelligence"]} rows={[["Teléfono", "94% válido", "Normalizar formato +503"], ["Correo", "87% válido", "132 registros sin correo"], ["Interés", "72% clasificado", "Falta categorizar 350 prospectos"], ["Fuente", "Completa", "Lista para atribución de campaña"]]} /></div>
         </Card>
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Canales de envío</h3>
@@ -1141,7 +1141,7 @@ function CampaignDeliveryPage() {
           </div>
           <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
             <h4 className="text-2xl font-black text-slate-950">Configuración seleccionada</h4>
-            <p className="mt-2 text-base font-semibold leading-8 text-slate-800">Canal activo: {selectedChannel === "all" ? "WhatsApp + Email + Voz" : selectedChannel}. Las respuestas se registrarán en CRM, crearán actividad en el timeline y podrán activar seguimientos para vendedoras.</p>
+            <p className="mt-2 text-base font-semibold leading-8 text-slate-800">Canal activo: {selectedChannel === "all" ? "WhatsApp + Email + Voz" : selectedChannel}. Las respuestas se registrarán en el expediente operacional, crearán actividad en el timeline y podrán activar seguimientos para vendedoras.</p>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               <button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white">Preparar audiencia</button>
               <button className="rounded-2xl bg-violet-600 px-5 py-4 text-sm font-black text-white">Revisar mensaje asistido</button>
@@ -1160,18 +1160,18 @@ function CampaignDeliveryPage() {
 function FunnelLibraryPage() {
   const [selectedFunnel, setSelectedFunnel] = useState("reserva");
   const funnels = {
-    reserva: { title: "Embudo de pre-reserva a formalización", stages: [["Lead interesado", "Origen: campaña, referido o app pública", "Asignar vendedora y registrar fuente"], ["Pre-reserva", "Unidad seleccionada", "Enviar confirmación y próximos pasos"], ["Documentos", "Checklist en proceso", "AMENA Intelligence detecta faltantes"], ["Pago", "Prima / gastos legales", "Seguimiento financiero"], ["Formalización", "Validación interna", "Cierre operativo"]] },
-    reactivacion: { title: "Embudo de reactivación de prospectos", stages: [["Base histórica", "Excel o CRM", "Limpiar datos"], ["Campaña", "WhatsApp, email o voz", "Medir respuesta"], ["Interés renovado", "Cliente responde", "Crear tarea"], ["Reserva potencial", "Explora unidad", "Agendar llamada"], ["Cierre", "Seguimiento humano", "Medir conversión"]] },
+    reserva: { title: "Embudo de pre-reserva a formalización", stages: [["Lead interesado", "Origen: campaña, referido o Reservas AMENA", "Asignar vendedora y registrar fuente"], ["Pre-reserva", "Unidad seleccionada", "Enviar confirmación y próximos pasos"], ["Documentos", "Checklist en proceso", "H-Operia Intelligence detecta faltantes"], ["Pago", "Prima / gastos legales", "Seguimiento financiero"], ["Formalización", "Validación interna", "Cierre operativo"]] },
+    reactivacion: { title: "Embudo de reactivación de prospectos", stages: [["Base histórica", "Excel o expediente operacional", "Limpiar datos"], ["Campaña", "WhatsApp, email o voz", "Medir respuesta"], ["Interés renovado", "Cliente responde", "Crear tarea"], ["Reserva potencial", "Explora unidad", "Agendar llamada"], ["Cierre", "Seguimiento humano", "Medir conversión"]] },
     referidos: { title: "Embudo de referidos", stages: [["Comprador actual", "Cliente satisfecho", "Solicitar referido"], ["Referido recibido", "Alta confianza", "Contacto rápido"], ["Exploración", "Unidad sugerida", "Mostrar avance y evidencia"], ["Pre-reserva", "Decisión más rápida", "Acompañamiento Marta"], ["Formalización", "Cierre con menor fricción", "Registrar aprendizaje"]] },
   };
   const current = funnels[selectedFunnel];
   return (
     <div className="space-y-5">
-      <PageHeader title="Archivo de Embudos de Ventas" subtitle="Biblioteca operativa para guardar, consultar y reutilizar embudos que convierten campañas, reservas, reactivaciones y referidos en aprendizaje comercial accionable." icon={Layers3} sync={martaSync.funnels} badges={[REPORT_DATE, "Plantillas reutilizables", "Aprendizaje comercial"]} syncNote="Este porcentaje indica qué tanto AMENA Intelligence conserva patrones, etapas, mensajes, criterios de avance y aprendizajes para que el equipo decida qué repetir, ajustar o descartar." />
+      <PageHeader title="Archivo de Embudos de Ventas" subtitle="Biblioteca operativa para guardar, consultar y reutilizar embudos que convierten campañas, reservas, reactivaciones y referidos en aprendizaje comercial accionable." icon={Layers3} sync={martaSync.funnels} badges={[REPORT_DATE, "Plantillas reutilizables", "Aprendizaje comercial"]} syncNote="Este porcentaje indica qué tanto H-Operia Intelligence conserva patrones, etapas, mensajes, criterios de avance y aprendizajes para que el equipo decida qué repetir, ajustar o descartar." />
       <div className="grid gap-4 md:grid-cols-3">
         <Metric title="Embudos guardados" value="12" note="Plantillas operativas" tone="blue" icon={Layers3} />
         <Metric title="Más efectivo" value="Referidos" note="Mayor conversión" tone="green" icon={Users} />
-        <Metric title="En revisión" value="3" note="Requieren ajuste AMENA Intelligence" tone="amber" icon={Bot} />
+        <Metric title="En revisión" value="3" note="Requieren ajuste H-Operia Intelligence" tone="amber" icon={Bot} />
       </div>
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -1189,7 +1189,7 @@ function FunnelLibraryPage() {
         </div>
       </Card>
       <AiObservation>
-        <p>AMENA Intelligence recomienda guardar los embudos como activos comerciales reutilizables. Cada campaña exitosa debe dejar una plantilla: etapas, mensajes, criterios de avance, responsables, métricas y aprendizajes para futuras ejecuciones.</p>
+        <p>H-Operia Intelligence recomienda guardar los embudos como activos comerciales reutilizables. Cada campaña exitosa debe dejar una plantilla: etapas, mensajes, criterios de avance, responsables, métricas y aprendizajes para futuras ejecuciones.</p>
       </AiObservation>
     </div>
   );
@@ -1208,7 +1208,7 @@ function DashboardsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Dashboards Ejecutivos" subtitle="Dashboards básicos, consultas ejecutivas por texto o voz y respuestas visuales con lupa por canal, modelo, sector o equipo comercial para decidir con contexto, no con vigilancia." icon={BarChart3} sync={martaSync.dashboards} badges={[REPORT_DATE, "Dashboards base", "Texto y voz"]} syncNote="Este porcentaje muestra qué tanto AMENA Intelligence desagrega preguntas ejecutivas, cruza métricas, detecta riesgos y presenta contexto para que la dirección revise, decida y ejecute con mayor claridad." />
+      <PageHeader title="Tableros Ejecutivos" subtitle="Tableros base, consultas ejecutivas por texto o voz y respuestas visuales con lupa por canal, modelo, sector o equipo comercial para decidir con contexto, no con vigilancia." icon={BarChart3} sync={martaSync.dashboards} badges={[REPORT_DATE, "Tableros base", "Texto y voz"]} syncNote="Este porcentaje muestra qué tanto H-Operia Intelligence desagrega preguntas ejecutivas, cruza métricas, detecta riesgos y presenta contexto para que la dirección revise, decida y ejecute con mayor claridad." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Ingresos totales" value="$184,500" note="Por canal, producto y equipo" tone="green" icon={BadgeDollarSign} />
         <Metric title="Mejor canal" value="Instagram" note="$62,000; revisar calidad" tone="blue" icon={Megaphone} />
@@ -1216,7 +1216,7 @@ function DashboardsPage() {
         <Metric title="Mejor vendedora" value="VND-034" note="$82,000" tone="amber" icon={Users} />
       </div>
       <Card>
-        <h3 className="text-3xl font-black text-slate-950">Dashboards que no pueden faltar</h3>
+        <h3 className="text-3xl font-black text-slate-950">Tableros que no pueden faltar</h3>
         <div className="mt-5 grid gap-4 xl:grid-cols-3">
           <DashboardMini title="Ingresos y formalización" text="Ingresos recibidos, pendientes, atrasos y conversión real por canal, campaña, modelo y vendedora." />
           <DashboardMini title="Operación comercial" text="Seguimientos pendientes, uso del acompañamiento Marta, formularios completados, velocidad de respuesta y apoyo por equipo." />
@@ -1225,7 +1225,7 @@ function DashboardsPage() {
       </Card>
       <Card>
         <h3 className="text-3xl font-black text-slate-950">Centro de consultas ejecutivas</h3>
-        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">El Director plantea una inquietud amplia. AMENA Intelligence la desagrega en preguntas o categorías para responderla con más rigor.</p>
+        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">El Director plantea una inquietud amplia. H-Operia Intelligence la desagrega en preguntas o categorías para responderla con más rigor.</p>
         <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto_auto]">
           <div className="rounded-2xl bg-slate-50 p-4 text-base font-bold text-slate-800">“{query}”</div>
           <button className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><PencilLine size={18} className="mr-2 inline" />Texto</button>
@@ -1235,8 +1235,8 @@ function DashboardsPage() {
           {["¿Qué canal genera más ingresos reales y menos atrasos?", "¿Qué vendedoras aprovechan mejor el acompañamiento asistido?", "¿Qué modelos se venden más rápido por sector?", "¿Qué campañas generan leads de baja calidad?"].map((s) => <button key={s} onClick={() => setQuery(s)} className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-800 hover:bg-slate-200">{s}</button>)}
         </div>
         <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-5">
-          <h4 className="text-xl font-black text-slate-950">Desagregación propuesta por AMENA Intelligence</h4>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Para resolver la inquietud del Director, AMENA Intelligence propone separar el requerimiento en cuatro categorías complementarias:</p>
+          <h4 className="text-xl font-black text-slate-950">Desagregación propuesta por H-Operia Intelligence</h4>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Para resolver la inquietud del Director, H-Operia Intelligence propone separar el requerimiento en cuatro categorías complementarias:</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {["Ingresos reales por canal y campaña", "Conversión por modelo, sector y unidad", "Acompañamiento del equipo y uso de Marta", "Riesgos financieros, documentales y de construcción"].map((c, i) => <div key={c} className="rounded-2xl bg-white p-4 text-base font-black text-slate-950">{i + 1}. {c}</div>)}
           </div>
@@ -1278,7 +1278,7 @@ function DashboardsPage() {
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <AiObservation>
           <p>Recomendaciones: felicitar a VND-034 por uso criterioso del acompañamiento Marta y resultados; coordinar con Marketing ajustes en Instagram porque genera volumen pero menor calidad; reforzar campañas de referidos por mejor conversión e ingresos reales.</p>
-          <p className="mt-3">Al hacer lupa en Instagram, AMENA Intelligence debe mostrar campañas concretas, ejemplos de promesas débiles, casos referenciales y acciones para mejorar segmentación, filtro financiero y seguimiento.</p>
+          <p className="mt-3">Al hacer lupa en Instagram, H-Operia Intelligence debe mostrar campañas concretas, ejemplos de promesas débiles, casos referenciales y acciones para mejorar segmentación, filtro financiero y seguimiento.</p>
         </AiObservation>
         <Card>
           <h3 className="text-2xl font-black text-slate-950">Criterio de gobierno para voz y texto</h3>
@@ -1291,103 +1291,182 @@ function DashboardsPage() {
 }
 
 function DemoPage() {
-  const verificationPanels = {
-    invitation: { title: "Invitación y reserva en vivo", items: ["Verificar que el director comercial haya recibido el link por WhatsApp o email.", "Abrir la app pública en el móvil del invitado.", "Abrir en la computadora la misma app para la demostración paralela.", "Confirmar que ambos recorridos están visibles para el público."] },
-    vapi: { title: "Verificaciones Vapi y Marta", items: ["Mostrar transcripción de la conversación.", "Mostrar evaluación de la llamada.", "Mostrar salida estructurada.", "Mostrar costos de la llamada."] },
-    operations: { title: "Verificaciones operacionales", items: ["Mostrar registro en Supabase.", "Mostrar mensaje enviado por WhatsApp.", "Mostrar correo electrónico enviado.", "Mostrar actualización en CRM.", "Mostrar cita agendada en calendario."] },
-    analytics: { title: "Verificaciones analíticas", items: ["Mostrar dashboards ejecutivos.", "Consultar una métrica en tiempo real.", "Abrir lupa por canal, sector o vendedora.", "Cerrar la demo mostrando trazabilidad completa."] },
+  const [whatsappStatus, setWhatsappStatus] = useState("Pendiente");
+  const [emailStatus, setEmailStatus] = useState("Pendiente");
+  const [simulatedDataInjected, setSimulatedDataInjected] = useState(false);
+  const ecosystemAccess = [
+    { icon: Home, title: "Gestión de Reservas", text: "Experiencia donde la persona presente inicia la reserva y deja señales comerciales útiles." },
+    { icon: Users, title: "Operaciones Comerciales", text: "Mesa de seguimiento para revisar clientes, próximos pasos, dudas y evidencia capturada." },
+    { icon: MonitorCog, title: "Centro de Mando", text: "Visión operativa para dirección, coordinación comercial, reportes y control de prioridades." },
+    { icon: Send, title: "Mensajería Operacional", text: "Capa que prepara envíos, registra estados y evita que la operación dependa de memoria humana." },
+    { icon: PhoneCall, title: "Marta / VAPI", text: "Conversación, transcripción, evaluación, salida estructurada y lectura de costo operativo." },
+    { icon: Database, title: "Evidencia Operacional", text: "Respaldo verificable del evento sin convertir la capa técnica en protagonista del demo." },
+  ];
+  const contactStatusTone = {
+    Enviado: "green",
+    Pendiente: "amber",
+    "Error controlado": "red",
   };
-  const [selectedPanel, setSelectedPanel] = useState("invitation");
-  const currentPanel = verificationPanels[selectedPanel];
+  const intelligenceRows = simulatedDataInjected
+    ? [
+      ["Tendencias de interés", "Apartamentos de 2 habitaciones, cercanía a acceso principal y fechas de entrega claras."],
+      ["Dudas frecuentes", "Financiamiento, documentos requeridos, disponibilidad por sector y diferencias entre modelos."],
+      ["Clientes prioritarios", "5 reservas con intención alta y próxima acción comercial en menos de 24 horas."],
+      ["Riesgos de seguimiento", "3 casos piden información financiera y pueden enfriarse si no reciben respuesta ordenada."],
+      ["Oportunidades comerciales", "Referidos y reactivación por WhatsApp muestran señales de conversión razonables."],
+      ["Acciones recomendadas", "Asignar seguimiento humano, enviar documentos faltantes y preparar respuesta asistida por Marta."],
+    ]
+    : [
+      ["Tendencias de interés", "Esperando datos simulados para generar lectura operacional."],
+      ["Dudas frecuentes", "Sin muestra activa todavía."],
+      ["Clientes prioritarios", "Pendiente de inyección."],
+      ["Riesgos de seguimiento", "Pendiente de inyección."],
+      ["Oportunidades comerciales", "Pendiente de inyección."],
+      ["Acciones recomendadas", "Inyectar datos simulados para activar el resumen mock."],
+    ];
+
+  const simulateContact = (channel) => {
+    console.log(`Centro Demo: ${channel} simulado`);
+    if (channel === "WhatsApp") setWhatsappStatus("Enviado");
+    if (channel === "Email") setEmailStatus("Enviado");
+  };
+
+  const injectSimulatedData = () => {
+    console.log("Centro Demo: inyección simulada de 20 a 25 reservas concluidas");
+    setSimulatedDataInjected(true);
+  };
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Sala Demo Operativa" subtitle="Orquesta la presentación frente al cliente: envío del link, reserva simultánea, conversación con Marta y verificación de evidencias dentro de un ecosistema operacional conectado." icon={Smartphone} sync={martaSync.demo} badges={[REPORT_DATE, "Presentación en vivo", "Credibilidad operacional"]} syncNote="Este porcentaje mide qué tan conectada está la demostración completa: app pública, Marta, canales, CRM, calendario y evidencias verificables en una sola experiencia operacional." />
+      <PageHeader title="Centro Demo" subtitle="Evidencia Operacional: demuestra que una reserva se transforma en acciones verificables dentro de una arquitectura inteligente." icon={Smartphone} sync={martaSync.demo} badges={["Demo en vivo", "Evidencia Operacional", "Arquitectura conectada"]} syncNote="Este porcentaje mide qué tan conectada está la demostración completa: Gestión de Reservas, Marta, Mensajería Operacional, Evidencia Operacional e inteligencia en una sola experiencia verificable." />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric title="Invitados en sala" value="7" note="Comité comercial y decisores" tone="blue" icon={Users} />
-        <Metric title="Verificaciones" value="9" note="Técnicas y operacionales" tone="green" icon={CheckCircle2} />
-        <Metric title="Canales en vivo" value="6" note="App, Marta, Vapi, CRM, WA, Email" tone="violet" icon={Layers3} />
-        <Metric title="Estado demo" value="92%" note="Lista para presentación" tone="amber" icon={Target} />
+        <Metric title="Reserva validada" value="Activa" note="Expediente operacional nacido desde la app" tone="green" icon={CheckCircle2} />
+        <Metric title="Marta / VAPI" value="Lista" note="Voz, transcripción y salida estructurada" tone="violet" icon={Bot} />
+        <Metric title="Comunicaciones reales" value="2 canales" note="WhatsApp oficial y email empresarial" tone="blue" icon={MessageCircle} />
+        <Metric title="H-Operia Intelligence" value={simulatedDataInjected ? "En lectura" : "Preparada"} note={simulatedDataInjected ? "Resumen mock actualizado" : "Esperando datos operativos"} tone="amber" icon={Target} />
       </div>
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
-          <h3 className="text-3xl font-black text-slate-950">Captura del invitado principal</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Durante la presentación, aquí se escriben los datos del director comercial o del miembro del equipo que va a recibir el link y hacer la prueba en su móvil.</p>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <DemoInput label="Nombre completo" placeholder="Ej. Carlos Pérez" />
-            <DemoInput label="Cargo" placeholder="Ej. Director Comercial" />
-            <DemoInput label="Correo electrónico" placeholder="director@empresa.com" />
-            <DemoInput label="Teléfono" placeholder="+503 7000-0000" />
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 01</div>
+              <h3 className="mt-2 text-3xl font-black text-slate-950">Validación y reserva en vivo</h3>
+            </div>
+            <Badge tone="green">Nacimiento del expediente</Badge>
           </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <button className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><Send size={16} className="mr-2 inline" />Enviar link app reservas</button>
-            <button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir app pública</button>
-            <button className="rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white"><Smartphone size={16} className="mr-2 inline" />Copiar link</button>
+          <p className="mt-4 text-base font-semibold leading-8 text-slate-800">La reserva no es el final del formulario. Es el nacimiento de un expediente operacional vivo: una señal verificable que conecta intención comercial, seguimiento humano, conversación asistida y evidencia técnica de respaldo.</p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {["Cliente identificado", "Unidad/lote seleccionado", "Hora de creación registrada", "Origen de la reserva visible", "Sincronización entre capas", "Evidencia Operacional como respaldo técnico"].map((item) => <div key={item} className="rounded-2xl bg-slate-50 p-4 text-base font-black text-slate-950">{item}</div>)}
           </div>
           <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Propósito del bloque</div>
-            <p className="mt-2 text-base font-semibold leading-8 text-slate-800">Este bloque te permite mostrar, desde el primer minuto, que el demo no es una simulación aislada sino una experiencia conectada: se captura un contacto real, se le envía un link real y el invitado entra realmente a la app pública desde su móvil.</p>
+            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Criterio de credibilidad</div>
+            <p className="mt-2 text-base font-semibold leading-8 text-slate-800">La audiencia debe ver que cada dato capturado tiene destino operativo: cliente, propiedad, canal, tiempo, conversación y siguiente acción. La base técnica acompaña la demostración como respaldo, no como espectáculo.</p>
           </div>
         </Card>
         <Card>
-          <h3 className="text-3xl font-black text-slate-950">Ruta escénica de la demostración</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Secuencia recomendada para la presentación frente al cliente.</p>
-          <div className="mt-5 space-y-3">
-            <StepCard number="1" title="Envío del link" text="Capturas el nombre, cargo, correo y teléfono del invitado; envías el link de la app de reservas y le pides abrirlo en su móvil." />
-            <StepCard number="2" title="Recorrido paralelo" text="Mientras el invitado interactúa con la app en su celular, tú proyectas la misma app desde tu computadora y haces una reserva paralela." />
-            <StepCard number="3" title="Conversación con Marta" text="Al terminar la reserva, ambos pueden conversar con Marta; el público escucha y ve la interacción." />
-            <StepCard number="4" title="Prueba de credibilidad" text="Después abres Vapi, Supabase, WhatsApp, email, CRM y calendario para mostrar evidencia real de todo lo que ocurrió." />
-            <StepCard number="5" title="Cierre ejecutivo" text="Finalizas con dashboards, métricas y una consulta analítica para demostrar que la operación también genera inteligencia ejecutiva." />
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 02</div>
+              <h3 className="mt-2 text-3xl font-black text-slate-950">Ecosistema H-Operia</h3>
+            </div>
+            <Badge tone="blue">Accesos visuales</Badge>
+          </div>
+          <p className="mt-4 text-base font-semibold leading-7 text-slate-700">Estos accesos funcionan como mapa operativo de la arquitectura. Por ahora son botones visuales para guiar la presentación sin ejecutar fetch real.</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {ecosystemAccess.map((item) => <VerificationCard key={item.title} icon={item.icon} title={item.title} text={item.text} />)}
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {ecosystemAccess.map((item) => <button key={`button-${item.title}`} onClick={() => console.log(`Centro Demo: acceso visual ${item.title}`)} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />{item.title}</button>)}
           </div>
         </Card>
       </div>
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div><h3 className="text-3xl font-black text-slate-950">Accesos rápidos durante la demo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Todo lo necesario para moverte durante la presentación sin perder ritmo ni credibilidad.</p></div>
-          <Badge tone="blue">Operación en vivo</Badge>
+          <div>
+            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 03</div>
+            <h3 className="mt-2 text-3xl font-black text-slate-950">Marta en vivo y log de VAPI</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Inmediatamente después de la llamada se muestra VAPI: transcripción, evaluación, salida estructurada y costos. Marta no es voz decorativa; es evidencia conversacional útil para decidir y ejecutar.</p>
+          </div>
+          <Badge tone="violet">Evidencia conversacional</Badge>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <VerificationCard icon={Home} title="App pública" text="Abrir la experiencia de reserva que usarán los asistentes." />
-          <VerificationCard icon={Bot} title="Marta" text="Entrar al widget o al punto de conversación posterior a la reserva." />
-          <VerificationCard icon={Database} title="Base de datos" text="Mostrar el registro creado en Supabase." />
-          <VerificationCard icon={BarChart3} title="Dashboards" text="Abrir los cuadros ejecutivos y hacer una consulta final." />
-        </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <button className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white">Abrir app pública</button>
-          <button className="rounded-2xl bg-violet-600 px-4 py-4 text-sm font-black text-white">Abrir conversación Marta</button>
-          <button className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white">Abrir Vapi</button>
-          <button className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white">Abrir Supabase</button>
-          <button className="rounded-2xl bg-amber-600 px-4 py-4 text-sm font-black text-white">Abrir CRM</button>
-          <button className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-900">Abrir calendarios</button>
+          <StepCard number="1" title="Transcripción" text="Texto completo de la interacción para revisar preguntas, objeciones, intención y tono." />
+          <StepCard number="2" title="Evaluación" text="Lectura de calidad: claridad del cliente, nivel de interés y puntos que requieren seguimiento." />
+          <StepCard number="3" title="Salida estructurada" text="Campos operativos listos para expediente: dudas, prioridad, documentos, pagos y próxima acción." />
+          <StepCard number="4" title="Costos" text="Costo de la llamada visible para gobernar uso, trazabilidad y eficiencia operacional." />
         </div>
       </Card>
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div><h3 className="text-3xl font-black text-slate-950">Centro de verificaciones de credibilidad</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Este bloque muestra que lo conversado en la reserva y con Marta se transforma en evidencias reales para que el equipo humano revise, decida y ejecute.</p></div>
-          <Badge tone="green">Demostración de confiabilidad</Badge>
+          <div>
+            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 04</div>
+            <h3 className="mt-2 text-3xl font-black text-slate-950">Verificaciones de contacto</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Estos controles demuestran envío o estado controlado. No prometen confirmación de recepción todavía: muestran enviado, pendiente o error controlado según avance de integración.</p>
+          </div>
+          <Badge tone="amber">Estados simulados</Badge>
         </div>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <DrillButton active={selectedPanel === "invitation"} onClick={() => setSelectedPanel("invitation")}>Invitación y reserva</DrillButton>
-          <DrillButton active={selectedPanel === "vapi"} onClick={() => setSelectedPanel("vapi")}>Vapi y Marta</DrillButton>
-          <DrillButton active={selectedPanel === "operations"} onClick={() => setSelectedPanel("operations")}>Operaciones</DrillButton>
-          <DrillButton active={selectedPanel === "analytics"} onClick={() => setSelectedPanel("analytics")}>Analítica</DrillButton>
-        </div>
-        <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-          <h4 className="text-2xl font-black text-slate-950">{currentPanel.title}</h4>
-          <div className="mt-4 grid gap-3">{currentPanel.items.map((item) => <div key={item} className="rounded-2xl bg-white p-4 text-base font-semibold leading-7 text-slate-800">{item}</div>)}</div>
+        <div className="mt-5 grid gap-5 xl:grid-cols-2">
+          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h4 className="text-2xl font-black text-slate-950">WhatsApp oficial</h4>
+                <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mensaje operacional de reserva enviado desde canal oficial cuando la integración esté activa.</p>
+              </div>
+              <Badge tone={contactStatusTone[whatsappStatus]}>{whatsappStatus}</Badge>
+            </div>
+            <button onClick={() => simulateContact("WhatsApp")} className="mt-5 rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><MessageCircle size={16} className="mr-2 inline" />Enviar WhatsApp oficial</button>
+          </div>
+          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h4 className="text-2xl font-black text-slate-950">Email empresarial</h4>
+                <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Correo formal con resumen de reserva, próximos pasos y trazabilidad del expediente.</p>
+              </div>
+              <Badge tone={contactStatusTone[emailStatus]}>{emailStatus}</Badge>
+            </div>
+            <button onClick={() => simulateContact("Email")} className="mt-5 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white"><Mail size={16} className="mr-2 inline" />Enviar email empresarial</button>
+          </div>
         </div>
       </Card>
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
-        <AiObservation title="Por qué esta página es tan importante">
-          <p>Esta no es una página decorativa. Es la mesa de control de la presentación. Desde aquí provocas el evento, guías la interacción, muestras trazabilidad y conviertes la experiencia en una demostración confiable de operación conectada.</p>
-          <p className="mt-3">La lógica correcta de esta página no es “mostrar botones”, sino ayudarte a dirigir un momento empresarial donde el cliente percibe que la solución ya está viva, conectada y lista para operar.</p>
-        </AiObservation>
         <Card>
-          <h3 className="text-2xl font-black text-slate-950">Cierre sugerido del demo</h3>
-          <p className="mt-3 text-base font-semibold leading-8 text-slate-800">1. Confirmas que el invitado recibió el link y usó la app.<br />2. Muestras la reserva paralela y la conversación con Marta.<br />3. Enseñas Vapi: transcripción, evaluación, salida estructurada y costos.<br />4. Enseñas Supabase, WhatsApp, email, CRM y calendario.<br />5. Cierras con dashboards y una consulta ejecutiva en vivo.</p>
-          <div className="mt-4 flex flex-wrap gap-2"><Badge tone="dark">Escena empresarial</Badge><Badge tone="blue">Prueba simultánea</Badge><Badge tone="green">Confiabilidad demostrada</Badge></div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 05</div>
+              <h3 className="mt-2 text-3xl font-black text-slate-950">Inyección de datos simulados</h3>
+            </div>
+            <Badge tone={simulatedDataInjected ? "green" : "slate"}>{simulatedDataInjected ? "Datos activos" : "Pendiente"}</Badge>
+          </div>
+          <p className="mt-4 text-base font-semibold leading-8 text-slate-800">La demo puede cargar de 20 a 25 sets de datos simulados de clientes que concluyeron reservas. Son datos razonablemente parecidos a la operación real, sin exagerar volumen ni prometer automatizaciones que todavía no se hayan conectado.</p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {["Cliente", "Propiedad", "Canal", "Interacción Marta", "Dudas", "Documentos", "Pagos", "Prioridad", "Próxima acción"].map((item) => <div key={item} className="rounded-2xl bg-slate-50 p-4 text-base font-black text-slate-950">{item}</div>)}
+          </div>
+          <button onClick={injectSimulatedData} className="mt-5 rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar datos simulados</button>
         </Card>
+        <AiObservation title="Bloque 06 · H-Operia Intelligence en tiempo real">
+          <p className="text-lg font-black text-slate-950">Cuando la operación genera datos, la plataforma produce inteligencia.</p>
+          <p className="mt-3">Después de la inyección, el resumen mock cambia para mostrar tendencias de interés, dudas frecuentes, clientes prioritarios, riesgos de seguimiento, oportunidades comerciales y acciones recomendadas.</p>
+          <div className="mt-5 grid gap-3">
+            {intelligenceRows.map(([title, text]) => <div key={title} className="rounded-2xl bg-white p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">{title}:</span> {text}</div>)}
+          </div>
+        </AiObservation>
       </div>
+      <Card>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 07</div>
+            <h3 className="mt-2 text-3xl font-black text-slate-950">Cierre de credibilidad operacional</h3>
+            <p className="mt-3 max-w-5xl text-xl font-black leading-9 text-slate-900">H-Operia deja de verse como una página web y empieza a percibirse como un sistema operativo comercial-operacional vivo.</p>
+            <p className="mt-3 max-w-5xl text-base font-semibold leading-8 text-slate-800">La fuerza del demo está en mostrar belleza visual, rigor técnico y trazabilidad concreta: reserva, conversación, comunicación, evidencia e inteligencia dentro de una arquitectura conectada, sin humo y sin promesas infladas.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 xl:justify-end">
+            <Badge tone="dark">Solidez</Badge>
+            <Badge tone="blue">Belleza</Badge>
+            <Badge tone="green">Rigor técnico</Badge>
+            <Badge tone="violet">Cero humo</Badge>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }
@@ -1423,11 +1502,11 @@ function CommunicationChannel({ channel, badge, tone, inboxTitle, messages, acti
 }
 
 function MartaProposalReviewCenter({ proposals }) {
-  return <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm"><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Bandeja de Respuestas Asistidas</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Marta recibe conversaciones; AMENA Intelligence estructura sugerencias para que la vendedora revise, edite, apruebe y envíe.</p></div><div className="flex flex-wrap gap-2"><Badge tone="violet">4 propuestas pendientes</Badge><Badge tone="slate">Revisión humana requerida</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-3">{proposals.map((proposal) => <MartaProposalCard key={`${proposal.type}-${proposal.title}`} type={proposal.type} title={proposal.title} analysis={proposal.analysis} proposal={proposal.proposal} />)}</div></div>;
+  return <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm"><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Bandeja de Respuestas Asistidas</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Marta recibe conversaciones; H-Operia Intelligence estructura sugerencias para que la vendedora revise, edite, apruebe y envíe.</p></div><div className="flex flex-wrap gap-2"><Badge tone="violet">4 propuestas pendientes</Badge><Badge tone="slate">Revisión humana requerida</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-3">{proposals.map((proposal) => <MartaProposalCard key={`${proposal.type}-${proposal.title}`} type={proposal.type} title={proposal.title} analysis={proposal.analysis} proposal={proposal.proposal} />)}</div></div>;
 }
 
 function MartaProposalCard({ type, title, analysis, proposal }) {
-  return <div className="rounded-3xl border border-violet-100 bg-white p-5 shadow-sm"><div className="text-sm uppercase tracking-[0.22em] text-violet-600 font-black">{type}</div><h3 className="mt-2 text-xl font-black text-slate-950">{title}</h3><div className="mt-4 rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Lectura AMENA Intelligence:</span> {analysis}</div><div className="mt-4 rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Propuesta:</span> {proposal}</div><div className="mt-5 flex flex-wrap gap-2"><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Revisar</button><button className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-800">Editar</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Aprobar</button></div></div>;
+  return <div className="rounded-3xl border border-violet-100 bg-white p-5 shadow-sm"><div className="text-sm uppercase tracking-[0.22em] text-violet-600 font-black">{type}</div><h3 className="mt-2 text-xl font-black text-slate-950">{title}</h3><div className="mt-4 rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Lectura H-Operia Intelligence:</span> {analysis}</div><div className="mt-4 rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Propuesta:</span> {proposal}</div><div className="mt-5 flex flex-wrap gap-2"><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Revisar</button><button className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-800">Editar</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Aprobar</button></div></div>;
 }
 
 function TrackingBlock({ tracking }) {
