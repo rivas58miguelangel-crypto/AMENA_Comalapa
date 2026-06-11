@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -325,26 +325,31 @@ function Badge({ children, tone = "slate" }) {
 }
 
 function Card({ children, className = "" }) {
-  return <div className={cls("rounded-3xl border border-slate-200 bg-white p-6 shadow-sm", className)}>{children}</div>;
+  return <div className={cls("min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6", className)}>{children}</div>;
 }
 
 function TopNav({ active, setActive }) {
   return (
-    <div className="sticky top-0 z-50 rounded-[2rem] bg-slate-950 p-5 text-white shadow-2xl">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
+    <div className="sticky top-0 z-50 w-full max-w-full overflow-hidden rounded-[2rem] bg-slate-950 p-4 text-white shadow-2xl sm:p-5">
+      <div className="mb-4 flex w-full min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
           <p className="text-xs font-black uppercase tracking-[0.35em] text-amber-300">H-Operia</p>
           <h2 className="text-3xl font-black">Centro de Mando</h2>
         </div>
-        <Badge tone="dark">{martaSync[active]}% Integración</Badge>
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-3 lg:w-auto lg:justify-end">
+          <Badge tone="dark">Integración demostrativa: {martaSync[active]}%</Badge>
+          <button onClick={() => setActive("demo")} className="max-w-full whitespace-normal rounded-2xl bg-amber-300 px-5 py-3 text-left text-sm font-black text-slate-950 transition hover:bg-amber-200">
+            <Smartphone size={16} className="mr-2 inline" />Iniciar demostración
+          </button>
+        </div>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-1">
+      <div className="flex w-full min-w-0 flex-wrap gap-3 pb-1">
         {menu.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActive(id)}
             className={cls(
-              "flex shrink-0 items-center gap-2 rounded-2xl px-5 py-3 text-sm font-black transition",
+              "flex max-w-full items-center gap-2 whitespace-normal rounded-2xl px-5 py-3 text-left text-sm font-black transition",
               active === id ? "bg-white text-slate-950" : "bg-white/10 text-white hover:bg-white/15"
             )}
           >
@@ -370,7 +375,7 @@ function PageHeader({ title, subtitle, icon: Icon, sync = 80, badges = [], syncN
             <p className="mt-3 max-w-5xl text-lg font-semibold leading-8 text-slate-800">{subtitle}</p>
           </div>
         </div>
-        <div className="min-w-[310px] rounded-3xl bg-slate-50 p-5 border border-slate-100">
+        <div className="min-w-0 rounded-3xl bg-slate-50 p-5 border border-slate-100 xl:min-w-[310px]">
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm font-black text-slate-950">Nivel de Integración Operacional</span>
             <span className="text-3xl font-black text-emerald-500">{sync}%</span>
@@ -435,9 +440,9 @@ function AiObservation({ title = "Observaciones estratégicas de H-Operia Intell
 
 function SimpleTable({ columns, rows }) {
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-left text-sm">
+    <div className="max-w-full overflow-hidden rounded-3xl border border-slate-200 bg-white">
+      <div className="max-w-full overflow-x-auto">
+        <table className="w-full min-w-[720px] table-fixed text-left text-sm lg:min-w-[860px]">
           <thead className="bg-slate-100 text-sm uppercase tracking-[0.18em] text-slate-950">
             <tr>{columns.map((c) => <th key={c} className="p-4 font-black">{c}</th>)}</tr>
           </thead>
@@ -455,7 +460,30 @@ function SimpleTable({ columns, rows }) {
 }
 
 function AppShell() {
-  const [active, setActive] = useState("executive");
+  const [active, setActive] = useState(() => {
+    if (typeof window === "undefined") return "executive";
+    const fromHash = window.location.hash.replace("#", "");
+    const fromStorage = window.localStorage.getItem("amena.activeSection") || "";
+    if (menu.some((item) => item.id === fromHash)) return fromHash;
+    if (menu.some((item) => item.id === fromStorage)) return fromStorage;
+    return "executive";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("amena.activeSection", active);
+    if (window.location.hash.replace("#", "") !== active) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${active}`);
+    }
+  }, [active]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const syncFromHash = () => {
+      const fromHash = window.location.hash.replace("#", "");
+      if (menu.some((item) => item.id === fromHash)) setActive(fromHash);
+    };
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, []);
   const Page = {
     executive: ExecutivePage,
     client: ClientPage,
@@ -473,7 +501,7 @@ function AppShell() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-amber-50 text-slate-950">
-      <div className="mx-auto max-w-[1800px] space-y-5 p-5">
+      <div className="mx-auto max-w-[1800px] space-y-5 p-3 sm:p-5">
         <TopNav active={active} setActive={setActive} />
         <Page />
       </div>
@@ -1292,27 +1320,31 @@ function DashboardsPage() {
 
 function DemoPage() {
   const phases = [
-    { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "Realizaremos una reserva completa en tiempo real y verificaremos datos, WhatsApp y correo dentro del ecosistema." },
-    { title: "FASE 02", name: "Conversación en vivo con Marta", text: "Interactuaremos con Marta y luego abriremos Vapi para visualizar logs, transcripciones y estructura operacional." },
-    { title: "FASE 03", name: "Operación comercial y mensajería operacional", text: "Mostraremos cómo vendedoras, seguimientos y mensajería reaccionan inmediatamente después de la reserva." },
-    { title: "FASE 04", name: "Centro de Mando y evidencia operacional", text: "Verificaremos desde la plataforma administrativa el estado real de la operación, comunicaciones y seguimiento." },
-    { title: "FASE 05", name: "Escalamiento operacional e inteligencia en tiempo real", text: "Inyectaremos actividad simulada de 20 clientes para ver cambios, prioridades y oportunidades detectadas." },
-    { title: "FASE 06", name: "Dashboards ejecutivos y cierre estratégico", text: "Cerraremos con métricas, dashboards e inteligencia ejecutiva derivada de la operación." },
+    { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "Realizaremos una reserva completa en tiempo real y verificaremos datos, WhatsApp y correo dentro del ecosistema.", nextStep: "buscar la reserva en Supabase y confirmar evidencia visible." },
+    { title: "FASE 02", name: "Conversación en vivo con Marta", text: "Interactuaremos con Marta y luego abriremos Vapi para visualizar logs, transcripciones y estructura operacional.", nextStep: "simular la conversación y abrir logs Vapi para revisar señales." },
+    { title: "FASE 03", name: "Operación comercial y mensajería operacional", text: "Mostraremos cómo vendedoras, seguimientos y mensajería reaccionan inmediatamente después de la reserva.", nextStep: "buscar informes de vendedora y verificar coordinación interna." },
+    { title: "FASE 04", name: "Centro de Mando y evidencia operacional", text: "Verificaremos desde la plataforma administrativa el estado real de la operación, comunicaciones y seguimiento.", nextStep: "abrir la evidencia administrativa y validar trazabilidad." },
+    { title: "FASE 05", name: "Escalamiento operacional e inteligencia en tiempo real", text: "Inyectaremos actividad simulada de 20 clientes para ver cambios, prioridades y oportunidades detectadas.", nextStep: "inyectar operaciones simuladas y revisar resultados posteriores." },
+    { title: "FASE 06", name: "Dashboards ejecutivos y cierre estratégico", text: "Cerraremos con métricas, dashboards e inteligencia ejecutiva derivada de la operación.", nextStep: "generar respuesta ejecutiva y copiar conclusión para junta." },
   ];
   const emptyVolunteer = { name: "", role: "", company: "", whatsapp: "", email: "" };
-  const baseVolunteer = { name: "Andrea López", role: "Gerente comercial", company: "Proyecto Comalapa", whatsapp: "+503 7000-0000", email: "andrea@empresa.com", whatsappStatus: "Pendiente", emailStatus: "Pendiente", received: "Pendiente", finished: "No" };
+  const baseVolunteer = { name: "Andrea López", role: "Gerente comercial", company: "Proyecto Comalapa", whatsapp: "+503 7000-0000", email: "andrea@empresa.com", whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
   const [activePhase, setActivePhase] = useState(0);
   const [completedPhases, setCompletedPhases] = useState([]);
   const [volunteerForm, setVolunteerForm] = useState(emptyVolunteer);
   const [volunteers, setVolunteers] = useState([baseVolunteer]);
   const [selectedPhone, setSelectedPhone] = useState(baseVolunteer.whatsapp);
   const [reservationStatus, setReservationStatus] = useState({ reservation: "Pendiente", whatsapp: "Pendiente", email: "Pendiente", evidence: "Pendiente" });
-  const [martaStatus, setMartaStatus] = useState("Lista");
+  const [commercialSearch, setCommercialSearch] = useState("");
+  const [martaStatus, setMartaStatus] = useState("Conversación pendiente");
   const [vapiStatus, setVapiStatus] = useState("Pendiente");
   const [simulatedDataInjected, setSimulatedDataInjected] = useState(false);
-  const [showDerivedChanges, setShowDerivedChanges] = useState(false);
-  const [executiveQuery, setExecutiveQuery] = useState("¿Qué canal genera más ingresos netos y menos atrasos?");
-  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviado: "green", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Lista: "violet", Visible: "green", No: "slate", Finalizado: "green" };
+  const [executiveQuery, setExecutiveQuery] = useState("");
+  const [executiveQuestions, setExecutiveQuestions] = useState(["¿Qué canal genera más ingresos netos y menos atrasos?", "¿Qué campañas generan leads de baja calidad?"]);
+  const [executiveBreakdown, setExecutiveBreakdown] = useState("Ingresos netos por canal y campaña\nConversión por modelo, sector y unidad\nAcompañamiento del equipo y uso de Marta\nRiesgos financieros, documentales y de escrituración");
+  const [selectedBreakdowns, setSelectedBreakdowns] = useState(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
+  const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
+  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviado: "green", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
   const phaseStatus = (index) => completedPhases.includes(index) ? "Completada" : activePhase === index ? "Activa" : "Pendiente";
@@ -1322,7 +1354,7 @@ function DemoPage() {
   };
   const addVolunteer = () => {
     if (!volunteerForm.name && !volunteerForm.whatsapp) return;
-    const next = { ...volunteerForm, whatsappStatus: "Pendiente", emailStatus: "Pendiente", received: "Pendiente", finished: "No" };
+    const next = { ...volunteerForm, whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
     setVolunteers((current) => [...current, next]);
     setSelectedPhone(next.whatsapp);
   };
@@ -1332,13 +1364,16 @@ function DemoPage() {
     setVolunteerForm(emptyVolunteer);
   };
   const validateReservation = () => setReservationStatus({ reservation: "Validada", whatsapp: selectedVolunteer.whatsappStatus === "Enviado" ? "Confirmado" : "Pendiente", email: selectedVolunteer.emailStatus === "Enviado" ? "Confirmado" : "Pendiente", evidence: "Generada" });
+  const simulateMartaConversation = () => {
+    setMartaStatus("Conversación en curso");
+    setVapiStatus("Pendiente");
+  };
   const openVapi = () => {
-    setMartaStatus("Activa");
+    setMartaStatus("Conversación analizada");
     setVapiStatus("Abierto");
   };
   const injectSimulatedData = () => {
     setSimulatedDataInjected(true);
-    setShowDerivedChanges(true);
     setReservationStatus({ reservation: "Validada", whatsapp: "Confirmado", email: "Confirmado", evidence: "Generada" });
     completePhase(4);
   };
@@ -1346,20 +1381,44 @@ function DemoPage() {
     ? [["Carlos Méndez", "María Fernanda", "Llamada post-reserva", "Solicita confirmar prima y documentos", "Alta", "Llamada financiera", "Hoy 4:30 PM", "Activo"], ["Andrea López", "VND-012", "Seguimiento documental", "Falta comprobante legible", "Media", "Enviar checklist", "Mañana 9:00 AM", "Pendiente"]]
     : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
   const messageRows = simulatedDataInjected
-    ? [["Marta", "Equipo comercial", "Interno", "Cliente pidió resumen financiero", "Enviado", "Hoy 4:12 PM", "Timeline"], ["VND-034", "Financiera", "WhatsApp interno", "Solicita validación de prima", "Pendiente", "Hoy 4:18 PM", "Expediente"]]
-    : [["Sistema", "Vendedora asignada", "Interno", "Nueva reserva lista para revisión", "Enviado", "Hoy 3:01 PM", "Timeline"]];
+    ? [["Marta", "Equipo comercial", "Interno", "Cliente pidió resumen financiero", "Enviado", "Hoy 4:12 PM", "Timeline"], ["VND-034", "Financiera", "WhatsApp interno", "Solicita validación de prima", "Pendiente", "Hoy 4:18 PM", "Expediente"], ["María Fernanda", "Coordinación comercial", "Interno", "Cliente Andrea López inició reserva y requiere confirmación documental.", "En revisión", "Hoy 4:22 PM", "Coordinación"]]
+    : [["H-Operia Intelligence", "Vendedora asignada", "Interno", "Nueva reserva lista para revisión", "Enviado", "Hoy 3:01 PM", "Timeline"], ["María Fernanda", "Coordinación comercial", "Interno", "Cliente Andrea López inició reserva y requiere confirmación documental.", "En revisión", "Hoy 3:07 PM", "Coordinación"]];
   const adminEvidence = [
-    ["Perfil Operacional", "Expediente del cliente", "Reserva vinculada", "Datos, comunicación y seguimiento quedan visibles para revisión.", reservationStatus.evidence === "Generada" ? "Visible" : "Pendiente"],
-    ["Operaciones Comerciales", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", simulatedDataInjected ? "Visible" : "Pendiente"],
-    ["Mensajería Operacional", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", simulatedDataInjected ? "Visible" : "Pendiente"],
+    ["Perfil Operacional", "Expediente del cliente", "Reserva vinculada", "Datos, comunicación y seguimiento quedan visibles para revisión.", reservationStatus.evidence === "Generada" ? "Visible" : "Pendiente", "Ver evidencia"],
+    ["Operaciones Comerciales", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", simulatedDataInjected ? "Visible" : "Pendiente", "Abrir página"],
+    ["Mensajería Operacional", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", simulatedDataInjected ? "Visible" : "Pendiente", "Abrir página"],
   ];
   const derivedChanges = [
-    { page: "Operaciones Comerciales", section: "Seguimientos activos", change: "Se agregaron nuevos seguimientos priorizados", description: "La operación muestra actividad comercial posterior a reservas simuladas." },
-    { page: "Mensajería Operacional", section: "Coordinación interna", change: "Se generaron mensajes operacionales entre equipo", description: "La mensajería permite visualizar coordinación posterior a nuevas reservas." },
-    { page: "Centro de Mando", section: "Expediente operacional", change: "Nuevos eventos aparecen consolidados", description: "El administrador puede verificar trazabilidad y estado." },
-    { page: "Dashboards", section: "Métricas ejecutivas", change: "Indicadores actualizados después de la inyección", description: "La operación se transforma en inteligencia ejecutiva." },
+    { page: "Operaciones Comerciales", section: "Seguimientos activos", change: "Se agregaron nuevos seguimientos priorizados", description: "La operación muestra actividad comercial posterior a reservas simuladas.", status: simulatedDataInjected ? "Verificado" : "Pendiente" },
+    { page: "Mensajería Operacional", section: "Coordinación interna", change: "Se generaron mensajes operacionales entre equipo", description: "La mensajería permite visualizar coordinación posterior a nuevas reservas.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
+    { page: "Centro de Mando", section: "Expediente operacional", change: "Nuevos eventos aparecen consolidados", description: "El administrador puede verificar trazabilidad y estado.", status: simulatedDataInjected ? "Verificado" : "Pendiente" },
+    { page: "Dashboards", section: "Métricas ejecutivas", change: "Indicadores actualizados después de la inyección", description: "La operación se transforma en inteligencia ejecutiva.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
   ];
-  const quickQueries = ["¿Qué canal genera más ingresos netos y menos atrasos?", "¿Qué vendedores aprovechan mejor el acompañamiento asistido?", "¿Qué modelo se vende más rápido por sector?", "¿Qué campañas generan leads de baja calidad?"];
+  const injectionResults = [
+    ["20", "operaciones generadas"],
+    ["8", "reservas nuevas"],
+    ["12", "seguimientos creados"],
+    ["6", "alertas detectadas"],
+    ["4", "recomendaciones generadas"],
+  ];
+  const breakdownItems = executiveBreakdown.split("\n").map((item) => item.trim()).filter(Boolean).slice(0, 4);
+  const addExecutiveQuestion = () => {
+    const next = executiveQuery.trim();
+    if (!next) return;
+    setExecutiveQuestions((current) => current.includes(next) ? current : [...current, next]);
+    setExecutiveQuery("");
+  };
+  const updateBreakdownItems = (items) => setExecutiveBreakdown(items.slice(0, 4).join("\n"));
+  const acceptBreakdown = (item) => setSelectedBreakdowns((current) => current.includes(item) ? current : [...current, item]);
+  const modifyBreakdown = (item, index) => {
+    const modified = `${item} · enfoque ejecutivo ajustado`;
+    updateBreakdownItems(breakdownItems.map((current, i) => i === index ? modified : current));
+    setSelectedBreakdowns((current) => current.includes(modified) ? current : [...current.filter((value) => value !== item), modified]);
+  };
+  const removeBreakdown = (item) => {
+    updateBreakdownItems(breakdownItems.filter((current) => current !== item));
+    setSelectedBreakdowns((current) => current.filter((value) => value !== item));
+  };
 
   return (
     <div className="space-y-5">
@@ -1373,7 +1432,7 @@ function DemoPage() {
         <div className="mt-5 grid gap-4 xl:grid-cols-3">
           {phases.map((phase, index) => {
             const state = phaseStatus(index);
-            return <div key={phase.title} className={cls("rounded-3xl border p-5", state === "Activa" ? "border-blue-200 bg-blue-50" : state === "Completada" ? "border-emerald-200 bg-emerald-50" : "border-slate-100 bg-slate-50")}><div className="flex items-start justify-between gap-3"><div><div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">{phase.title}</div><h4 className="mt-2 text-xl font-black text-slate-950">{phase.name}</h4></div><Badge tone={statusTone[state] || "slate"}>{state}</Badge></div><p className="mt-3 text-base font-semibold leading-7 text-slate-700">{phase.text}</p><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => setActivePhase(index)} className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Marcar activa</button><button onClick={() => completePhase(index)} className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white">Completar fase</button></div></div>;
+            return <div key={phase.title} className={cls("rounded-3xl border p-5", state === "Activa" ? "border-blue-200 bg-blue-50" : state === "Completada" ? "border-emerald-200 bg-emerald-50" : "border-slate-100 bg-slate-50")}><div className="flex items-start justify-between gap-3"><div><div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">{phase.title}</div><h4 className="mt-2 text-xl font-black text-slate-950">{phase.name}</h4></div><Badge tone={statusTone[state] || "slate"}>{state}</Badge></div><p className="mt-3 text-base font-semibold leading-7 text-slate-700">{phase.text}</p><p className="mt-3 rounded-2xl bg-white/80 px-4 py-3 text-sm font-black leading-6 text-slate-800">Siguiente paso: {phase.nextStep}</p><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => setActivePhase(index)} className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Presentar esta fase</button><button onClick={() => completePhase(index)} className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white">Fase demostrada</button></div></div>;
           })}
         </div>
       </Card>
@@ -1384,20 +1443,20 @@ function DemoPage() {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {[["name", "Nombre completo", "Ej. Andrea López"], ["role", "Cargo", "Ej. Gerente comercial"], ["company", "Empresa", "Ej. Proyecto Comalapa"], ["whatsapp", "WhatsApp", "+503 7000-0000"], ["email", "Email", "persona@empresa.com"]].map(([field, label, placeholder]) => <div key={field}><label className="mb-2 block text-sm font-black uppercase tracking-[0.18em] text-slate-700">{label}</label><input value={volunteerForm[field]} onChange={(e) => setVolunteerForm((current) => ({ ...current, [field]: e.target.value }))} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 outline-none" placeholder={placeholder} /></div>)}
           </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <button onClick={addVolunteer} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><Users size={16} className="mr-2 inline" />Registrar voluntario</button>
             <button onClick={() => updateVolunteerStatus("whatsappStatus", "Enviado")} className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white"><MessageCircle size={16} className="mr-2 inline" />Enviar link WhatsApp</button>
             <button onClick={() => updateVolunteerStatus("emailStatus", "Enviado")} className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white"><Mail size={16} className="mr-2 inline" />Enviar link email</button>
-            <button onClick={() => updateVolunteerStatus("received", "Confirmado")} className="rounded-2xl bg-violet-600 px-4 py-4 text-sm font-black text-white"><CheckCircle2 size={16} className="mr-2 inline" />Marcar recibido</button>
-            <button onClick={finishVolunteer} className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-950">Finalizar voluntario</button>
+            <button onClick={finishVolunteer} className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-950">Guardar y limpiar formulario</button>
           </div>
           <div className="mt-5 grid gap-3">
-            {volunteers.map((item) => <button key={`${item.whatsapp}-${item.email}`} onClick={() => setSelectedPhone(item.whatsapp)} className={cls("rounded-2xl border p-4 text-left", selectedPhone === item.whatsapp ? "border-slate-950 bg-slate-100" : "border-slate-100 bg-slate-50")}><div className="font-black text-slate-950">{item.name || "Voluntario sin nombre"}</div><div className="mt-1 text-sm font-semibold text-slate-700">{item.role} · {item.company} · {item.whatsapp}</div><div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[item.whatsappStatus] || "slate"}>WA {item.whatsappStatus}</Badge><Badge tone={statusTone[item.emailStatus] || "slate"}>Email {item.emailStatus}</Badge><Badge tone={statusTone[item.received] || "slate"}>{item.received}</Badge><Badge tone={statusTone[item.finished] || "slate"}>{item.finished}</Badge></div></button>)}
+            {volunteers.map((item) => <button key={`${item.whatsapp}-${item.email}`} onClick={() => setSelectedPhone(item.whatsapp)} className={cls("rounded-2xl border p-4 text-left", selectedPhone === item.whatsapp ? "border-slate-950 bg-slate-100" : "border-slate-100 bg-slate-50")}><div className="font-black text-slate-950">{item.name || "Voluntario sin nombre"}</div><div className="mt-1 text-sm font-semibold text-slate-700">{item.role} · {item.company} · {item.whatsapp}</div><div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[item.whatsappStatus] || "slate"}>WhatsApp enviado: {item.whatsappStatus}</Badge><Badge tone={statusTone[item.emailStatus] || "slate"}>Email enviado: {item.emailStatus}</Badge><Badge tone={statusTone[item.reservationStarted] || "slate"}>Reserva iniciada: {item.reservationStarted}</Badge><Badge tone={statusTone[item.reservationCompleted] || "slate"}>Reserva completada: {item.reservationCompleted}</Badge></div></button>)}
           </div>
         </Card>
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Reserva pública en vivo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Busca por teléfono y muestra el resumen equivalente antes de confirmar la reserva.</p></div><Badge tone="blue">Preparado para Evidencia Operacional</Badge></div>
-          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><CheckCircle2 size={16} className="mr-2 inline" />Validar resumen</button></div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><Database size={16} className="mr-2 inline" />Buscar reserva en Supabase</button><button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir registro en Supabase</button></div>
+          <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-600">Última actualización: hace 12 segundos</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <InfoCard title="Nombre del cliente" value={selectedVolunteer.name || "Sin registro"} />
             <InfoCard title="Teléfono" value={selectedVolunteer.whatsapp || selectedPhone} />
@@ -1416,29 +1475,108 @@ function DemoPage() {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
-        <Card><h3 className="text-3xl font-black text-slate-950">Operaciones Comerciales</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Información recuperable desde la app de vendedoras.</p><div className="mt-5"><SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /></div></Card>
-        <Card><h3 className="text-3xl font-black text-slate-950">Mensajería Operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mensajes internos entre equipo, con estado y evidencia.</p><div className="mt-5"><SimpleTable columns={["Remitente", "Destino/equipo", "Canal", "Mensaje/resumen", "Estado", "Fecha/hora", "Evidencia"]} rows={messageRows} /></div></Card>
+        <Card>
+          <h3 className="text-3xl font-black text-slate-950">Operaciones Comerciales</h3>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Información relevante desde la aplicación de vendedoras.</p>
+          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
+            <input value={commercialSearch} onChange={(e) => setCommercialSearch(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por cliente o teléfono" />
+            <button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><Search size={16} className="mr-2 inline" />Buscar informes de vendedora</button>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir app vendedoras</button>
+          </div>
+          <div className="mt-5"><SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /></div>
+        </Card>
+        <Card>
+          <h3 className="text-3xl font-black text-slate-950">Mensajería Operacional</h3>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mensajes internos entre equipo, con estado y evidencia.</p>
+          <div className="mt-5 grid gap-3">
+            {messageRows.map(([from, to, channel, message, state, time, evidence]) => (
+              <div key={`${from}-${time}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2"><Badge tone={statusTone[state] || "slate"}>{state}</Badge><span className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{time} · {evidence}</span></div>
+                <div className="mt-3 grid gap-2 text-sm font-semibold leading-6 text-slate-800 md:grid-cols-2">
+                  <div><span className="font-black text-slate-950">De:</span> {from}</div>
+                  <div><span className="font-black text-slate-950">Para:</span> {to}</div>
+                  <div><span className="font-black text-slate-950">Canal:</span> {channel}</div>
+                  <div><span className="font-black text-slate-950">Estado:</span> {state}</div>
+                </div>
+                <p className="mt-3 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Mensaje:</span> {message}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Marta + Vapi</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Conversación, logs y evidencia conversacional útil para seguimiento.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
         <div className="mt-5 grid gap-4 xl:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Transcripción:</span> “Quiero confirmar prima, fecha de entrega y documentos para avanzar.”</div><div className="rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Structured output:</span> intención alta, duda financiera, documento pendiente, próxima acción: llamada humana.</div><div className="rounded-2xl bg-emerald-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Evidencia:</span> resumen de llamada y tarea de seguimiento.</div></div>
-        <button onClick={openVapi} className="mt-5 rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><PhoneCall size={16} className="mr-2 inline" />Abrir Vapi / logs</button><div className="mt-3"><Badge tone={vapiStatus === "Abierto" ? "green" : "amber"}>{vapiStatus}</Badge></div>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button onClick={simulateMartaConversation} className="rounded-2xl bg-violet-600 px-5 py-4 text-sm font-black text-white"><Bot size={16} className="mr-2 inline" />Mostrar conversación con Marta</button>
+          <button onClick={openVapi} className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><PhoneCall size={16} className="mr-2 inline" />Abrir logs Vapi</button>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2"><Badge tone="green">Logs verificados</Badge></div>
       </Card>
 
-      <Card><h3 className="text-3xl font-black text-slate-950">Evidencia administrativa</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Impacto verificable en páginas del Admin, sin conteos decorativos.</p><div className="mt-5"><SimpleTable columns={["Página Admin impactada", "Sección", "Resumen del cambio", "Descripción operacional", "Estado"]} rows={adminEvidence} /></div></Card>
+      <Card><h3 className="text-3xl font-black text-slate-950">Evidencia administrativa</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Impacto verificable en páginas del Admin, sin conteos decorativos.</p><div className="mt-5"><SimpleTable columns={["Página Admin impactada", "Sección", "Resumen del cambio", "Descripción operacional", "Estado", "Acción"]} rows={adminEvidence.map(([page, section, summary, description, state, action]) => [page, section, summary, description, state, <button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />{action}</button>])} /></div></Card>
 
       <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-        <Card><h3 className="text-3xl font-black text-slate-950">Inyección operacional controlada</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Activa 20 operaciones simuladas para demostrar cómo cambian páginas, prioridades y recomendaciones sin integrar servicios reales.</p><div className="mt-5 grid gap-3 md:grid-cols-2"><InfoCard title="Estado antes" value="Reserva base" detail="Un expediente y seguimiento inicial." /><InfoCard title="Estado después" value={simulatedDataInjected ? "20 operaciones simuladas" : "Pendiente"} detail="Cambios distribuidos por página." /></div><div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar 20 operaciones simuladas</button><button onClick={() => setShowDerivedChanges(true)} className="rounded-2xl bg-blue-600 px-6 py-4 text-base font-black text-white">Ver cambios derivados de la inyección</button></div></Card>
-        <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Cambios derivados de la simulación</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Ver cambios derivados de la inyección de datos simulados</p></div><Badge tone={showDerivedChanges ? "green" : "amber"}>{showDerivedChanges ? "Visible" : "Pendiente"}</Badge></div><div className="mt-5 grid gap-4">{(showDerivedChanges ? derivedChanges : derivedChanges.slice(0, 1)).map((item) => <div key={item.page} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">Página: {item.page}</Badge><Badge tone="blue">{item.section}</Badge></div><h4 className="mt-4 text-xl font-black text-slate-950">{item.change}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{item.description}</p></div>)}</div></Card>
+        <Card><h3 className="text-3xl font-black text-slate-950">Inyección operacional controlada</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Activa 20 operaciones simuladas para demostrar cómo cambian páginas, prioridades y recomendaciones sin integrar servicios reales.</p><div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{injectionResults.map(([value, label]) => <div key={label} className="min-w-0 rounded-2xl bg-slate-50 p-4"><div className="text-3xl font-black text-slate-950">{value}</div><div className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-slate-700">{label}</div></div>)}</div><div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar 20 operaciones simuladas</button></div></Card>
+        <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Cambios derivados de la simulación</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cambios visibles en tiempo real tras la inyección de datos simulados.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div><div className="mt-5 grid gap-4">{derivedChanges.map((item) => <div key={item.page} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">Página: {item.page}</Badge><Badge tone="blue">{item.section}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><h4 className="mt-4 text-xl font-black text-slate-950">{item.change}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{item.description}</p><button className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Ver página impactada</button></div>)}</div></Card>
       </div>
 
       <Card>
         <h3 className="text-3xl font-black text-slate-950">Centro de consultas ejecutivas</h3>
-        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Pregunta sugerida: {executiveQuery}</p>
-        <div className="mt-5 flex flex-wrap gap-2">{quickQueries.map((query) => <button key={query} onClick={() => setExecutiveQuery(query)} className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-800 hover:bg-slate-200">{query}</button>)}</div>
-        <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-5"><h4 className="text-xl font-black text-slate-950">Desglose propuesto por H-Operia Intelligence</h4><div className="mt-4 grid gap-3 md:grid-cols-2">{["Ingresos netos por canal y campaña", "Conversión por modelo, sector y unidad", "Acompañamiento del equipo y uso de Marta", "Riesgos financieros, documentales y de escrituración"].map((item, index) => <div key={item} className="rounded-2xl bg-white p-4 text-base font-black text-slate-950">{index + 1}. {item}</div>)}</div></div>
-        <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto_auto]"><input value={executiveQuery} onChange={(e) => setExecutiveQuery(e.target.value)} className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold outline-none" placeholder="Escribir otra consulta ejecutiva" /><button className="rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black text-white">Ampliar por área</button><button className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-black text-white">Enviar requerimiento final</button></div>
+        <p className="mt-3 text-base font-semibold leading-7 text-slate-700">A continuación escriba su pregunta o sus preguntas, una por una. Al terminar cada pregunta presione Enter para agregarla al listado.</p>
+        <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
+          <input value={executiveQuery} onChange={(e) => setExecutiveQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addExecutiveQuestion(); }} className="min-w-0 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold outline-none" placeholder="Escribir pregunta ejecutiva individual" />
+          <button onClick={addExecutiveQuestion} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><Bot size={16} className="mr-2 inline" />Ingrese su pregunta individualmente</button>
+        </div>
+        <div className="mt-4 rounded-3xl border border-slate-100 bg-slate-50 p-4">
+          <div className="text-sm font-black text-slate-700">Preguntas ingresadas</div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {executiveQuestions.map((query, index) => <span key={`${query}-${index}`} className="rounded-full bg-white px-4 py-2 text-sm font-black text-slate-800 shadow-sm">{index + 1}. {query}</span>)}
+          </div>
+        </div>
+        <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-5">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h4 className="text-xl font-black text-slate-950">Desglose propuesto por H-Operia Intelligence</h4>
+              <p className="mt-3 text-base font-semibold leading-8 text-slate-800">H-Operia Intelligence descompone la pregunta ejecutiva para revisar ingresos, conversión, acompañamiento humano y riesgos operativos antes de generar una conclusión. Puede modificar, eliminar o aceptar cada desglose antes de enviarlo.</p>
+            </div>
+            <Badge tone={selectedBreakdowns.length ? "green" : "amber"}>{selectedBreakdowns.length} seleccionados</Badge>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {breakdownItems.map((item, index) => (
+              <div key={item} className="rounded-2xl bg-white p-4">
+                <div className="text-base font-black leading-7 text-slate-950">{index + 1}. {item}</div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button onClick={() => modifyBreakdown(item, index)} className="rounded-2xl bg-slate-100 px-4 py-2 text-xs font-black text-slate-900">Modificar</button>
+                  <button onClick={() => removeBreakdown(item)} className="rounded-2xl bg-rose-100 px-4 py-2 text-xs font-black text-rose-800">Eliminar</button>
+                  <button onClick={() => acceptBreakdown(item)} className="rounded-2xl bg-emerald-100 px-4 py-2 text-xs font-black text-emerald-800">Aceptar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 rounded-2xl border border-blue-100 bg-white p-5">
+            <h4 className="text-xl font-black text-slate-950">Desgloses seleccionados para respuesta</h4>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Este es el conjunto final que se enviará para generar la respuesta ejecutiva.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {selectedBreakdowns.map((item) => <span key={item} className="rounded-full bg-blue-100 px-4 py-2 text-sm font-black text-blue-900">{item}</span>)}
+            </div>
+            <button onClick={() => setExecutiveResponseReady(true)} className="mt-4 rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black text-white">Enviar desgloses</button>
+          </div>
+          <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50 p-5">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+              <h4 className="text-xl font-black text-slate-950">Respuestas generadas por H-Operia Intelligence</h4>
+              <Badge tone={executiveResponseReady ? "green" : "amber"}>{executiveResponseReady ? "Posterior al envío" : "Esperando desgloses"}</Badge>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Texto ejecutivo", "Cuadros comparativos", "Dashboard", "PDF descargable", "Imagen ejecutiva"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
+            </div>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">{executiveResponseReady ? "Resultado mock posterior al envío de desgloses: referidos concentra el mejor balance entre ingresos netos, conversión y menor atraso operativo. Instagram mantiene volumen, pero necesita filtro financiero temprano y seguimiento humano documentado. Para junta, la conclusión es reforzar referidos, ajustar pauta digital y pedir evidencia semanal por vendedora." : "Al enviar los desgloses seleccionados, H-Operia Intelligence generará una conclusión ejecutiva en los formatos disponibles."}</p>
+            <button className="mt-4 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><ClipboardCheck size={16} className="mr-2 inline" />Copiar conclusión para junta</button>
+          </div>
+        </div>
       </Card>
     </div>
   );
