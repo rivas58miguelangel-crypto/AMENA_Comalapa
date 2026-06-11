@@ -22,7 +22,6 @@ import {
   Mail,
   Megaphone,
   MessageCircle,
-  Mic,
   MonitorCog,
   PhoneCall,
   Search,
@@ -34,7 +33,6 @@ import {
   Users,
   WalletCards,
   MapPinned,
-  PencilLine,
 } from "lucide-react";
 
 const REPORT_DATE = "Corte: 15 mayo 2026";
@@ -546,6 +544,44 @@ function ExecutivePage() {
         <Metric title="Integración H-Operia Intelligence" value="86%" note="Promedio operativo" tone="violet" icon={Bot} />
         <Metric title="Acciones hoy" value="43" note="Sugeridas para revisión directiva" tone="blue" icon={Target} />
       </div>
+      <Card>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <h3 className="text-3xl font-black text-slate-950">Consulta ejecutiva asistida</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">H-Operia Intelligence transforma preguntas directivas en desgloses verificables y conclusiones accionables.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {["Texto ejecutivo", "Cuadro comparativo", "Dashboard", "PDF para junta"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
+          </div>
+        </div>
+        <div className="mt-5 grid gap-4 xl:grid-cols-4">
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-700">1. Pregunta ejecutiva</div>
+            <p className="mt-3 text-base font-black leading-7 text-slate-950">¿Qué está frenando la conversión de reservas esta semana?</p>
+          </div>
+          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+            <div className="text-sm font-black uppercase tracking-[0.18em] text-blue-800">2. Desglose propuesto</div>
+            <div className="mt-3 space-y-2">
+              {["Calidad de leads por canal", "Velocidad de respuesta comercial", "Seguimiento de reservas iniciadas", "Riesgos documentales o financieros"].map((item) => <div key={item} className="rounded-xl bg-white px-3 py-2 text-sm font-black text-slate-900">{item}</div>)}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+            <div className="text-sm font-black uppercase tracking-[0.18em] text-amber-800">3. Validación humana</div>
+            <p className="mt-3 text-base font-semibold leading-7 text-slate-800">Dirección revisa el desglose, prioriza reservas iniciadas y confirma qué áreas deben responder primero.</p>
+            <div className="mt-3 flex flex-wrap gap-2"><Badge tone="amber">Revisión directiva</Badge><Badge tone="dark">Criterio humano</Badge></div>
+          </div>
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+            <div className="text-sm font-black uppercase tracking-[0.18em] text-emerald-800">4. Respuesta ejecutiva</div>
+            <p className="mt-3 text-base font-semibold leading-7 text-slate-800">La conversión se está viendo afectada principalmente por retrasos de seguimiento y dispersión entre canales. Se recomienda priorizar reservas iniciadas, reforzar contacto humano y revisar casos con documentación pendiente.</p>
+          </div>
+        </div>
+        <div className="mt-5 rounded-2xl border border-slate-100 bg-white p-4">
+          <div className="text-sm font-black text-slate-700">Evidencia conectada:</div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {["Ventas / Vendedoras", "Marketing / Canales", "Finanzas / Pagos", "Expediente Vivo"].map((item) => <Badge key={item} tone="blue">{item}</Badge>)}
+          </div>
+        </div>
+      </Card>
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <DetailStack
           title="Prioridades ejecutivas de la semana"
@@ -1224,7 +1260,6 @@ function FunnelLibraryPage() {
 }
 
 function DashboardsPage() {
-  const [query, setQuery] = useState("Muéstrame ingresos recibidos por canal, modelo, sector y vendedora");
   const [selectedLens, setSelectedLens] = useState("Canal");
   const lensMap = {
     Canal: { winner: "Instagram", detail: "Genera el mayor ingreso total, pero su formalización es más débil que la de referidos. La lupa debe abrir campañas concretas, mensajes, filtros y tiempos de seguimiento.", actions: ["Auditar promesa del anuncio", "Filtrar mejor urgencia y presupuesto", "Comparar con rendimiento de referidos"] },
@@ -1253,27 +1288,53 @@ function DashboardsPage() {
       </Card>
       <Card>
         <h3 className="text-3xl font-black text-slate-950">Centro de consultas ejecutivas</h3>
-        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">El Director plantea una inquietud amplia. H-Operia Intelligence la desagrega en preguntas o categorías para responderla con más rigor.</p>
-        <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto_auto]">
-          <div className="rounded-2xl bg-slate-50 p-4 text-base font-bold text-slate-800">“{query}”</div>
-          <button className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><PencilLine size={18} className="mr-2 inline" />Texto</button>
-          <button className="rounded-2xl bg-violet-600 px-6 py-4 text-base font-black text-white"><Mic size={18} className="mr-2 inline" />Voz</button>
+        <p className="mt-3 text-base font-semibold leading-7 text-slate-700">A continuación escriba su pregunta o sus preguntas, una por una. Al terminar cada pregunta presione Enter para agregarla al listado.</p>
+        <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
+          <input className="min-w-0 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold outline-none" placeholder="Escribir pregunta ejecutiva individual" />
+          <button className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><Bot size={16} className="mr-2 inline" />Ingrese su pregunta individualmente</button>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {["¿Qué canal genera más ingresos reales y menos atrasos?", "¿Qué vendedoras aprovechan mejor el acompañamiento asistido?", "¿Qué modelos se venden más rápido por sector?", "¿Qué campañas generan leads de baja calidad?"].map((s) => <button key={s} onClick={() => setQuery(s)} className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-800 hover:bg-slate-200">{s}</button>)}
+        <div className="mt-4 rounded-3xl border border-slate-100 bg-slate-50 p-4">
+          <div className="text-sm font-black text-slate-700">Preguntas ingresadas</div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {["¿Qué canal genera más ingresos netos y menos atrasos?", "¿Qué campañas generan leads de baja calidad?"].map((question) => <span key={question} className="rounded-full bg-white px-4 py-2 text-sm font-black text-slate-800 shadow-sm">{question}</span>)}
+          </div>
         </div>
         <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-5">
-          <h4 className="text-xl font-black text-slate-950">Desagregación propuesta por H-Operia Intelligence</h4>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Para resolver la inquietud del Director, H-Operia Intelligence propone separar el requerimiento en cuatro categorías complementarias:</p>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h4 className="text-xl font-black text-slate-950">Desglose propuesto por H-Operia Intelligence</h4>
+              <p className="mt-3 text-base font-semibold leading-8 text-slate-800">H-Operia Intelligence descompone la pregunta ejecutiva para revisar ingresos, conversión, acompañamiento humano y riesgos operativos antes de generar una conclusión. Puede modificar, eliminar o aceptar cada desglose antes de enviarlo.</p>
+            </div>
+            <Badge tone="green">2 seleccionados</Badge>
+          </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {["Ingresos reales por canal y campaña", "Conversión por modelo, sector y unidad", "Acompañamiento del equipo y uso de Marta", "Riesgos financieros, documentales y de construcción"].map((c, i) => <div key={c} className="rounded-2xl bg-white p-4 text-base font-black text-slate-950">{i + 1}. {c}</div>)}
+            {["Ingresos netos por canal y campaña", "Conversión por modelo, sector y unidad", "Acompañamiento del equipo y uso de Marta", "Riesgos financieros, documentales y de escrituración"].map((item, index) => (
+              <div key={item} className="rounded-2xl bg-white p-4">
+                <div className="text-base font-black leading-7 text-slate-950">{index + 1}. {item}</div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button className="rounded-2xl bg-slate-100 px-4 py-2 text-xs font-black text-slate-900">Modificar</button>
+                  <button className="rounded-2xl bg-rose-100 px-4 py-2 text-xs font-black text-rose-800">Eliminar</button>
+                  <button className="rounded-2xl bg-emerald-100 px-4 py-2 text-xs font-black text-emerald-800">Aceptar</button>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="mt-5 grid gap-3 xl:grid-cols-[auto_1fr_auto]">
-            <button className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white">Estoy de acuerdo</button>
-            <input className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold outline-none" placeholder="Escriba sus ampliaciones antes de enviar el requerimiento final" />
-            <button className="rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black text-white"><Mic size={16} className="mr-2 inline" />Ampliar por voz</button>
+          <div className="mt-5 rounded-2xl border border-blue-100 bg-white p-5">
+            <h4 className="text-xl font-black text-slate-950">Desgloses seleccionados para respuesta</h4>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Este es el conjunto final que se enviará para generar la respuesta ejecutiva.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"].map((item) => <span key={item} className="rounded-full bg-blue-100 px-4 py-2 text-sm font-black text-blue-900">{item}</span>)}
+            </div>
+            <button className="mt-4 rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black text-white">Enviar desgloses</button>
           </div>
-          <button className="mt-4 rounded-2xl bg-emerald-600 px-6 py-4 text-base font-black text-white">Enviar requerimiento final</button>
+          <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50 p-5">
+            <h4 className="text-xl font-black text-slate-950">Respuestas generadas por H-Operia Intelligence</h4>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Texto ejecutivo", "Cuadros comparativos", "Dashboard", "PDF descargable", "Imagen ejecutiva"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
+            </div>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">Al enviar los desgloses seleccionados, H-Operia Intelligence generará una conclusión ejecutiva en los formatos disponibles.</p>
+            <button className="mt-4 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><ClipboardCheck size={16} className="mr-2 inline" />Copiar conclusión para junta</button>
+          </div>
         </div>
       </Card>
       <Card>
