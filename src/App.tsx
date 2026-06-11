@@ -1291,180 +1291,257 @@ function DashboardsPage() {
 }
 
 function DemoPage() {
-  const [whatsappStatus, setWhatsappStatus] = useState("Pendiente");
-  const [emailStatus, setEmailStatus] = useState("Pendiente");
-  const [simulatedDataInjected, setSimulatedDataInjected] = useState(false);
-  const ecosystemAccess = [
-    { icon: Home, title: "Gestión de Reservas", text: "Experiencia donde la persona presente inicia la reserva y deja señales comerciales útiles." },
-    { icon: Users, title: "Operaciones Comerciales", text: "Mesa de seguimiento para revisar clientes, próximos pasos, dudas y evidencia capturada." },
-    { icon: MonitorCog, title: "Centro de Mando", text: "Visión operativa para dirección, coordinación comercial, reportes y control de prioridades." },
-    { icon: Send, title: "Mensajería Operacional", text: "Capa que prepara envíos, registra estados y evita que la operación dependa de memoria humana." },
-    { icon: PhoneCall, title: "Marta / VAPI", text: "Conversación, transcripción, evaluación, salida estructurada y lectura de costo operativo." },
-    { icon: Database, title: "Evidencia Operacional", text: "Respaldo verificable del evento sin convertir la capa técnica en protagonista del demo." },
+  const phases = [
+    { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "Realizaremos una reserva completa en tiempo real y verificaremos datos, WhatsApp y correo dentro del ecosistema." },
+    { title: "FASE 02", name: "Operación comercial y mensajería operacional", text: "Mostraremos cómo vendedoras, seguimientos y mensajería reaccionan inmediatamente después de la reserva." },
+    { title: "FASE 03", name: "Conversación en vivo con Marta", text: "Interactuaremos con Marta y luego abriremos Vapi para visualizar logs, transcripciones y estructura operacional." },
+    { title: "FASE 04", name: "Centro de Mando y evidencia operacional", text: "Verificaremos desde la plataforma administrativa el estado real de la operación, comunicaciones y seguimiento." },
+    { title: "FASE 05", name: "Escalamiento operacional e inteligencia en tiempo real", text: "Inyectaremos actividad simulada de 20 clientes para ver cambios, prioridades y oportunidades detectadas." },
+    { title: "FASE 06", name: "Dashboards ejecutivos y cierre estratégico", text: "Cerraremos con métricas, dashboards e inteligencia ejecutiva derivada de la operación." },
   ];
-  const contactStatusTone = {
-    Enviado: "green",
-    Pendiente: "amber",
-    "Error controlado": "red",
+  const simulatedClients = [
+    "Andrea López", "Carlos Méndez", "Sofía Herrera", "Luis Ramírez", "Daniela Pineda",
+    "Jorge Escobar", "María Castillo", "Fernando Rivas", "Lucía Molina", "Ricardo Fuentes",
+    "Gabriela Torres", "Manuel Aguilar", "Paola Duarte", "Roberto Salinas", "Elena Vargas",
+    "Diego Morales", "Claudia Reyes", "Hugo Cárdenas", "Valeria Núñez", "Oscar Benítez",
+  ];
+  const [activePhase, setActivePhase] = useState(0);
+  const [completedPhases, setCompletedPhases] = useState([]);
+  const [participant, setParticipant] = useState({ name: "", role: "", company: "", whatsapp: "", email: "" });
+  const [participantStatus, setParticipantStatus] = useState({
+    added: false,
+    whatsapp: "Pendiente",
+    email: "Pendiente",
+    received: "Pendiente",
+    opened: "Pendiente",
+  });
+  const [reservationStatus, setReservationStatus] = useState({
+    reservation: "Validando",
+    data: "Pendiente",
+    whatsapp: "Pendiente",
+    email: "Pendiente",
+    evidence: "Pendiente",
+  });
+  const [martaStatus, setMartaStatus] = useState("Lista");
+  const [vapiStatus, setVapiStatus] = useState("Pendiente");
+  const [simulatedDataInjected, setSimulatedDataInjected] = useState(false);
+  const completedCount = completedPhases.length;
+  const progress = Math.round((completedCount / phases.length) * 100);
+  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviado: "green", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Lista: "violet", Error: "red", Validando: "amber" };
+  const currentClient = participantStatus.added && participant.name ? participant.name : "Andrea López";
+  const simulatedSummary = simulatedDataInjected
+    ? { clients: 20, reservations: 14, conversations: 18, followups: 26, alerts: 7, priorities: 9, dashboards: 6, recommendations: 8 }
+    : { clients: 1, reservations: 1, conversations: 1, followups: 3, alerts: 1, priorities: 2, dashboards: 3, recommendations: 2 };
+  const phaseStatus = (index) => completedPhases.includes(index) ? "Completada" : activePhase === index ? "Activa" : "Pendiente";
+  const markActive = (index) => setActivePhase(index);
+  const completePhase = (index) => {
+    setCompletedPhases((current) => current.includes(index) ? current : [...current, index]);
+    if (index < phases.length - 1) setActivePhase(index + 1);
   };
-  const intelligenceRows = simulatedDataInjected
-    ? [
-      ["Tendencias de interés", "Apartamentos de 2 habitaciones, cercanía a acceso principal y fechas de entrega claras."],
-      ["Dudas frecuentes", "Financiamiento, documentos requeridos, disponibilidad por sector y diferencias entre modelos."],
-      ["Clientes prioritarios", "5 reservas con intención alta y próxima acción comercial en menos de 24 horas."],
-      ["Riesgos de seguimiento", "3 casos piden información financiera y pueden enfriarse si no reciben respuesta ordenada."],
-      ["Oportunidades comerciales", "Referidos y reactivación por WhatsApp muestran señales de conversión razonables."],
-      ["Acciones recomendadas", "Asignar seguimiento humano, enviar documentos faltantes y preparar respuesta asistida por Marta."],
-    ]
-    : [
-      ["Tendencias de interés", "Esperando datos simulados para generar lectura operacional."],
-      ["Dudas frecuentes", "Sin muestra activa todavía."],
-      ["Clientes prioritarios", "Pendiente de inyección."],
-      ["Riesgos de seguimiento", "Pendiente de inyección."],
-      ["Oportunidades comerciales", "Pendiente de inyección."],
-      ["Acciones recomendadas", "Inyectar datos simulados para activar el resumen mock."],
-    ];
-
-  const simulateContact = (channel) => {
-    console.log(`Centro Demo: ${channel} simulado`);
-    if (channel === "WhatsApp") setWhatsappStatus("Enviado");
-    if (channel === "Email") setEmailStatus("Enviado");
+  const updateParticipantField = (field, value) => setParticipant((current) => ({ ...current, [field]: value }));
+  const addParticipant = () => setParticipantStatus((current) => ({ ...current, added: true }));
+  const participantAction = (field, value) => setParticipantStatus((current) => ({ ...current, [field]: value }));
+  const validateReservation = () => setReservationStatus({ reservation: "Validada", data: "Enviado", whatsapp: "Confirmado", email: "Confirmado", evidence: "Generada" });
+  const openVapi = () => {
+    setMartaStatus("Activa");
+    setVapiStatus("Abierto");
   };
-
   const injectSimulatedData = () => {
-    console.log("Centro Demo: inyección simulada de 20 a 25 reservas concluidas");
+    console.log("Centro Demo: actividad simulada de 20 clientes");
     setSimulatedDataInjected(true);
+    setReservationStatus({ reservation: "Validada", data: "Enviado", whatsapp: "Confirmado", email: "Confirmado", evidence: "Generada" });
+    completePhase(4);
   };
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Centro Demo" subtitle="Evidencia Operacional: demuestra que una reserva se transforma en acciones verificables dentro de una arquitectura inteligente." icon={Smartphone} sync={martaSync.demo} badges={["Demo en vivo", "Evidencia Operacional", "Arquitectura conectada"]} syncNote="Este porcentaje mide qué tan conectada está la demostración completa: Gestión de Reservas, Marta, Mensajería Operacional, Evidencia Operacional e inteligencia en una sola experiencia verificable." />
+      <PageHeader title="Centro Demo" subtitle="Tablero de mando escénico para ejecutar una demostración ejecutiva en vivo: reserva, mensajería, Marta, evidencia operacional, simulación e inteligencia." icon={Smartphone} sync={martaSync.demo} badges={["Operación viva", "Demo ejecutiva", "Evidencia Operacional"]} syncNote="Mide el avance visible de la demostración: fases completadas, estados operacionales y señales generadas durante la presentación." />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric title="Reserva validada" value="Activa" note="Expediente operacional nacido desde la app" tone="green" icon={CheckCircle2} />
-        <Metric title="Marta / VAPI" value="Lista" note="Voz, transcripción y salida estructurada" tone="violet" icon={Bot} />
-        <Metric title="Comunicaciones reales" value="2 canales" note="WhatsApp oficial y email empresarial" tone="blue" icon={MessageCircle} />
-        <Metric title="H-Operia Intelligence" value={simulatedDataInjected ? "En lectura" : "Preparada"} note={simulatedDataInjected ? "Resumen mock actualizado" : "Esperando datos operativos"} tone="amber" icon={Target} />
+        <Metric title="Progreso demo" value={`${progress}%`} note={`${completedCount} de ${phases.length} fases completadas`} tone="green" icon={Target} />
+        <Metric title="Fase activa" value={String(activePhase + 1).padStart(2, "0")} note={phases[activePhase].name} tone="blue" icon={Layers3} />
+        <Metric title="Clientes en escena" value={String(simulatedSummary.clients)} note={simulatedDataInjected ? "Actividad simulada inyectada" : "Reserva base en vivo"} tone="violet" icon={Users} />
+        <Metric title="Alertas" value={String(simulatedSummary.alerts)} note={simulatedDataInjected ? "Priorizadas por H-Operia Intelligence" : "Sin escalamiento masivo"} tone="amber" icon={AlertTriangle} />
       </div>
+      <Card>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <h3 className="text-3xl font-black text-slate-950">Ruta escénica de la demostración</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Guía operativa para avanzar la demo frente a audiencia, con estado por fase y progreso general.</p>
+          </div>
+          <Badge tone="green">{progress}% avance</Badge>
+        </div>
+        <div className="mt-5 h-3 rounded-full bg-slate-100">
+          <div className="h-3 rounded-full bg-emerald-400" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="mt-5 grid gap-4 xl:grid-cols-3">
+          {phases.map((phase, index) => {
+            const state = phaseStatus(index);
+            return (
+              <div key={phase.title} className={cls("rounded-3xl border p-5", state === "Activa" ? "border-blue-200 bg-blue-50" : state === "Completada" ? "border-emerald-200 bg-emerald-50" : "border-slate-100 bg-slate-50")}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">{phase.title}</div>
+                    <h4 className="mt-2 text-xl font-black text-slate-950">{phase.name}</h4>
+                  </div>
+                  <Badge tone={statusTone[state] || "slate"}>{state}</Badge>
+                </div>
+                <p className="mt-3 text-base font-semibold leading-7 text-slate-700">{phase.text}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button onClick={() => markActive(index)} className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Marcar activa</button>
+                  <button onClick={() => completePhase(index)} className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white">Completar fase</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 01</div>
-              <h3 className="mt-2 text-3xl font-black text-slate-950">Validación y reserva en vivo</h3>
+              <h3 className="text-3xl font-black text-slate-950">Participantes de la demostración</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Captura rápida para enviar accesos y confirmar recepción durante la presentación.</p>
             </div>
-            <Badge tone="green">Nacimiento del expediente</Badge>
+            <Badge tone={participantStatus.added ? "green" : "amber"}>{participantStatus.added ? "Participante agregado" : "Pendiente"}</Badge>
           </div>
-          <p className="mt-4 text-base font-semibold leading-8 text-slate-800">La reserva no es el final del formulario. Es el nacimiento de un expediente operacional vivo: una señal verificable que conecta intención comercial, seguimiento humano, conversación asistida y evidencia técnica de respaldo.</p>
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
-            {["Cliente identificado", "Unidad/lote seleccionado", "Hora de creación registrada", "Origen de la reserva visible", "Sincronización entre capas", "Evidencia Operacional como respaldo técnico"].map((item) => <div key={item} className="rounded-2xl bg-slate-50 p-4 text-base font-black text-slate-950">{item}</div>)}
-          </div>
-          <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Criterio de credibilidad</div>
-            <p className="mt-2 text-base font-semibold leading-8 text-slate-800">La audiencia debe ver que cada dato capturado tiene destino operativo: cliente, propiedad, canal, tiempo, conversación y siguiente acción. La base técnica acompaña la demostración como respaldo, no como espectáculo.</p>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-            <div>
-              <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 02</div>
-              <h3 className="mt-2 text-3xl font-black text-slate-950">Ecosistema H-Operia</h3>
-            </div>
-            <Badge tone="blue">Accesos visuales</Badge>
-          </div>
-          <p className="mt-4 text-base font-semibold leading-7 text-slate-700">Estos accesos funcionan como mapa operativo de la arquitectura. Por ahora son botones visuales para guiar la presentación sin ejecutar fetch real.</p>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {ecosystemAccess.map((item) => <VerificationCard key={item.title} icon={item.icon} title={item.title} text={item.text} />)}
+            {[
+              ["name", "Nombre completo", "Ej. Andrea López"],
+              ["role", "Cargo", "Ej. Gerente comercial"],
+              ["company", "Empresa", "Ej. Proyecto Comalapa"],
+              ["whatsapp", "WhatsApp", "+503 7000-0000"],
+              ["email", "Email", "persona@empresa.com"],
+            ].map(([field, label, placeholder]) => (
+              <div key={field}>
+                <label className="mb-2 block text-sm font-black uppercase tracking-[0.18em] text-slate-700">{label}</label>
+                <input value={participant[field]} onChange={(e) => updateParticipantField(field, e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 outline-none" placeholder={placeholder} />
+              </div>
+            ))}
           </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {ecosystemAccess.map((item) => <button key={`button-${item.title}`} onClick={() => console.log(`Centro Demo: acceso visual ${item.title}`)} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />{item.title}</button>)}
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <button onClick={addParticipant} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><Users size={16} className="mr-2 inline" />Agregar participante</button>
+            <button onClick={() => participantAction("whatsapp", "Enviado")} className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white"><MessageCircle size={16} className="mr-2 inline" />Enviar link WhatsApp</button>
+            <button onClick={() => participantAction("email", "Enviado")} className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white"><Mail size={16} className="mr-2 inline" />Enviar link email</button>
+            <button onClick={() => participantAction("received", "Confirmado")} className="rounded-2xl bg-violet-600 px-4 py-4 text-sm font-black text-white"><CheckCircle2 size={16} className="mr-2 inline" />Marcar recibido</button>
+            <button onClick={() => participantAction("opened", "Abierto")} className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-950"><ExternalLink size={16} className="mr-2 inline" />Abrir app pública</button>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            {Object.entries(participantStatus).map(([key, value]) => key !== "added" && <div key={key} className="rounded-2xl bg-slate-50 p-4"><div className="text-xs font-black uppercase tracking-[0.2em] text-slate-600">{key}</div><div className="mt-2"><Badge tone={statusTone[value] || "slate"}>{value}</Badge></div></div>)}
           </div>
         </Card>
-      </div>
-      <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 03</div>
-            <h3 className="mt-2 text-3xl font-black text-slate-950">Marta en vivo y log de VAPI</h3>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Inmediatamente después de la llamada se muestra VAPI: transcripción, evaluación, salida estructurada y costos. Marta no es voz decorativa; es evidencia conversacional útil para decidir y ejecutar.</p>
-          </div>
-          <Badge tone="violet">Evidencia conversacional</Badge>
-        </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StepCard number="1" title="Transcripción" text="Texto completo de la interacción para revisar preguntas, objeciones, intención y tono." />
-          <StepCard number="2" title="Evaluación" text="Lectura de calidad: claridad del cliente, nivel de interés y puntos que requieren seguimiento." />
-          <StepCard number="3" title="Salida estructurada" text="Campos operativos listos para expediente: dudas, prioridad, documentos, pagos y próxima acción." />
-          <StepCard number="4" title="Costos" text="Costo de la llamada visible para gobernar uso, trazabilidad y eficiencia operacional." />
-        </div>
-      </Card>
-      <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 04</div>
-            <h3 className="mt-2 text-3xl font-black text-slate-950">Verificaciones de contacto</h3>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Estos controles demuestran envío o estado controlado. No prometen confirmación de recepción todavía: muestran enviado, pendiente o error controlado según avance de integración.</p>
-          </div>
-          <Badge tone="amber">Estados simulados</Badge>
-        </div>
-        <div className="mt-5 grid gap-5 xl:grid-cols-2">
-          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <h4 className="text-2xl font-black text-slate-950">WhatsApp oficial</h4>
-                <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mensaje operacional de reserva enviado desde canal oficial cuando la integración esté activa.</p>
-              </div>
-              <Badge tone={contactStatusTone[whatsappStatus]}>{whatsappStatus}</Badge>
-            </div>
-            <button onClick={() => simulateContact("WhatsApp")} className="mt-5 rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><MessageCircle size={16} className="mr-2 inline" />Enviar WhatsApp oficial</button>
-          </div>
-          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <h4 className="text-2xl font-black text-slate-950">Email empresarial</h4>
-                <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Correo formal con resumen de reserva, próximos pasos y trazabilidad del expediente.</p>
-              </div>
-              <Badge tone={contactStatusTone[emailStatus]}>{emailStatus}</Badge>
-            </div>
-            <button onClick={() => simulateContact("Email")} className="mt-5 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white"><Mail size={16} className="mr-2 inline" />Enviar email empresarial</button>
-          </div>
-        </div>
-      </Card>
-      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 05</div>
-              <h3 className="mt-2 text-3xl font-black text-slate-950">Inyección de datos simulados</h3>
+              <h3 className="text-3xl font-black text-slate-950">Reserva pública en vivo</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Acompaña la reserva y muestra sus estados operativos sin conectar servicios reales.</p>
             </div>
-            <Badge tone={simulatedDataInjected ? "green" : "slate"}>{simulatedDataInjected ? "Datos activos" : "Pendiente"}</Badge>
+            <Badge tone="blue">Fase 01</Badge>
           </div>
-          <p className="mt-4 text-base font-semibold leading-8 text-slate-800">La demo puede cargar de 20 a 25 sets de datos simulados de clientes que concluyeron reservas. Son datos razonablemente parecidos a la operación real, sin exagerar volumen ni prometer automatizaciones que todavía no se hayan conectado.</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
-            {["Cliente", "Propiedad", "Canal", "Interacción Marta", "Dudas", "Documentos", "Pagos", "Prioridad", "Próxima acción"].map((item) => <div key={item} className="rounded-2xl bg-slate-50 p-4 text-base font-black text-slate-950">{item}</div>)}
+            <InfoCard title="Cliente actual" value={currentClient} detail="Participante o cliente demo activo." />
+            <InfoCard title="Unidad seleccionada" value="Torre 3 · Nivel 7 · A704" detail="Unidad de ejemplo para la reserva." />
+            {Object.entries(reservationStatus).map(([key, value]) => <div key={key} className="rounded-2xl bg-slate-50 p-4"><div className="text-xs font-black uppercase tracking-[0.2em] text-slate-600">{key}</div><div className="mt-2"><Badge tone={statusTone[value] || "slate"}>{value}</Badge></div></div>)}
           </div>
-          <button onClick={injectSimulatedData} className="mt-5 rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar datos simulados</button>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><CheckCircle2 size={16} className="mr-2 inline" />Validar reserva</button>
+            <button onClick={() => console.log("Centro Demo: acceso visual a Evidencia Operacional")} className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><Database size={16} className="mr-2 inline" />Abrir registros</button>
+          </div>
         </Card>
-        <AiObservation title="Bloque 06 · H-Operia Intelligence en tiempo real">
-          <p className="text-lg font-black text-slate-950">Cuando la operación genera datos, la plataforma produce inteligencia.</p>
-          <p className="mt-3">Después de la inyección, el resumen mock cambia para mostrar tendencias de interés, dudas frecuentes, clientes prioritarios, riesgos de seguimiento, oportunidades comerciales y acciones recomendadas.</p>
-          <div className="mt-5 grid gap-3">
-            {intelligenceRows.map(([title, text]) => <div key={title} className="rounded-2xl bg-white p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">{title}:</span> {text}</div>)}
-          </div>
-        </AiObservation>
       </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+        <Card>
+          <h3 className="text-3xl font-black text-slate-950">Operaciones comerciales y mensajería</h3>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Reacción posterior a la reserva: seguimiento, mensajes, prioridad y alertas.</p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            <InfoCard title="Seguimientos activos" value={String(simulatedSummary.followups)} detail="Tareas comerciales abiertas." />
+            <InfoCard title="Vendedora asignada" value="VND-034 · María Fernanda" detail="Responsable de revisión y contacto." />
+            <InfoCard title="Mensajes operacionales" value={String(simulatedDataInjected ? 32 : 2)} detail="WhatsApp y email simulados." />
+            <InfoCard title="Prioridad comercial" value={simulatedDataInjected ? "Alta" : "Media"} detail="Calculada por actividad y señales." />
+          </div>
+          <div className="mt-5 grid gap-3">
+            {["Confirmar recepción de link", "Enviar checklist documental", "Preparar llamada financiera", simulatedDataInjected ? "Escalar 7 alertas comerciales" : "Monitorear siguiente respuesta"].map((item) => <div key={item} className="rounded-2xl bg-slate-50 p-4 text-base font-black text-slate-950">{item}</div>)}
+          </div>
+        </Card>
+        <Card>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h3 className="text-3xl font-black text-slate-950">Marta + Vapi</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Conversación, transcripción y estructura operacional para revisión inmediata.</p>
+            </div>
+            <Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge>
+          </div>
+          <div className="mt-5 grid gap-3">
+            <div className="rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Transcripción:</span> “Busco confirmar prima, fecha de entrega y documentos para avanzar esta semana.”</div>
+            <div className="rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Structured output:</span> intención alta, duda financiera, documento pendiente, próxima acción: llamada humana.</div>
+            <div className="rounded-2xl bg-emerald-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Evidencia generada:</span> resumen de llamada, prioridad comercial y tarea de seguimiento.</div>
+          </div>
+          <button onClick={openVapi} className="mt-5 rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><PhoneCall size={16} className="mr-2 inline" />Abrir Vapi / logs</button>
+          <div className="mt-3"><Badge tone={vapiStatus === "Abierto" ? "green" : "amber"}>{vapiStatus}</Badge></div>
+        </Card>
+      </div>
+
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">Bloque 07</div>
-            <h3 className="mt-2 text-3xl font-black text-slate-950">Cierre de credibilidad operacional</h3>
-            <p className="mt-3 max-w-5xl text-xl font-black leading-9 text-slate-900">H-Operia deja de verse como una página web y empieza a percibirse como un sistema operativo comercial-operacional vivo.</p>
-            <p className="mt-3 max-w-5xl text-base font-semibold leading-8 text-slate-800">La fuerza del demo está en mostrar belleza visual, rigor técnico y trazabilidad concreta: reserva, conversación, comunicación, evidencia e inteligencia dentro de una arquitectura conectada, sin humo y sin promesas infladas.</p>
+            <h3 className="text-3xl font-black text-slate-950">Centro de Mando en vivo</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Estado administrativo de la operación durante la demostración.</p>
           </div>
-          <div className="flex flex-wrap gap-2 xl:justify-end">
-            <Badge tone="dark">Solidez</Badge>
-            <Badge tone="blue">Belleza</Badge>
-            <Badge tone="green">Rigor técnico</Badge>
-            <Badge tone="violet">Cero humo</Badge>
+          <Badge tone="dark">Operación monitoreada</Badge>
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+          <InfoCard title="Actividad reciente" value={simulatedDataInjected ? "48 eventos" : "6 eventos"} />
+          <InfoCard title="Clientes activos" value={String(simulatedSummary.clients)} />
+          <InfoCard title="Seguimientos" value={String(simulatedSummary.followups)} />
+          <InfoCard title="Eventos operacionales" value={simulatedDataInjected ? "64" : "9"} />
+          <InfoCard title="Alertas" value={String(simulatedSummary.alerts)} />
+          <InfoCard title="Resumen ejecutivo" value={simulatedDataInjected ? "Priorizar 9 casos" : "Demo estable"} />
+        </div>
+      </Card>
+
+      <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+        <Card>
+          <h3 className="text-3xl font-black text-slate-950">Escalamiento operacional simulado</h3>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Inyecta actividad local de 20 clientes realistas para cambiar estados, prioridades y recomendaciones.</p>
+          <button onClick={injectSimulatedData} className="mt-5 rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar actividad simulada</button>
+          <div className="mt-5 grid gap-2">
+            {simulatedClients.slice(0, simulatedDataInjected ? 20 : 5).map((name, index) => <div key={name} className="rounded-2xl bg-slate-50 p-3 text-sm font-black text-slate-900">{String(index + 1).padStart(2, "0")} · {name}</div>)}
           </div>
+        </Card>
+        <Card>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h3 className="text-3xl font-black text-slate-950">Cambios derivados de la simulación</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Ver cambios derivados de la inyección de datos simulados</p>
+            </div>
+            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Inyección aplicada" : "Esperando inyección"}</Badge>
+          </div>
+          <div className="mt-5"><SimpleTable columns={["Indicador", "Antes", "Después"]} rows={[
+            ["Nuevos clientes", "1", String(simulatedSummary.clients)],
+            ["Nuevas reservas", "1", String(simulatedSummary.reservations)],
+            ["Nuevos seguimientos", "3", String(simulatedSummary.followups)],
+            ["Nuevas conversaciones", "1", String(simulatedSummary.conversations)],
+            ["Nuevas alertas", "1", String(simulatedSummary.alerts)],
+            ["Nuevas recomendaciones", "2", String(simulatedSummary.recommendations)],
+            ["Páginas impactadas", "Centro Demo", "Centro Demo, Operaciones Comerciales, Tableros, Evidencia Operacional"],
+          ]} /></div>
+        </Card>
+      </div>
+
+      <Card>
+        <h3 className="text-3xl font-black text-slate-950">Dashboards ejecutivos</h3>
+        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cierre estratégico con métricas derivadas de la operación viva.</p>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Metric title="Conversión operacional" value={simulatedDataInjected ? "70%" : "1/1"} note="Reservas sobre clientes activos" tone="green" icon={CheckCircle2} />
+          <Metric title="Actividad comercial" value={simulatedDataInjected ? "48" : "6"} note="Eventos registrados" tone="blue" icon={Activity} />
+          <Metric title="Seguimientos" value={String(simulatedSummary.followups)} note="Tareas abiertas" tone="amber" icon={Clock} />
+          <Metric title="Embudo operacional" value={simulatedDataInjected ? "14 reservas" : "1 reserva"} note="Reserva a formalización" tone="violet" icon={Layers3} />
+        </div>
+        <div className="mt-5 grid gap-4 xl:grid-cols-3">
+          <VerificationCard icon={BarChart3} title="Métricas clave" text={simulatedDataInjected ? "Reservas, conversaciones, seguimientos y alertas se actualizan para cierre ejecutivo." : "Métricas base listas para la demo."} />
+          <VerificationCard icon={AlertTriangle} title="Alertas estratégicas" text={simulatedDataInjected ? "7 alertas requieren revisión comercial y financiera." : "1 alerta controlada en reserva base."} />
+          <VerificationCard icon={Bot} title="Insights ejecutivos" text={simulatedDataInjected ? "H-Operia Intelligence recomienda priorizar 9 casos, reforzar mensajes financieros y segmentar por urgencia." : "Esperando inyección para generar lectura ejecutiva ampliada."} />
         </div>
       </Card>
     </div>
