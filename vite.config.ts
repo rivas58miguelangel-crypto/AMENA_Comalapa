@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     // Usamos el nombre de tu carpeta en Hostinger para que los assets carguen bien
-    base: '/visualizador-amena-01/',
+    base: './',
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
