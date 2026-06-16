@@ -1380,6 +1380,7 @@ function DashboardsPage() {
 }
 
 function DemoPage() {
+  const DEMO_BACKEND_URL = "http://localhost:4000";
   const phases = [
     { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "Realizaremos una reserva completa en tiempo real y verificaremos datos, WhatsApp y correo dentro del ecosistema.", nextStep: "buscar la reserva en Supabase y confirmar evidencia visible." },
     { title: "FASE 02", name: "Conversación en vivo con Marta", text: "Interactuaremos con Marta y luego abriremos Vapi para visualizar logs, transcripciones y estructura operacional.", nextStep: "simular la conversación y abrir logs Vapi para revisar señales." },
@@ -1396,6 +1397,7 @@ function DemoPage() {
   const [volunteers, setVolunteers] = useState([baseVolunteer]);
   const [selectedPhone, setSelectedPhone] = useState(baseVolunteer.whatsapp);
   const [reservationStatus, setReservationStatus] = useState({ reservation: "Pendiente", whatsapp: "Pendiente", email: "Pendiente", evidence: "Pendiente" });
+  const [deliveryEvidence, setDeliveryEvidence] = useState([]);
   const [commercialSearch, setCommercialSearch] = useState("");
   const [martaStatus, setMartaStatus] = useState("Conversación pendiente");
   const [vapiStatus, setVapiStatus] = useState("Pendiente");
@@ -1405,7 +1407,7 @@ function DemoPage() {
   const [executiveBreakdown, setExecutiveBreakdown] = useState("Ingresos netos por canal y campaña\nConversión por modelo, sector y unidad\nAcompañamiento del equipo y uso de Marta\nRiesgos financieros, documentales y de escrituración");
   const [selectedBreakdowns, setSelectedBreakdowns] = useState(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
   const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
-  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviado: "green", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
+  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
   const phaseStatus = (index) => completedPhases.includes(index) ? "Completada" : activePhase === index ? "Activa" : "Pendiente";
@@ -1420,6 +1422,65 @@ function DemoPage() {
     setSelectedPhone(next.whatsapp);
   };
   const updateVolunteerStatus = (field, value) => setVolunteers((current) => current.map((item) => item.whatsapp === selectedPhone ? { ...item, [field]: value } : item));
+  const demoLink = () => {
+    if (typeof window === "undefined") return "#demo";
+    return `${window.location.origin}${window.location.pathname}#demo`;
+  };
+  const addDeliveryEvidence = (entry) => {
+    const time = new Date().toLocaleTimeString("es-SV", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    setDeliveryEvidence((current) => [{ ...entry, time }, ...current].slice(0, 6));
+  };
+  const sendDemoLink = async (channel) => {
+    const isWhatsApp = channel === "whatsapp";
+    const endpointPath = isWhatsApp ? "/send-whatsapp" : "/send-email";
+    const endpoint = `${DEMO_BACKEND_URL}${endpointPath}`;
+    const statusField = isWhatsApp ? "whatsappStatus" : "emailStatus";
+    const recipient = isWhatsApp ? selectedVolunteer.whatsapp || selectedPhone : selectedVolunteer.email;
+
+    if (!recipient) {
+      updateVolunteerStatus(statusField, "Error");
+      addDeliveryEvidence({
+        channel: isWhatsApp ? "WhatsApp" : "Email",
+        endpoint,
+        recipient: "Sin destinatario",
+        result: "Error: falta destinatario",
+      });
+      return;
+    }
+
+    updateVolunteerStatus(statusField, "Enviando");
+
+    try {
+      const payload = isWhatsApp
+        ? { phone: selectedVolunteer.whatsapp || selectedPhone, name: selectedVolunteer.name, link: demoLink() }
+        : { to: selectedVolunteer.email, name: selectedVolunteer.name, link: demoLink() };
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText || "Error"}`);
+      }
+
+      updateVolunteerStatus(statusField, "Enviado");
+      addDeliveryEvidence({
+        channel: isWhatsApp ? "WhatsApp" : "Email",
+        endpoint,
+        recipient,
+        result: `Enviado al backend · HTTP ${response.status}`,
+      });
+    } catch (error) {
+      updateVolunteerStatus(statusField, "Error");
+      addDeliveryEvidence({
+        channel: isWhatsApp ? "WhatsApp" : "Email",
+        endpoint,
+        recipient,
+        result: `Error: ${error instanceof Error ? error.message : "No se pudo contactar el backend"}`,
+      });
+    }
+  };
   const finishVolunteer = () => {
     updateVolunteerStatus("finished", "Finalizado");
     setVolunteerForm(emptyVolunteer);
@@ -1506,9 +1567,34 @@ function DemoPage() {
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <button onClick={addVolunteer} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><Users size={16} className="mr-2 inline" />Registrar voluntario</button>
-            <button onClick={() => updateVolunteerStatus("whatsappStatus", "Enviado")} className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white"><MessageCircle size={16} className="mr-2 inline" />Enviar link WhatsApp</button>
-            <button onClick={() => updateVolunteerStatus("emailStatus", "Enviado")} className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white"><Mail size={16} className="mr-2 inline" />Enviar link email</button>
+            <button onClick={() => sendDemoLink("whatsapp")} disabled={selectedVolunteer.whatsappStatus === "Enviando"} className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><MessageCircle size={16} className="mr-2 inline" />Enviar link WhatsApp</button>
+            <button onClick={() => sendDemoLink("email")} disabled={selectedVolunteer.emailStatus === "Enviando"} className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><Mail size={16} className="mr-2 inline" />Enviar link email</button>
             <button onClick={finishVolunteer} className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-950">Guardar y limpiar formulario</button>
+          </div>
+          <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div className="flex flex-col gap-2 xl:flex-row xl:items-start xl:justify-between">
+              <div>
+                <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-700">Evidencia operacional de envío</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Solicitud enviada al backend local. Esto confirma envío solicitado, no recepción final del destinatario.</p>
+              </div>
+              <Badge tone="violet">Marta acompaña · H-Operia Intelligence analiza · humano decide</Badge>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {deliveryEvidence.length === 0 && <div className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-700">Sin envíos solicitados todavía.</div>}
+              {deliveryEvidence.map((item) => (
+                <div key={`${item.channel}-${item.time}-${item.recipient}`} className="rounded-xl bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-800">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-black text-slate-950">{item.channel}</span>
+                    <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-600">{item.time}</span>
+                  </div>
+                  <div className="mt-2 grid gap-1 md:grid-cols-3">
+                    <div><span className="font-black text-slate-950">Endpoint:</span> {item.endpoint}</div>
+                    <div><span className="font-black text-slate-950">Destinatario:</span> {item.recipient}</div>
+                    <div><span className="font-black text-slate-950">Resultado:</span> {item.result}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="mt-5 grid gap-3">
             {volunteers.map((item) => <button key={`${item.whatsapp}-${item.email}`} onClick={() => setSelectedPhone(item.whatsapp)} className={cls("rounded-2xl border p-4 text-left", selectedPhone === item.whatsapp ? "border-slate-950 bg-slate-100" : "border-slate-100 bg-slate-50")}><div className="font-black text-slate-950">{item.name || "Voluntario sin nombre"}</div><div className="mt-1 text-sm font-semibold text-slate-700">{item.role} · {item.company} · {item.whatsapp}</div><div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[item.whatsappStatus] || "slate"}>WhatsApp enviado: {item.whatsappStatus}</Badge><Badge tone={statusTone[item.emailStatus] || "slate"}>Email enviado: {item.emailStatus}</Badge><Badge tone={statusTone[item.reservationStarted] || "slate"}>Reserva iniciada: {item.reservationStarted}</Badge><Badge tone={statusTone[item.reservationCompleted] || "slate"}>Reserva completada: {item.reservationCompleted}</Badge></div></button>)}
