@@ -1398,6 +1398,7 @@ function DemoPage() {
   const [selectedPhone, setSelectedPhone] = useState(baseVolunteer.whatsapp);
   const [reservationStatus, setReservationStatus] = useState({ reservation: "Pendiente", whatsapp: "Pendiente", email: "Pendiente", evidence: "Pendiente" });
   const [deliveryEvidence, setDeliveryEvidence] = useState([]);
+  const [visibleSendStatus, setVisibleSendStatus] = useState({ whatsappStatus: "Pendiente", emailStatus: "Pendiente" });
   const [commercialSearch, setCommercialSearch] = useState("");
   const [martaStatus, setMartaStatus] = useState("Conversación pendiente");
   const [vapiStatus, setVapiStatus] = useState("Pendiente");
@@ -1410,6 +1411,20 @@ function DemoPage() {
   const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
+  const normalizeSalvadoranPhone = (value) => {
+    const compact = value.trim().replace(/[\s().-]/g, "");
+    if (!compact) return "";
+    if (compact.startsWith("+")) return `+${compact.slice(1).replace(/\D/g, "")}`;
+    const digits = compact.replace(/\D/g, "");
+    if (digits.startsWith("503")) return `+${digits}`;
+    if (digits.length === 8) return `+503${digits}`;
+    return digits ? `+${digits}` : "";
+  };
+  const resetDemoEvidence = () => {
+    setDeliveryEvidence([]);
+    setReservationStatus({ reservation: "Pendiente", whatsapp: "Pendiente", email: "Pendiente", evidence: "Pendiente" });
+    setVisibleSendStatus({ whatsappStatus: "Pendiente", emailStatus: "Pendiente" });
+  };
   const phaseStatus = (index) => completedPhases.includes(index) ? "Completada" : activePhase === index ? "Activa" : "Pendiente";
   const completePhase = (index) => {
     setCompletedPhases((current) => current.includes(index) ? current : [...current, index]);
@@ -1417,11 +1432,17 @@ function DemoPage() {
   };
   const addVolunteer = () => {
     if (!volunteerForm.name && !volunteerForm.whatsapp) return;
-    const next = { ...volunteerForm, whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
+    const normalizedWhatsapp = normalizeSalvadoranPhone(volunteerForm.whatsapp);
+    const next = { ...volunteerForm, whatsapp: normalizedWhatsapp, email: volunteerForm.email.trim(), whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
     setVolunteers((current) => [...current, next]);
     setSelectedPhone(next.whatsapp);
+    resetDemoEvidence();
   };
-  const updateVolunteerStatus = (field, value) => setVolunteers((current) => current.map((item) => item.whatsapp === selectedPhone ? { ...item, [field]: value } : item));
+  const updateVolunteerStatus = (field, value, identity = selectedPhone) => setVolunteers((current) => current.map((item) => item.whatsapp === identity || item.email === identity ? { ...item, [field]: value } : item));
+  const updateVisibleSendStatus = (field, value, identity) => {
+    setVisibleSendStatus((current) => ({ ...current, [field]: value }));
+    if (identity) updateVolunteerStatus(field, value, identity);
+  };
   const demoLink = () => {
     if (typeof window === "undefined") return "#demo";
     return `${window.location.origin}${window.location.pathname}#demo`;
@@ -1435,10 +1456,15 @@ function DemoPage() {
     const endpointPath = isWhatsApp ? "/send-whatsapp" : "/send-email";
     const endpoint = `${DEMO_BACKEND_URL}${endpointPath}`;
     const statusField = isWhatsApp ? "whatsappStatus" : "emailStatus";
-    const recipient = isWhatsApp ? selectedVolunteer.whatsapp || selectedPhone : selectedVolunteer.email;
+    const formVolunteer = {
+      name: volunteerForm.name.trim(),
+      whatsapp: normalizeSalvadoranPhone(volunteerForm.whatsapp),
+      email: volunteerForm.email.trim(),
+    };
+    const recipient = isWhatsApp ? formVolunteer.whatsapp : formVolunteer.email;
 
     if (!recipient) {
-      updateVolunteerStatus(statusField, "Error");
+      updateVisibleSendStatus(statusField, "Error", formVolunteer.whatsapp || formVolunteer.email);
       addDeliveryEvidence({
         channel: isWhatsApp ? "WhatsApp" : "Email",
         endpoint,
@@ -1448,12 +1474,12 @@ function DemoPage() {
       return;
     }
 
-    updateVolunteerStatus(statusField, "Enviando");
+    updateVisibleSendStatus(statusField, "Enviando", formVolunteer.whatsapp || formVolunteer.email);
 
     try {
       const payload = isWhatsApp
-        ? { phone: selectedVolunteer.whatsapp || selectedPhone, name: selectedVolunteer.name, link: demoLink() }
-        : { to: selectedVolunteer.email, name: selectedVolunteer.name, link: demoLink() };
+        ? { phone: formVolunteer.whatsapp, name: formVolunteer.name, link: demoLink() }
+        : { to: formVolunteer.email, name: formVolunteer.name, link: demoLink() };
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1464,7 +1490,7 @@ function DemoPage() {
         throw new Error(`HTTP ${response.status} ${response.statusText || "Error"}`);
       }
 
-      updateVolunteerStatus(statusField, "Enviado");
+      updateVisibleSendStatus(statusField, "Enviado", formVolunteer.whatsapp || formVolunteer.email);
       addDeliveryEvidence({
         channel: isWhatsApp ? "WhatsApp" : "Email",
         endpoint,
@@ -1472,7 +1498,7 @@ function DemoPage() {
         result: `Enviado al backend · HTTP ${response.status}`,
       });
     } catch (error) {
-      updateVolunteerStatus(statusField, "Error");
+      updateVisibleSendStatus(statusField, "Error", formVolunteer.whatsapp || formVolunteer.email);
       addDeliveryEvidence({
         channel: isWhatsApp ? "WhatsApp" : "Email",
         endpoint,
@@ -1484,6 +1510,7 @@ function DemoPage() {
   const finishVolunteer = () => {
     updateVolunteerStatus("finished", "Finalizado");
     setVolunteerForm(emptyVolunteer);
+    resetDemoEvidence();
   };
   const validateReservation = () => setReservationStatus({ reservation: "Validada", whatsapp: selectedVolunteer.whatsappStatus === "Enviado" ? "Confirmado" : "Pendiente", email: selectedVolunteer.emailStatus === "Enviado" ? "Confirmado" : "Pendiente", evidence: "Generada" });
   const simulateMartaConversation = () => {
@@ -1567,8 +1594,8 @@ function DemoPage() {
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <button onClick={addVolunteer} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><Users size={16} className="mr-2 inline" />Registrar voluntario</button>
-            <button onClick={() => sendDemoLink("whatsapp")} disabled={selectedVolunteer.whatsappStatus === "Enviando"} className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><MessageCircle size={16} className="mr-2 inline" />Enviar link WhatsApp</button>
-            <button onClick={() => sendDemoLink("email")} disabled={selectedVolunteer.emailStatus === "Enviando"} className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><Mail size={16} className="mr-2 inline" />Enviar link email</button>
+            <button onClick={() => sendDemoLink("whatsapp")} disabled={visibleSendStatus.whatsappStatus === "Enviando"} className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><MessageCircle size={16} className="mr-2 inline" />Enviar link WhatsApp</button>
+            <button onClick={() => sendDemoLink("email")} disabled={visibleSendStatus.emailStatus === "Enviando"} className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><Mail size={16} className="mr-2 inline" />Enviar link email</button>
             <button onClick={finishVolunteer} className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-950">Guardar y limpiar formulario</button>
           </div>
           <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
