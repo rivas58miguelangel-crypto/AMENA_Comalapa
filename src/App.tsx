@@ -1391,6 +1391,124 @@ function DemoPage() {
   ];
   const emptyVolunteer = { name: "", role: "", company: "", whatsapp: "", email: "" };
   const baseVolunteer = { name: "Andrea López", role: "Gerente comercial", company: "Proyecto Comalapa", whatsapp: "+503 7000-0000", email: "andrea@empresa.com", whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
+  const createDemoRunId = () => {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) return `demo-${crypto.randomUUID()}`;
+    return `demo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  };
+  const createSimulatedReservationClients = (demoRunId) => {
+    const names = ["Carlos Mendez", "Andrea Lopez", "Sofia Rivera", "Mario Hernandez", "Lucia Alvarez", "Roberto Castillo", "Paola Garcia", "Jorge Morales", "Elena Torres", "Diego Ramirez", "Natalia Flores", "Victor Pineda", "Claudia Reyes", "Fernando Ortiz", "Gabriela Cruz", "Ricardo Salazar", "Monica Aguilar", "Hector Vasquez", "Daniela Mejia", "Oscar Campos"];
+    const channels = ["App Reservas", "Landing publica", "Referido", "Campana digital"];
+    return names.map((name, index) => ({
+      id: `sim-res-${String(index + 1).padStart(2, "0")}`,
+      demoRunId,
+      name,
+      phone: `+503 7${String(1000000 + index * 317).slice(0, 7)}`,
+      unit: `Torre ${index % 3 + 1} · Nivel ${index % 8 + 1} · A${String(701 + index).padStart(3, "0")}`,
+      source: channels[index % channels.length],
+      reservationStatus: index % 5 === 0 ? "Avanzada" : index % 3 === 0 ? "Completada" : "En progreso",
+      createdAt: index < 10 ? `Hoy 3:${String(10 + index).padStart(2, "0")} PM` : `Hoy 4:${String(index - 10).padStart(2, "0")} PM`,
+    }));
+  };
+  const createSimulatedInternalMessages = (demoRunId, clients) => {
+    const topics = ["Coordinacion con vendedora", "Alerta de documentos", "Consulta de pagos", "Seguimiento de cita", "Prioridad comercial"];
+    const fromRoles = ["Marta", "Coordinacion comercial", "Financiera", "Documentos", "Gerencia comercial"];
+    const toRoles = ["Vendedora responsable", "Financiera", "Servicio al cliente", "Coordinacion comercial", "Direccion comercial"];
+    return clients.map((client, index) => ({
+      id: `sim-msg-${String(index + 1).padStart(2, "0")}`,
+      demoRunId,
+      relatedClientName: client.name,
+      fromRole: fromRoles[index % fromRoles.length],
+      toRole: toRoles[index % toRoles.length],
+      messageText: `${topics[index % topics.length]} para ${client.name}: revisar reserva ${client.reservationStatus.toLowerCase()} y dejar evidencia del siguiente movimiento.`,
+      topic: topics[index % topics.length],
+      priority: index % 5 === 0 ? "Alta" : index % 2 === 0 ? "Media" : "Baja",
+      createdAt: index < 10 ? `Hoy 4:${String(12 + index).padStart(2, "0")} PM` : `Hoy 5:${String(index - 10).padStart(2, "0")} PM`,
+    }));
+  };
+  const createSimulatedSellerReports = (demoRunId, clients) => {
+    const sellers = ["Maria Fernanda", "VND-012", "VND-034", "VND-021"];
+    const interactionTypes = ["Llamada post-reserva", "Reunion virtual", "Seguimiento documental", "Visita a sala de ventas"];
+    const needs = ["Claridad financiera", "Validar documentos", "Confirmar disponibilidad", "Incluir decisor familiar"];
+    const objections = ["Monto de prima", "Tiempo de entrega", "Documentos pendientes", "Comparacion con otra opcion"];
+    return clients.map((client, index) => ({
+      id: `sim-seller-${String(index + 1).padStart(2, "0")}`,
+      demoRunId,
+      clientName: client.name,
+      sellerName: sellers[index % sellers.length],
+      interactionType: interactionTypes[index % interactionTypes.length],
+      summary: `${client.name} confirma interes y pide acompanamiento posterior a la reserva ${client.reservationStatus.toLowerCase()}.`,
+      detectedNeed: needs[index % needs.length],
+      objection: objections[index % objections.length],
+      nextStep: index % 4 === 0 ? "Llamada financiera" : index % 4 === 1 ? "Enviar checklist" : index % 4 === 2 ? "Confirmar unidad" : "Agendar seguimiento",
+      priority: index % 5 === 0 ? "Alta" : index % 2 === 0 ? "Media" : "Baja",
+      createdAt: index < 10 ? `Hoy 4:${String(20 + index).padStart(2, "0")} PM` : `Manana 9:${String(index - 10).padStart(2, "0")} AM`,
+    }));
+  };
+  const createSimulatedVapiCallLogs = (demoRunId, clients) => {
+    const intents = ["confirmar financiamiento", "validar modelo preferido", "agendar cita", "resolver documentos", "confirmar decision familiar"];
+    const models = ["Modelo A", "Modelo B", "Apartamento 2 hab", "Casa familiar"];
+    const budgets = ["$85k-$95k", "$95k-$110k", "$110k-$125k", "$125k-$140k"];
+    return clients.map((client, index) => {
+      const structuredOutput = {
+        wantsFinancing: index % 2 === 0,
+        preferredModel: models[index % models.length],
+        budgetRange: budgets[index % budgets.length],
+        familyDecisionPending: index % 3 === 0,
+        documentsPending: index % 4 === 0,
+        appointmentRequested: index % 5 !== 0,
+        urgencyLevel: index % 5 === 0 ? "Alta" : index % 2 === 0 ? "Media" : "Baja",
+      };
+      return {
+        id: `sim-vapi-${String(index + 1).padStart(2, "0")}`,
+        demoRunId,
+        clientName: client.name,
+        callId: `call_${demoRunId.replace("demo-", "").slice(0, 8)}_${String(index + 1).padStart(2, "0")}`,
+        assistantName: "Marta",
+        channel: "voice",
+        durationSeconds: 105 + index * 11,
+        callStatus: index % 6 === 0 ? "needs_review" : "completed",
+        transcriptSummary: `${client.name} conversa con Marta sobre reserva ${client.reservationStatus.toLowerCase()}, financiamiento, modelo preferido y siguiente cita.`,
+        detectedIntent: intents[index % intents.length],
+        verifiedData: `Telefono ${client.phone}; unidad ${client.unit}; fuente ${client.source}.`,
+        structuredOutput,
+        nextStep: structuredOutput.appointmentRequested ? "Confirmar cita con vendedora" : "Enviar resumen financiero",
+        riskSignal: structuredOutput.documentsPending || structuredOutput.familyDecisionPending ? "Requiere seguimiento humano" : "Sin riesgo critico",
+        createdAt: index < 10 ? `Hoy 5:${String(10 + index).padStart(2, "0")} PM` : `Manana 8:${String(index - 10).padStart(2, "0")} AM`,
+      };
+    });
+  };
+  const createSimulatedMartaWhatsAppFollowups = (demoRunId, clients) => {
+    const replies = ["Gracias, quiero revisar financiamiento", "Me falta enviar documentos", "Mi esposa quiere ver el detalle", "Confirmo cita para manana", "Necesito comparar modelos"];
+    const intents = ["financiamiento", "documentos", "decision familiar", "cita", "comparacion de modelo"];
+    return clients.map((client, index) => ({
+      id: `sim-wa-${String(index + 1).padStart(2, "0")}`,
+      demoRunId,
+      clientName: client.name,
+      channel: "whatsapp_text",
+      messageText: `Hola ${client.name}, soy Marta. Te comparto el siguiente paso de tu reserva y puedo ayudarte a coordinar documentos, cita o financiamiento.`,
+      customerReply: replies[index % replies.length],
+      detectedIntent: intents[index % intents.length],
+      nextStep: index % 5 === 0 ? "Escalar a financiera" : index % 3 === 0 ? "Agendar llamada humana" : "Registrar seguimiento en expediente",
+      status: index % 4 === 0 ? "Requiere respuesta humana" : "Simulado",
+      createdAt: index < 10 ? `Hoy 5:${String(25 + index).padStart(2, "0")} PM` : `Manana 8:${String(20 + index - 10).padStart(2, "0")} AM`,
+    }));
+  };
+  const createSimulatedIntelligenceSignals = (demoRunId, clients, messages, reports, vapiLogs, whatsappFollowups) => [
+    { id: "sim-signal-01", demoRunId, source: "Reservas", title: "Flujo de reservas activo", summary: `${clients.length} clientes avanzaron o completaron reserva en la app publica.`, priority: "Media" },
+    { id: "sim-signal-02", demoRunId, source: "Mensajeria", title: "Coordinacion interna generada", summary: `${messages.filter((item) => item.priority === "Alta").length} mensajes internos quedaron con prioridad alta.`, priority: "Alta" },
+    { id: "sim-signal-03", demoRunId, source: "Vendedoras", title: "Seguimiento humano posterior", summary: `${reports.length} reportes de vendedoras conectan objeciones, necesidades y proximos pasos.`, priority: "Media" },
+    { id: "sim-signal-04", demoRunId, source: "H-Operia Intelligence", title: "Riesgo financiero temprano", summary: `${reports.filter((item) => item.objection === "Monto de prima").length} clientes mencionan prima o claridad financiera.`, priority: "Alta" },
+    { id: "sim-signal-05", demoRunId, source: "Marta Voz / Vapi", title: "Intenciones de voz estructuradas", summary: `${vapiLogs.filter((item) => item.structuredOutput.wantsFinancing).length} llamadas detectan interes en financiamiento y salida estructurada lista para revision.`, priority: "Alta" },
+    { id: "sim-signal-06", demoRunId, source: "Marta WhatsApp", title: "Seguimientos conversacionales activos", summary: `${whatsappFollowups.filter((item) => item.status === "Requiere respuesta humana").length} seguimientos de texto requieren intervencion humana posterior.`, priority: "Media" },
+  ];
+  const createSimulatedOperationalEvidence = (demoRunId, clients, messages, reports, signals, vapiLogs, whatsappFollowups) => [
+    { id: "sim-evidence-01", demoRunId, page: "Aplicacion de Reservas", section: "Clientes/reservas", summary: `${clients.length} registros de reserva simulados`, status: "Visible" },
+    { id: "sim-evidence-02", demoRunId, page: "Mensajeria Operacional", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: "Visible" },
+    { id: "sim-evidence-03", demoRunId, page: "Aplicacion de Vendedoras", section: "Reportes humanos", summary: `${reports.length} reportes de interacciones posteriores`, status: "Visible" },
+    { id: "sim-evidence-04", demoRunId, page: "Marta Voz / Vapi", section: "Logs de llamadas", summary: `${vapiLogs.length} logs de voz simulados con salida estructurada`, status: "Visible" },
+    { id: "sim-evidence-05", demoRunId, page: "Marta WhatsApp Texto", section: "Seguimientos conversacionales", summary: `${whatsappFollowups.length} seguimientos de texto simulados`, status: "Visible" },
+    { id: "sim-evidence-06", demoRunId, page: "H-Operia Intelligence", section: "Senales derivadas", summary: `${signals.length} senales ejecutivas generadas`, status: "Generado" },
+  ];
   const [activePhase, setActivePhase] = useState(0);
   const [completedPhases, setCompletedPhases] = useState([]);
   const [volunteerForm, setVolunteerForm] = useState(emptyVolunteer);
@@ -1402,15 +1520,26 @@ function DemoPage() {
   const [commercialSearch, setCommercialSearch] = useState("");
   const [martaStatus, setMartaStatus] = useState("Conversación pendiente");
   const [vapiStatus, setVapiStatus] = useState("Pendiente");
-  const [simulatedDataInjected, setSimulatedDataInjected] = useState(false);
+  const [activeDemoContext, setActiveDemoContext] = useState(null as null | { demoRunId: string; prospectCompanyName: string; projectName: string; scenarioName: string; status: string; injectedAt: string });
+  const [simulatedReservationClients, setSimulatedReservationClients] = useState<any[]>([]);
+  const [simulatedInternalMessages, setSimulatedInternalMessages] = useState<any[]>([]);
+  const [simulatedSellerReports, setSimulatedSellerReports] = useState<any[]>([]);
+  const [simulatedVapiCallLogs, setSimulatedVapiCallLogs] = useState<any[]>([]);
+  const [simulatedMartaWhatsAppFollowups, setSimulatedMartaWhatsAppFollowups] = useState<any[]>([]);
+  const [simulatedIntelligenceSignals, setSimulatedIntelligenceSignals] = useState<any[]>([]);
+  const [simulatedOperationalEvidence, setSimulatedOperationalEvidence] = useState<any[]>([]);
   const [executiveQuery, setExecutiveQuery] = useState("");
   const [executiveQuestions, setExecutiveQuestions] = useState(["¿Qué canal genera más ingresos netos y menos atrasos?", "¿Qué campañas generan leads de baja calidad?"]);
   const [executiveBreakdown, setExecutiveBreakdown] = useState("Ingresos netos por canal y campaña\nConversión por modelo, sector y unidad\nAcompañamiento del equipo y uso de Marta\nRiesgos financieros, documentales y de escrituración");
   const [selectedBreakdowns, setSelectedBreakdowns] = useState(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
   const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
-  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
+  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", Alta: "red", Media: "amber", Baja: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
+  const simulatedDataInjected = activeDemoContext?.status === "injected" && simulatedReservationClients.length > 0 && simulatedInternalMessages.length > 0 && simulatedSellerReports.length > 0 && simulatedVapiCallLogs.length > 0 && simulatedMartaWhatsAppFollowups.length > 0;
+  const demoRunIdShort = activeDemoContext ? activeDemoContext.demoRunId.replace("demo-", "").slice(0, 8) : "Sin demo activa";
+  const demoStatusBefore = activeDemoContext ? "Sin demo activa" : "Pendiente";
+  const demoStatusAfter = activeDemoContext?.status || "Pendiente";
   const normalizeSalvadoranPhone = (value) => {
     const compact = value.trim().replace(/[\s().-]/g, "");
     if (!compact) return "";
@@ -1522,33 +1651,61 @@ function DemoPage() {
     setVapiStatus("Abierto");
   };
   const injectSimulatedData = () => {
-    setSimulatedDataInjected(true);
+    const nextDemoRunId = createDemoRunId();
+    const nextReservationClients = createSimulatedReservationClients(nextDemoRunId);
+    const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, nextReservationClients);
+    const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, nextReservationClients);
+    const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, nextReservationClients);
+    const nextMartaWhatsAppFollowups = createSimulatedMartaWhatsAppFollowups(nextDemoRunId, nextReservationClients);
+    const nextIntelligenceSignals = createSimulatedIntelligenceSignals(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextVapiCallLogs, nextMartaWhatsAppFollowups);
+    const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
+    setSimulatedReservationClients(nextReservationClients);
+    setSimulatedInternalMessages(nextInternalMessages);
+    setSimulatedSellerReports(nextSellerReports);
+    setSimulatedVapiCallLogs(nextVapiCallLogs);
+    setSimulatedMartaWhatsAppFollowups(nextMartaWhatsAppFollowups);
+    setSimulatedIntelligenceSignals(nextIntelligenceSignals);
+    setSimulatedOperationalEvidence(nextOperationalEvidence);
+    setActiveDemoContext({
+      demoRunId: nextDemoRunId,
+      prospectCompanyName: selectedVolunteer.company || volunteerForm.company || "Empresa demo local",
+      projectName: "AMENA Comalapa",
+      scenarioName: "Centro Demo local sin Supabase",
+      status: "injected",
+      injectedAt: new Date().toLocaleString("es-SV", { dateStyle: "short", timeStyle: "short" }),
+    });
     setReservationStatus({ reservation: "Validada", whatsapp: "Confirmado", email: "Confirmado", evidence: "Generada" });
     completePhase(4);
   };
   const commercialRows = simulatedDataInjected
-    ? [["Carlos Méndez", "María Fernanda", "Llamada post-reserva", "Solicita confirmar prima y documentos", "Alta", "Llamada financiera", "Hoy 4:30 PM", "Activo"], ["Andrea López", "VND-012", "Seguimiento documental", "Falta comprobante legible", "Media", "Enviar checklist", "Mañana 9:00 AM", "Pendiente"]]
+    ? simulatedSellerReports.slice(0, 5).map((report) => [report.clientName, report.sellerName, report.interactionType, `${report.summary} Necesidad: ${report.detectedNeed}. Objecion: ${report.objection}.`, report.priority, report.nextStep, report.createdAt, "Activo"])
     : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
   const messageRows = simulatedDataInjected
-    ? [["Marta", "Equipo comercial", "Interno", "Cliente pidió resumen financiero", "Enviado", "Hoy 4:12 PM", "Timeline"], ["VND-034", "Financiera", "WhatsApp interno", "Solicita validación de prima", "Pendiente", "Hoy 4:18 PM", "Expediente"], ["María Fernanda", "Coordinación comercial", "Interno", "Cliente Andrea López inició reserva y requiere confirmación documental.", "En revisión", "Hoy 4:22 PM", "Coordinación"]]
+    ? simulatedInternalMessages.slice(0, 5).map((message) => [message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt, message.relatedClientName])
     : [["H-Operia Intelligence", "Vendedora asignada", "Interno", "Nueva reserva lista para revisión", "Enviado", "Hoy 3:01 PM", "Timeline"], ["María Fernanda", "Coordinación comercial", "Interno", "Cliente Andrea López inició reserva y requiere confirmación documental.", "En revisión", "Hoy 3:07 PM", "Coordinación"]];
-  const adminEvidence = [
-    ["Perfil Operacional", "Expediente del cliente", "Reserva vinculada", "Datos, comunicación y seguimiento quedan visibles para revisión.", reservationStatus.evidence === "Generada" ? "Visible" : "Pendiente", "Ver evidencia"],
-    ["Operaciones Comerciales", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", simulatedDataInjected ? "Visible" : "Pendiente", "Abrir página"],
-    ["Mensajería Operacional", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", simulatedDataInjected ? "Visible" : "Pendiente", "Abrir página"],
-  ];
+  const adminEvidence = simulatedDataInjected
+    ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
+    : [
+        ["Perfil Operacional", "Expediente del cliente", "Reserva vinculada", "Datos, comunicación y seguimiento quedan visibles para revisión.", reservationStatus.evidence === "Generada" ? "Visible" : "Pendiente", "Ver evidencia"],
+        ["Operaciones Comerciales", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", "Pendiente", "Abrir página"],
+        ["Mensajería Operacional", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", "Pendiente", "Abrir página"],
+      ];
   const derivedChanges = [
-    { page: "Operaciones Comerciales", section: "Seguimientos activos", change: "Se agregaron nuevos seguimientos priorizados", description: "La operación muestra actividad comercial posterior a reservas simuladas.", status: simulatedDataInjected ? "Verificado" : "Pendiente" },
-    { page: "Mensajería Operacional", section: "Coordinación interna", change: "Se generaron mensajes operacionales entre equipo", description: "La mensajería permite visualizar coordinación posterior a nuevas reservas.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
-    { page: "Centro de Mando", section: "Expediente operacional", change: "Nuevos eventos aparecen consolidados", description: "El administrador puede verificar trazabilidad y estado.", status: simulatedDataInjected ? "Verificado" : "Pendiente" },
-    { page: "Dashboards", section: "Métricas ejecutivas", change: "Indicadores actualizados después de la inyección", description: "La operación se transforma en inteligencia ejecutiva.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
+    { page: "Aplicación de Reservas", section: "Clientes/reservas simuladas", change: `${simulatedReservationClients.length} registros de reserva disponibles`, description: "Personas que completaron o avanzaron en el flujo de reserva quedan listas para trazabilidad administrativa.", status: simulatedDataInjected ? "Verificado" : "Pendiente" },
+    { page: "Mensajería Operacional", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes internos generados`, description: "La mensajería muestra coordinación sobre documentos, pagos, citas y prioridades comerciales.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
+    { page: "Aplicación de Vendedoras", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes de vendedoras creados`, description: "Las vendedoras registran llamadas, reuniones, objeciones, necesidades y próximos pasos.", status: simulatedDataInjected ? "Verificado" : "Pendiente" },
+    { page: "Marta Voz / Vapi", section: "Logs estructurados", change: `${simulatedVapiCallLogs.length} llamadas simuladas`, description: "Marta Voz produce transcript summary, intención detectada, datos verificados y salida estructurada tipo Vapi.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
+    { page: "Marta WhatsApp Texto", section: "Seguimiento conversacional", change: `${simulatedMartaWhatsAppFollowups.length} seguimientos simulados`, description: "Marta texto simula respuestas posteriores sin enviar WhatsApp real ni consultar servicios externos.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
+    { page: "H-Operia Intelligence", section: "Señales y evidencias", change: `${simulatedIntelligenceSignals.length} señales y ${simulatedOperationalEvidence.length} evidencias derivadas`, description: "La operación simulada se transforma en señales ejecutivas revisables dentro del Admin.", status: simulatedDataInjected ? "Generado" : "Pendiente" },
   ];
   const injectionResults = [
-    ["20", "operaciones generadas"],
-    ["8", "reservas nuevas"],
-    ["12", "seguimientos creados"],
-    ["6", "alertas detectadas"],
-    ["4", "recomendaciones generadas"],
+    [String(simulatedReservationClients.length), "reservas/clientes simulados"],
+    [String(simulatedInternalMessages.length), "mensajes internos equipo"],
+    [String(simulatedSellerReports.length), "reportes vendedoras"],
+    [String(simulatedVapiCallLogs.length), "logs Marta Voz / Vapi"],
+    [String(simulatedMartaWhatsAppFollowups.length), "seguimientos Marta WhatsApp"],
+    [String(simulatedIntelligenceSignals.length), "señales H-OperIA Intelligence"],
+    [String(simulatedOperationalEvidence.length), "evidencias operacionales"],
   ];
   const breakdownItems = executiveBreakdown.split("\n").map((item) => item.trim()).filter(Boolean).slice(0, 4);
   const addExecutiveQuestion = () => {
@@ -1645,6 +1802,11 @@ function DemoPage() {
             <InfoCard title="Estado email" value={reservationStatus.email} />
             <InfoCard title="Evidencia de registro" value={reservationStatus.evidence} />
           </div>
+          {simulatedDataInjected && (
+            <div className="mt-5">
+              <SimpleTable columns={["Cliente", "Fuente", "Unidad", "Estado reserva", "Creado"]} rows={simulatedReservationClients.slice(0, 5).map((client) => [client.name, client.source, client.unit, client.reservationStatus, client.createdAt])} />
+            </div>
+          )}
         </Card>
       </div>
 
@@ -1671,8 +1833,8 @@ function DemoPage() {
                 <div className="mt-3 grid gap-2 text-sm font-semibold leading-6 text-slate-800 md:grid-cols-2">
                   <div><span className="font-black text-slate-950">De:</span> {from}</div>
                   <div><span className="font-black text-slate-950">Para:</span> {to}</div>
-                  <div><span className="font-black text-slate-950">Canal:</span> {channel}</div>
-                  <div><span className="font-black text-slate-950">Estado:</span> {state}</div>
+                  <div><span className="font-black text-slate-950">Tema:</span> {channel}</div>
+                  <div><span className="font-black text-slate-950">Prioridad:</span> {state}</div>
                 </div>
                 <p className="mt-3 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Mensaje:</span> {message}</p>
               </div>
@@ -1689,12 +1851,94 @@ function DemoPage() {
           <button onClick={openVapi} className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><PhoneCall size={16} className="mr-2 inline" />Abrir logs Vapi</button>
         </div>
         <div className="mt-3 flex flex-wrap gap-2"><Badge tone="green">Logs verificados</Badge></div>
+        {simulatedDataInjected && (
+          <div className="mt-5 space-y-4">
+            <div className="grid gap-3 xl:grid-cols-2">
+              {simulatedVapiCallLogs.slice(0, 2).map((log) => (
+                <div key={log.id} className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Badge tone={log.callStatus === "completed" ? "green" : "amber"}>{log.assistantName} · {log.channel}</Badge>
+                    <span className="text-xs font-black uppercase tracking-[0.16em] text-violet-900">{log.callId} · {log.durationSeconds}s</span>
+                  </div>
+                  <h4 className="mt-3 text-lg font-black text-slate-950">{log.clientName} · {log.detectedIntent}</h4>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800"><span className="font-black text-slate-950">Resumen llamada:</span> {log.transcriptSummary}</p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800"><span className="font-black text-slate-950">Datos verificados:</span> {log.verifiedData}</p>
+                  <div className="mt-3 rounded-xl bg-white p-3 text-sm font-semibold leading-6 text-slate-800">
+                    <div className="font-black text-slate-950">Structured output</div>
+                    <div className="mt-1 grid gap-1 sm:grid-cols-2">
+                      <span>Financiamiento: {log.structuredOutput.wantsFinancing ? "Si" : "No"}</span>
+                      <span>Modelo: {log.structuredOutput.preferredModel}</span>
+                      <span>Presupuesto: {log.structuredOutput.budgetRange}</span>
+                      <span>Familia pendiente: {log.structuredOutput.familyDecisionPending ? "Si" : "No"}</span>
+                      <span>Docs pendientes: {log.structuredOutput.documentsPending ? "Si" : "No"}</span>
+                      <span>Urgencia: {log.structuredOutput.urgencyLevel}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[log.structuredOutput.urgencyLevel] || "violet"}>{log.riskSignal}</Badge><Badge tone="blue">{log.nextStep}</Badge></div>
+                </div>
+              ))}
+            </div>
+            <div className="grid gap-3 xl:grid-cols-2">
+              {simulatedMartaWhatsAppFollowups.slice(0, 2).map((followup) => (
+                <div key={followup.id} className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Badge tone={followup.status === "Simulado" ? "green" : "amber"}>{followup.channel}</Badge>
+                    <span className="text-xs font-black uppercase tracking-[0.16em] text-emerald-900">{followup.createdAt}</span>
+                  </div>
+                  <h4 className="mt-3 text-lg font-black text-slate-950">{followup.clientName} · {followup.detectedIntent}</h4>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800"><span className="font-black text-slate-950">Marta:</span> {followup.messageText}</p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800"><span className="font-black text-slate-950">Respuesta cliente:</span> {followup.customerReply}</p>
+                  <div className="mt-3 flex flex-wrap gap-2"><Badge tone="blue">{followup.nextStep}</Badge><Badge tone={followup.status === "Simulado" ? "green" : "amber"}>{followup.status}</Badge></div>
+                </div>
+              ))}
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {simulatedIntelligenceSignals.map((signal) => (
+                <div key={signal.id} className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Badge tone={statusTone[signal.priority] || "violet"}>{signal.priority}</Badge>
+                    <span className="text-xs font-black uppercase tracking-[0.16em] text-violet-900">{signal.source}</span>
+                  </div>
+                  <h4 className="mt-3 text-lg font-black text-slate-950">{signal.title}</h4>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{signal.summary}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
 
       <Card><h3 className="text-3xl font-black text-slate-950">Evidencia administrativa</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Impacto verificable en páginas del Admin, sin conteos decorativos.</p><div className="mt-5"><SimpleTable columns={["Página Admin impactada", "Sección", "Resumen del cambio", "Descripción operacional", "Estado", "Acción"]} rows={adminEvidence.map(([page, section, summary, description, state, action]) => [page, section, summary, description, state, <button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />{action}</button>])} /></div></Card>
 
       <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-        <Card><h3 className="text-3xl font-black text-slate-950">Inyección operacional controlada</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Activa 20 operaciones simuladas para demostrar cómo cambian páginas, prioridades y recomendaciones sin integrar servicios reales.</p><div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{injectionResults.map(([value, label]) => <div key={label} className="min-w-0 rounded-2xl bg-slate-50 p-4"><div className="text-3xl font-black text-slate-950">{value}</div><div className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-slate-700">{label}</div></div>)}</div><div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar 20 operaciones simuladas</button></div></Card>
+        <Card>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h3 className="text-3xl font-black text-slate-950">Inyección operacional controlada</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Activa 20 operaciones simuladas para demostrar cómo cambian páginas, prioridades y recomendaciones sin integrar servicios reales.</p>
+            </div>
+            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Demo activa" : "Sin demo activa"}</Badge>
+          </div>
+          <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              <InfoCard title="Empresa demo activa" value={activeDemoContext?.prospectCompanyName || "Sin demo activa"} />
+              <InfoCard title="Proyecto demo activo" value={activeDemoContext?.projectName || "Proyecto Comalapa"} />
+              <InfoCard title="DemoRunId corto" value={demoRunIdShort} />
+              <InfoCard title="Reservas/clientes simulados" value={String(simulatedReservationClients.length)} />
+              <InfoCard title="Mensajes internos simulados" value={String(simulatedInternalMessages.length)} />
+              <InfoCard title="Reportes de vendedoras" value={String(simulatedSellerReports.length)} />
+              <InfoCard title="Logs Marta Voz / Vapi" value={String(simulatedVapiCallLogs.length)} />
+              <InfoCard title="Seguimientos Marta WhatsApp" value={String(simulatedMartaWhatsAppFollowups.length)} />
+              <InfoCard title="Estado antes" value={demoStatusBefore} />
+              <InfoCard title="Estado despues" value={demoStatusAfter} />
+            </div>
+            {activeDemoContext && <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Escenario: {activeDemoContext.scenarioName} · Inyectado: {activeDemoContext.injectedAt}</p>}
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {injectionResults.map(([value, label]) => <div key={label} className="min-w-0 rounded-2xl bg-slate-50 p-4"><div className="text-3xl font-black text-slate-950">{value}</div><div className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-slate-700">{label}</div></div>)}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar 20 clientes simulados</button></div>
+        </Card>
         <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Cambios derivados de la simulación</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cambios visibles en tiempo real tras la inyección de datos simulados.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div><div className="mt-5 grid gap-4">{derivedChanges.map((item) => <div key={item.page} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">Página: {item.page}</Badge><Badge tone="blue">{item.section}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><h4 className="mt-4 text-xl font-black text-slate-950">{item.change}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{item.description}</p><button className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Ver página impactada</button></div>)}</div></Card>
       </div>
 
