@@ -394,7 +394,7 @@ function PageHeader({ title, subtitle, icon: Icon, sync = 80, badges = [], syncN
   );
 }
 
-function Metric({ title, value, note, tone = "slate", icon: Icon = Activity, onClick, active = false }) {
+function Metric({ title, value, note, tone = "slate", icon: Icon = Activity, onClick = undefined, active = false }) {
   const tones = {
     slate: "bg-slate-50 text-slate-950",
     green: "bg-emerald-50 text-emerald-950",
@@ -1160,7 +1160,7 @@ function CampaignsPage() {
           <Badge tone="blue">Canal → campañas → lupa operativa</Badge>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          {Object.entries(selectedChannelData.campaigns).map(([key, campaign]) => <DrillButton key={key} active={selectedCampaign === key} onClick={() => setSelectedCampaign(key)}>{campaign.title}</DrillButton>)}
+          {Object.entries(selectedChannelData.campaigns as Record<string, { title: string; result: string; diagnosis: string; action: string; marta: string }>).map(([key, campaign]) => <DrillButton key={key} active={selectedCampaign === key} onClick={() => setSelectedCampaign(key)}>{campaign.title}</DrillButton>)}
         </div>
         <div className="mt-5"><CampaignCard title={currentCampaign.title} result={currentCampaign.result} diagnosis={currentCampaign.diagnosis} action={currentCampaign.action} /></div>
         <div className="mt-5 rounded-3xl border border-violet-100 bg-violet-50 p-5 text-base font-semibold leading-8 text-slate-800"><span className="font-black text-slate-950">Comentario de H-Operia Intelligence:</span> {currentCampaign.marta}</div>
@@ -1989,7 +1989,7 @@ function DemoPage() {
   );
 }
 
-function InfoCard({ title, value, detail }) {
+function InfoCard({ title, value, detail = undefined }) {
   return <div className="rounded-2xl bg-slate-50 p-4"><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">{title}</div><div className="mt-2 text-base font-black text-slate-950">{value}</div>{detail && <div className="mt-2 text-sm font-semibold leading-6 text-slate-700">{detail}</div>}</div>;
 }
 
