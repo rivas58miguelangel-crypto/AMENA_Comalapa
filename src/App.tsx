@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import DemoScenarioRoute from "./components/demo/DemoScenarioRoute";
 import {
   Activity,
   AlertTriangle,
@@ -1729,19 +1730,7 @@ function DemoPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Centro Demo" subtitle="Tablero de mando escénico para ejecutar una demostración ejecutiva en vivo: reserva, mensajería, Marta, evidencia operacional, simulación e inteligencia." icon={Smartphone} sync={martaSync.demo} badges={["Operación viva", "Demo ejecutiva", "Evidencia Operacional"]} syncNote="Mide el avance visible de la demostración: fases completadas, estados operacionales y señales generadas durante la presentación." />
-      <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div><h3 className="text-3xl font-black text-slate-950">Ruta escénica de la demostración</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Guía operativa para avanzar la demo frente a audiencia, con estado por fase y progreso general.</p></div>
-          <Badge tone="green">{progress}% avance</Badge>
-        </div>
-        <div className="mt-5 h-3 rounded-full bg-slate-100"><div className="h-3 rounded-full bg-emerald-400" style={{ width: `${progress}%` }} /></div>
-        <div className="mt-5 grid gap-4 xl:grid-cols-3">
-          {phases.map((phase, index) => {
-            const state = phaseStatus(index);
-            return <div key={phase.title} className={cls("rounded-3xl border p-5", state === "Activa" ? "border-blue-200 bg-blue-50" : state === "Completada" ? "border-emerald-200 bg-emerald-50" : "border-slate-100 bg-slate-50")}><div className="flex items-start justify-between gap-3"><div><div className="text-sm font-black uppercase tracking-[0.22em] text-slate-700">{phase.title}</div><h4 className="mt-2 text-xl font-black text-slate-950">{phase.name}</h4></div><Badge tone={statusTone[state] || "slate"}>{state}</Badge></div><p className="mt-3 text-base font-semibold leading-7 text-slate-700">{phase.text}</p><p className="mt-3 rounded-2xl bg-white/80 px-4 py-3 text-sm font-black leading-6 text-slate-800">Siguiente paso: {phase.nextStep}</p><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => setActivePhase(index)} className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Presentar esta fase</button><button onClick={() => completePhase(index)} className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white">Fase demostrada</button></div></div>;
-          })}
-        </div>
-      </Card>
+      <DemoScenarioRoute phases={phases} progress={progress} phaseStatus={phaseStatus} onPresentPhase={setActivePhase} onCompletePhase={completePhase} />
 
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
