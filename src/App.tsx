@@ -332,8 +332,9 @@ function TopNav({ active, setActive }) {
     <div className="sticky top-0 z-50 w-full max-w-full overflow-hidden rounded-[2rem] bg-slate-950 p-4 text-white shadow-2xl sm:p-5">
       <div className="mb-4 flex w-full min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-black uppercase tracking-[0.35em] text-amber-300">H-Operia</p>
-          <h2 className="text-3xl font-black">Centro de Mando</h2>
+          <p className="text-xs font-black uppercase tracking-[0.35em] text-amber-300">H-OperIA</p>
+          <p className="mt-1 text-sm font-bold text-slate-300">Humanización de las operaciones con IA</p>
+          <h2 className="mt-1 text-3xl font-black">Centro de Mando</h2>
         </div>
         <div className="flex w-full min-w-0 flex-wrap items-center gap-3 lg:w-auto lg:justify-end">
           <Badge tone="dark">Integración demostrativa: {martaSync[active]}%</Badge>
@@ -369,7 +370,8 @@ function PageHeader({ title, subtitle, icon: Icon, sync = 80, badges = [], syncN
             <Icon size={30} />
           </div>
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.35em] text-amber-500">Humanizar la operación inteligente</p>
+            <p className="text-base font-black uppercase tracking-[0.35em] text-amber-600">H-OperIA</p>
+            <p className="mt-1 text-base font-extrabold text-slate-800">Humanización de las operaciones con IA</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">{title}</h1>
             <p className="mt-3 max-w-5xl text-lg font-semibold leading-8 text-slate-800">{subtitle}</p>
           </div>
