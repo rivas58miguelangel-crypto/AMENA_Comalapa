@@ -1899,6 +1899,30 @@ function DemoPage() {
 
       <Card><h3 className="text-3xl font-black text-slate-950">Evidencia administrativa</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Impacto verificable en páginas del Admin, sin conteos decorativos.</p><div className="mt-5"><SimpleTable columns={["Página Admin impactada", "Sección", "Resumen del cambio", "Descripción operacional", "Estado", "Acción"]} rows={adminEvidence.map(([page, section, summary, description, state, action]) => [page, section, summary, description, state, <button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />{action}</button>])} /></div></Card>
 
+      <Card>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <h3 className="text-3xl font-black text-slate-950">Inventario Demo Reutilizable</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Construir demos reutilizables a partir de información pública del proyecto.</p>
+          </div>
+          <Badge tone="amber">Próxima fase de implementación</Badge>
+        </div>
+        <div className="mt-5 grid gap-5 xl:grid-cols-2">
+          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <h4 className="text-xl font-black text-slate-950">Información prevista</h4>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Proyectos", "Torres", "Manzanas", "Niveles", "Modelos", "Apartamentos / lotes", "Amenidades", "Precios y disponibilidad demo"].map((item) => <Badge key={item} tone="slate">{item}</Badge>)}
+            </div>
+          </div>
+          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <h4 className="text-xl font-black text-slate-950">Fuentes previstas</h4>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Sitio web del prospecto", "Redes sociales públicas", "Documentación pública", "Carga manual opcional"].map((item) => <Badge key={item} tone="blue">{item}</Badge>)}
+            </div>
+          </div>
+        </div>
+      </Card>
+
       <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
