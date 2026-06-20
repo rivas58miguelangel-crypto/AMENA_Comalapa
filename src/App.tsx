@@ -310,7 +310,7 @@ function cls(...v) {
   return v.filter(Boolean).join(" ");
 }
 
-function Badge({ children, tone = "slate" }) {
+function Badge({ children, tone = "slate" }: { children: any; tone?: string; key?: React.Key }) {
   const tones = {
     slate: "bg-slate-100 text-slate-900 border-slate-200",
     green: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -2019,12 +2019,12 @@ function InfoCard({ title, value, detail = undefined }) {
   return <div className="rounded-2xl bg-slate-50 p-4"><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">{title}</div><div className="mt-2 text-base font-black text-slate-950">{value}</div>{detail && <div className="mt-2 text-sm font-semibold leading-6 text-slate-700">{detail}</div>}</div>;
 }
 
-function KpiCard({ title, value, color }) {
+function KpiCard({ title, value, color }: { title: any; value: any; color: any; key?: React.Key }) {
   const colors = { green: "bg-emerald-100 text-emerald-800", amber: "bg-amber-100 text-amber-800", red: "bg-rose-100 text-rose-800", blue: "bg-blue-100 text-blue-800" };
   return <div className="rounded-2xl bg-white p-4 shadow-sm"><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">{title}</div><div className={`mt-3 inline-flex rounded-full px-4 py-2 text-base font-black ${colors[color]}`}>{value}</div></div>;
 }
 
-function EvidenceCard({ title, value }) {
+function EvidenceCard({ title, value }: { title: any; value: any; key?: React.Key }) {
   return <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><div className="text-lg font-black text-slate-950">{title}</div><div className="mt-3 rounded-full bg-emerald-100 px-4 py-2 text-base font-bold text-emerald-800 inline-flex">{value}</div></div>;
 }
 
@@ -2032,7 +2032,7 @@ function TimelineBlock({ items }) {
   return <Card><h2 className="text-3xl font-black text-slate-950">Timeline Operacional Total</h2><p className="mt-2 text-base font-semibold text-slate-700">Historial unificado de comunicaciones, tickets, pagos, seguimientos y eventos operacionales.</p><div className="mt-6 space-y-4">{items.map((item) => <TimelineItem key={`${item.time}-${item.title}`} time={item.time} title={item.title} description={item.description} />)}</div></Card>;
 }
 
-function TimelineItem({ time, title, description }) {
+function TimelineItem({ time, title, description }: { time: any; title: any; description: any; key?: React.Key }) {
   return <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5"><div className="text-sm font-black text-slate-700 w-16">{time}</div><div><div className="text-lg font-black text-slate-950">{title}</div><div className="mt-1 text-base font-semibold text-slate-700 leading-7">{description}</div></div></div>;
 }
 
@@ -2040,7 +2040,7 @@ function CommunicationsHub({ channels }) {
   return <Card><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Comunicaciones Operacionales</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Desde el perfil del cliente se pueden leer mensajes recibidos, revisar correos, enviar respuestas, usar plantillas, aprobar sugerencias asistidas y dejar evidencia automática en el timeline operacional.</p></div><div className="flex flex-wrap gap-2"><Badge tone="green">WhatsApp conectado</Badge><Badge tone="blue">Email conectado</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-2">{channels.map((channel) => <CommunicationChannel key={channel.channel} channel={channel.channel} badge={channel.badge} tone={channel.tone} inboxTitle={channel.inboxTitle} messages={channel.messages} actions={channel.actions} recommendation={channel.recommendation} />)}</div></Card>;
 }
 
-function CommunicationChannel({ channel, badge, tone, inboxTitle, messages, actions, recommendation }) {
+function CommunicationChannel({ channel, badge, tone, inboxTitle, messages, actions, recommendation }: { channel: any; badge: any; tone: any; inboxTitle: any; messages: any; actions: any; recommendation: any; key?: React.Key }) {
   const mainButton = tone === "green" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700";
   return <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"><div><h3 className="text-2xl font-black text-slate-950">{channel}</h3><p className="mt-1 text-base font-semibold text-slate-700">Lectura, respuesta, envío y registro automático de evidencia.</p></div><Badge tone={tone}>{badge}</Badge></div><div className="mt-4 grid gap-3 md:grid-cols-3"><button className={`rounded-2xl px-4 py-3 text-sm font-black text-white ${mainButton}`}>Leer recibidos</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-slate-800">Enviar nuevo</button><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white hover:bg-violet-700">Revisar propuesta asistida</button></div><div className="mt-5 rounded-2xl bg-white p-4"><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">{inboxTitle}</div><div className="mt-4 space-y-3">{messages.map((message) => <div key={`${message.from}-${message.time}-${message.tag}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div className="font-black text-slate-950">{message.from}</div><div className="text-xs font-bold text-slate-600">{message.time}</div></div><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{message.text}</p><div className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700">{message.tag}</div></div>)}</div></div><div className="mt-4 rounded-2xl bg-white p-4"><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">Acciones rápidas</div><div className="mt-3 flex flex-wrap gap-2">{actions.map((action) => <button key={action} className="rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-800 hover:bg-slate-200">{action}</button>)}</div></div><div className="mt-4 rounded-2xl border border-violet-100 bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Sugerencia asistida:</span> {recommendation}</div></div>;
 }
@@ -2049,7 +2049,7 @@ function MartaProposalReviewCenter({ proposals }) {
   return <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm"><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Bandeja de Respuestas Asistidas</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Marta recibe conversaciones; H-Operia Intelligence estructura sugerencias para que la vendedora revise, edite, apruebe y envíe.</p></div><div className="flex flex-wrap gap-2"><Badge tone="violet">4 propuestas pendientes</Badge><Badge tone="slate">Revisión humana requerida</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-3">{proposals.map((proposal) => <MartaProposalCard key={`${proposal.type}-${proposal.title}`} type={proposal.type} title={proposal.title} analysis={proposal.analysis} proposal={proposal.proposal} />)}</div></div>;
 }
 
-function MartaProposalCard({ type, title, analysis, proposal }) {
+function MartaProposalCard({ type, title, analysis, proposal }: { type: any; title: any; analysis: any; proposal: any; key?: React.Key }) {
   return <div className="rounded-3xl border border-violet-100 bg-white p-5 shadow-sm"><div className="text-sm uppercase tracking-[0.22em] text-violet-600 font-black">{type}</div><h3 className="mt-2 text-xl font-black text-slate-950">{title}</h3><div className="mt-4 rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Lectura H-Operia Intelligence:</span> {analysis}</div><div className="mt-4 rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Propuesta:</span> {proposal}</div><div className="mt-5 flex flex-wrap gap-2"><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Revisar</button><button className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-800">Editar</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Aprobar</button></div></div>;
 }
 
@@ -2076,7 +2076,7 @@ function TrackingBlock({ tracking }) {
   );
 }
 
-function MiniMetric({ title, value, note, onClick, active = false }) {
+function MiniMetric({ title, value, note, onClick, active = false }: { title: any; value: any; note: any; onClick: any; active?: boolean; key?: React.Key }) {
   const Wrapper = onClick ? "button" : "div";
   return <Wrapper onClick={onClick} className={cls("rounded-3xl border border-slate-100 bg-slate-50 p-5 text-left transition", onClick && "w-full cursor-pointer hover:shadow-md hover:-translate-y-0.5", active && "ring-4 ring-slate-950/10")}><div className="text-sm uppercase tracking-[0.22em] text-slate-700 font-black">{title}</div><div className="mt-2 text-3xl font-black text-slate-950">{value}</div><div className="mt-1 text-base font-semibold text-slate-700">{note}</div>{onClick && <div className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Clic para ver detalles</div>}</Wrapper>;
 }
@@ -2109,7 +2109,7 @@ function DrillLayer({ title, children }) {
   return <div><p className="mb-3 text-sm font-black uppercase tracking-[0.22em] text-slate-700">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>;
 }
 
-function DrillButton({ children, active, onClick }) {
+function DrillButton({ children, active, onClick }: { children: any; active: any; onClick: any; key?: React.Key }) {
   return <button onClick={onClick} className={cls("rounded-full px-4 py-2 text-sm font-black transition", active ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-900 hover:bg-slate-200")}>{children}</button>;
 }
 
