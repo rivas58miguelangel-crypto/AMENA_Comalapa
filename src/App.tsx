@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import DemoCommandEvidencePanel from "./components/demo/DemoCommandEvidencePanel";
 import DemoScenarioRoute from "./components/demo/DemoScenarioRoute";
 import {
   Activity,
@@ -1899,7 +1900,23 @@ function DemoPage() {
         )}
       </Card>
 
-      <Card><h3 className="text-3xl font-black text-slate-950">Evidencia administrativa</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Impacto verificable en páginas del Admin, sin conteos decorativos.</p><div className="mt-5"><SimpleTable columns={["Página Admin impactada", "Sección", "Resumen del cambio", "Descripción operacional", "Estado", "Acción"]} rows={adminEvidence.map(([page, section, summary, description, state, action]) => [page, section, summary, description, state, <button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />{action}</button>])} /></div></Card>
+      <DemoCommandEvidencePanel
+        demoContext={activeDemoContext}
+        demoRunIdShort={demoRunIdShort}
+        reservationStatus={reservationStatus}
+        martaStatus={martaStatus}
+        vapiStatus={vapiStatus}
+        simulatedDataInjected={simulatedDataInjected}
+        counts={{
+          reservations: simulatedReservationClients.length,
+          messages: simulatedInternalMessages.length,
+          sellerReports: simulatedSellerReports.length,
+          vapiLogs: simulatedVapiCallLogs.length,
+          whatsappFollowups: simulatedMartaWhatsAppFollowups.length,
+          evidence: simulatedOperationalEvidence.length,
+        }}
+        evidence={adminEvidence}
+      />
 
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
