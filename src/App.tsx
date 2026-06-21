@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import DemoCommandEvidencePanel from "./components/demo/DemoCommandEvidencePanel";
 import DemoScenarioRoute from "./components/demo/DemoScenarioRoute";
 import {
@@ -1537,6 +1537,7 @@ function DemoPage() {
   const [executiveBreakdown, setExecutiveBreakdown] = useState("Ingresos netos por canal y campaña\nConversión por modelo, sector y unidad\nAcompañamiento del equipo y uso de Marta\nRiesgos financieros, documentales y de escrituración");
   const [selectedBreakdowns, setSelectedBreakdowns] = useState(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
   const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
+  const phaseSectionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", Alta: "red", Media: "amber", Baja: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
@@ -1559,6 +1560,13 @@ function DemoPage() {
     setVisibleSendStatus({ whatsappStatus: "Pendiente", emailStatus: "Pendiente" });
   };
   const phaseStatus = (index) => completedPhases.includes(index) ? "Completada" : activePhase === index ? "Activa" : "Pendiente";
+  const presentPhase = (index) => {
+    setActivePhase(index);
+    phaseSectionRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
   const completePhase = (index) => {
     setCompletedPhases((current) => current.includes(index) ? current : [...current, index]);
     if (index < phases.length - 1) setActivePhase(index + 1);
@@ -1733,9 +1741,9 @@ function DemoPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Centro Demo" subtitle="Tablero de mando escénico para ejecutar una demostración ejecutiva en vivo: reserva, mensajería, Marta, evidencia operacional, simulación e inteligencia." icon={Smartphone} sync={martaSync.demo} badges={["Operación viva", "Demo ejecutiva", "Evidencia Operacional"]} syncNote="Mide el avance visible de la demostración: fases completadas, estados operacionales y señales generadas durante la presentación." />
-      <DemoScenarioRoute phases={phases} progress={progress} phaseStatus={phaseStatus} onPresentPhase={setActivePhase} onCompletePhase={completePhase} />
+      <DemoScenarioRoute phases={phases} progress={progress} phaseStatus={phaseStatus} onPresentPhase={presentPhase} onCompletePhase={completePhase} />
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+      <div ref={(element) => { phaseSectionRefs.current[0] = element; }} className="grid scroll-mt-64 gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Participantes de la demostración</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Registra voluntarios, envía accesos y deja estados visibles para la escena.</p></div><Badge tone="blue">{volunteers.length} registrados</Badge></div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -1802,7 +1810,7 @@ function DemoPage() {
         </Card>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+      <div ref={(element) => { phaseSectionRefs.current[2] = element; }} className="grid scroll-mt-64 gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Operaciones Comerciales</h3>
           <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Información relevante desde la aplicación de vendedoras.</p>
@@ -1835,7 +1843,8 @@ function DemoPage() {
         </Card>
       </div>
 
-      <Card>
+      <div ref={(element) => { phaseSectionRefs.current[1] = element; }} className="scroll-mt-64">
+        <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Marta + Vapi</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Conversación, logs y evidencia conversacional útil para seguimiento.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
         <div className="mt-5 grid gap-4 xl:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Transcripción:</span> “Quiero confirmar prima, fecha de entrega y documentos para avanzar.”</div><div className="rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Structured output:</span> intención alta, duda financiera, documento pendiente, próxima acción: llamada humana.</div><div className="rounded-2xl bg-emerald-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Evidencia:</span> resumen de llamada y tarea de seguimiento.</div></div>
         <div className="mt-5 flex flex-wrap gap-2">
@@ -1898,8 +1907,10 @@ function DemoPage() {
             </div>
           </div>
         )}
-      </Card>
+        </Card>
+      </div>
 
+      <div ref={(element) => { phaseSectionRefs.current[3] = element; }} className="scroll-mt-64">
       <DemoCommandEvidencePanel
         demoContext={activeDemoContext}
         demoRunIdShort={demoRunIdShort}
@@ -1917,6 +1928,7 @@ function DemoPage() {
         }}
         evidence={adminEvidence}
       />
+      </div>
 
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -1942,7 +1954,7 @@ function DemoPage() {
         </div>
       </Card>
 
-      <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+      <div ref={(element) => { phaseSectionRefs.current[4] = element; }} className="grid scroll-mt-64 gap-5 xl:grid-cols-[0.9fr_1.1fr]">
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
@@ -1974,7 +1986,8 @@ function DemoPage() {
         <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Cambios derivados de la simulación</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cambios visibles en tiempo real tras la inyección de datos simulados.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div><div className="mt-5 grid gap-4">{derivedChanges.map((item) => <div key={item.page} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">Página: {item.page}</Badge><Badge tone="blue">{item.section}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><h4 className="mt-4 text-xl font-black text-slate-950">{item.change}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{item.description}</p><button className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Ver página impactada</button></div>)}</div></Card>
       </div>
 
-      <Card>
+      <div ref={(element) => { phaseSectionRefs.current[5] = element; }} className="scroll-mt-64">
+        <Card>
         <h3 className="text-3xl font-black text-slate-950">Centro de consultas ejecutivas</h3>
         <p className="mt-3 text-base font-semibold leading-7 text-slate-700">A continuación escriba su pregunta o sus preguntas, una por una. Al terminar cada pregunta presione Enter para agregarla al listado.</p>
         <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
@@ -2027,7 +2040,8 @@ function DemoPage() {
             <button className="mt-4 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><ClipboardCheck size={16} className="mr-2 inline" />Copiar conclusión para junta</button>
           </div>
         </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
