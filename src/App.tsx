@@ -1386,12 +1386,12 @@ function DashboardsPage() {
 function DemoPage() {
   const DEMO_BACKEND_URL = "http://localhost:4000";
   const phases = [
-    { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "Realizaremos una reserva completa en tiempo real y verificaremos datos, WhatsApp y correo dentro del ecosistema.", nextStep: "buscar la reserva en Supabase y confirmar evidencia visible." },
-    { title: "FASE 02", name: "Conversación en vivo con Marta", text: "Interactuaremos con Marta y luego abriremos Vapi para visualizar logs, transcripciones y estructura operacional.", nextStep: "simular la conversación y abrir logs Vapi para revisar señales." },
-    { title: "FASE 03", name: "Operación comercial y mensajería operacional", text: "Mostraremos cómo vendedoras, seguimientos y mensajería reaccionan inmediatamente después de la reserva.", nextStep: "buscar informes de vendedora y verificar coordinación interna." },
-    { title: "FASE 04", name: "Centro de Mando y evidencia operacional", text: "Verificaremos desde la plataforma administrativa el estado real de la operación, comunicaciones y seguimiento.", nextStep: "abrir la evidencia administrativa y validar trazabilidad." },
-    { title: "FASE 05", name: "Escalamiento operacional e inteligencia en tiempo real", text: "Inyectaremos actividad simulada de 20 clientes para ver cambios, prioridades y oportunidades detectadas.", nextStep: "inyectar operaciones simuladas y revisar resultados posteriores." },
-    { title: "FASE 06", name: "Dashboards ejecutivos y cierre estratégico", text: "Cerraremos con métricas, dashboards e inteligencia ejecutiva derivada de la operación.", nextStep: "generar respuesta ejecutiva y copiar conclusión para junta." },
+    { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.", nextStep: "validar cliente, unidad, fuente, estado y evidencia visible." },
+    { title: "FASE 02", name: "Operaciones Comerciales y Mensajería Operacional", text: "Desde clientes reservados mostraremos reportes de vendedoras, objeciones, prioridades, próximos pasos y coordinación interna.", nextStep: "revisar seguimiento comercial y mensajes operacionales del equipo." },
+    { title: "FASE 03", name: "Marta · Acompañamiento Multicanal", text: "Marta acompaña por voz o texto y registra cada interacción como dato estructurado para evidencia, seguimiento e inteligencia.", nextStep: "revisar por separado Marta Voz / Vapi y Marta WhatsApp / Texto." },
+    { title: "FASE 04", name: "Centro de Mando, Admin y Evidencia Operacional", text: "Consolidaremos datos de Reservas, Operaciones Comerciales, Mensajería Interna y Marta Multicanal.", nextStep: "validar fuentes, conteos, trazabilidad y evidencia administrativa." },
+    { title: "FASE 05", name: "H-OperIA Intelligence", text: "Transformaremos señales de reservas, vendedoras, mensajería y Marta en riesgos, oportunidades, prioridades y recomendaciones.", nextStep: "inyectar operaciones simuladas y revisar señales por fuente." },
+    { title: "FASE 06", name: "Cierre ejecutivo y próximos pasos", text: "Cerraremos con métricas, dashboards e inteligencia ejecutiva derivada de la operación.", nextStep: "generar respuesta ejecutiva y copiar conclusión para junta." },
   ];
   const emptyVolunteer = { name: "", role: "", company: "", whatsapp: "", email: "" };
   const baseVolunteer = { name: "Andrea López", role: "Gerente comercial", company: "Proyecto Comalapa", whatsapp: "+503 7000-0000", email: "andrea@empresa.com", whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
@@ -1709,12 +1709,15 @@ function DemoPage() {
         ["Mensajería Operacional", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", "Pendiente", "Abrir página"],
       ];
   const derivedChanges = [
-    { phase: "Fase 01", page: "Reserva pública en vivo", section: "Clientes y reservas simuladas", change: `${simulatedReservationClients.length} reservas disponibles para seguimiento`, observation: "Observe estados de avance, fuente y unidad en una muestra representativa.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-reservation-live" },
-    { phase: "Fase 02", page: "Marta + Vapi", section: "Conversaciones, seguimientos y señales", change: `${simulatedVapiCallLogs.length} llamadas y ${simulatedMartaWhatsAppFollowups.length} seguimientos generados`, observation: "Observe intenciones, riesgos y casos que requieren intervención humana.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-vapi" },
-    { phase: "Fase 03", page: "Operación comercial", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes de vendedoras creados`, observation: "Observe prioridades, objeciones y próximos pasos asignados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
-    { phase: "Fase 03", page: "Mensajería operacional", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes internos generados`, observation: "Observe responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
-    { phase: "Fase 04", page: "Centro de Mando y Evidencia", section: "Trazabilidad y evidencia administrativa", change: `${simulatedOperationalEvidence.length} evidencias agregadas a la corrida`, observation: "Observe la cadena completa, los módulos impactados y su estado de evidencia.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
-    { phase: "Fase 06", page: "Cierre estratégico", section: "Consultas de H-OperIA Intelligence", change: `${simulatedIntelligenceSignals.length} señales disponibles para lectura ejecutiva`, observation: "Observe cómo la actividad se convierte en preguntas, criterios y una conclusión para junta.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-executive-close" },
+    { phase: "Fase 01", source: "Reservas", page: "Reserva pública", section: "Cliente, unidad, fuente y estado", change: `${simulatedReservationClients.length} reservas disponibles para seguimiento`, observation: "Clientes operacionales y unidades que originan el ciclo.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-reservation-live" },
+    { phase: "Fase 02", source: "Vendedoras", page: "Operaciones Comerciales", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
+    { phase: "Fase 02", source: "Mensajería interna", page: "Mensajería Operacional", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
+    { phase: "Fase 03", source: "Marta Voz / Vapi", page: "Marta Multicanal", section: "Voz, llamadas y structured output", change: `${simulatedVapiCallLogs.length} logs de llamadas disponibles`, observation: "Intenciones, bloqueos, urgencia y casos que requieren intervención humana.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-vapi-voice" },
+    { phase: "Fase 03", source: "Marta WhatsApp", page: "Marta Multicanal", section: "WhatsApp / Texto", change: `${simulatedMartaWhatsAppFollowups.length} seguimientos conversacionales`, observation: "Respuestas, intención detectada y siguiente acción por texto.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-whatsapp" },
+    { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias agregadas a la corrida`, observation: "Reservas, reportes, mensajes, llamadas y seguimientos consolidados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
+    { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Intelligence", section: "Riesgos, oportunidades y recomendaciones", change: `${simulatedIntelligenceSignals.length} señales derivadas por fuente`, observation: "La actividad operacional se transforma en prioridades ejecutables.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
+    { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Consultas y conclusión", change: `${simulatedIntelligenceSignals.length} señales disponibles para lectura ejecutiva`, observation: "Las señales se convierten en criterios y una conclusión para junta.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-executive-close" },
+    { phase: "Auxiliar", source: "Información pública", page: "Inventario Demo", section: "Sección auxiliar técnica", change: "8 categorías de inventario previstas", observation: "Soporte reutilizable fuera de la ruta escénica principal.", status: "Visible", targetId: "demo-technical-inventory" },
   ];
   const injectionResults = [
     [String(simulatedReservationClients.length), "reservas/clientes simulados"],
@@ -1792,7 +1795,7 @@ function DemoPage() {
         </Card>
         <div id="demo-reservation-live" className="scroll-mt-64">
         <Card>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Reserva pública en vivo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Busca por teléfono y muestra el resumen equivalente antes de confirmar la reserva.</p></div><Badge tone="blue">Preparado para Evidencia Operacional</Badge></div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Reserva pública en vivo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.</p></div><Badge tone="blue">Preparado para Evidencia Operacional</Badge></div>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><Database size={16} className="mr-2 inline" />Buscar reserva en Supabase</button><button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir registro en Supabase</button></div>
           <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-600">Última actualización: hace 12 segundos</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -1818,11 +1821,11 @@ function DemoPage() {
         </div>
       </div>
 
-      <div ref={(element) => { phaseSectionRefs.current[2] = element; }} className="grid scroll-mt-64 gap-5 xl:grid-cols-[1fr_1fr]">
+      <div ref={(element) => { phaseSectionRefs.current[1] = element; }} className="grid scroll-mt-64 gap-5 xl:grid-cols-[1fr_1fr]">
         <div id="demo-commercial-operations" className="scroll-mt-64">
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Operaciones Comerciales</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Información relevante desde la aplicación de vendedoras.</p>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Reportes de vendedoras nacidos desde clientes reservados: interacciones, objeciones, prioridades y próximos pasos.</p>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
             <input value={commercialSearch} onChange={(e) => setCommercialSearch(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por cliente o teléfono" />
             <button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><Search size={16} className="mr-2 inline" />Buscar informes de vendedora</button>
@@ -1836,7 +1839,7 @@ function DemoPage() {
         <div id="demo-operational-messaging" className="scroll-mt-64">
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Mensajería Operacional</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mensajes internos entre equipo, con estado y evidencia.</p>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Coordinación interna nacida desde clientes reservados: mensajes operacionales, responsables, prioridad y evidencia.</p>
           <div className="mt-5 grid gap-3">
             {messageRows.map(([from, to, channel, message, state, time, evidence]) => (
               <div key={`${from}-${time}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
@@ -1855,9 +1858,16 @@ function DemoPage() {
         </div>
       </div>
 
-      <div id="demo-marta-vapi" ref={(element) => { phaseSectionRefs.current[1] = element; }} className="scroll-mt-64">
+      <div id="demo-marta-vapi" ref={(element) => { phaseSectionRefs.current[2] = element; }} className="scroll-mt-64">
         <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Marta + Vapi</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Conversación, logs y evidencia conversacional útil para seguimiento.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Marta · Acompañamiento Multicanal</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Toda interacción de Marta se registra como dato estructurado para evidencia, expediente, seguimiento e inteligencia.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Badge tone="green">Activo · Voz / Vapi</Badge>
+          <Badge tone="green">Activo · WhatsApp</Badge>
+          <Badge tone="slate">Próximo · Email</Badge>
+          <Badge tone="slate">Próximo · Widget Web</Badge>
+          <Badge tone="slate">Próximo · Link posterior</Badge>
+        </div>
         <div className="mt-5 grid gap-4 xl:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Transcripción:</span> “Quiero confirmar prima, fecha de entrega y documentos para avanzar.”</div><div className="rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Structured output:</span> intención alta, duda financiera, documento pendiente, próxima acción: llamada humana.</div><div className="rounded-2xl bg-emerald-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Evidencia:</span> resumen de llamada y tarea de seguimiento.</div></div>
         <div className="mt-5 flex flex-wrap gap-2">
           <button onClick={simulateMartaConversation} className="rounded-2xl bg-violet-600 px-5 py-4 text-sm font-black text-white"><Bot size={16} className="mr-2 inline" />Mostrar conversación con Marta</button>
@@ -1866,7 +1876,9 @@ function DemoPage() {
         <div className="mt-3 flex flex-wrap gap-2"><Badge tone="green">Logs verificados</Badge></div>
         {simulatedDataInjected && (
           <div className="mt-5 space-y-4">
-            <div className="grid gap-3 xl:grid-cols-2">
+            <div id="demo-marta-vapi-voice" className="scroll-mt-64">
+              <h4 className="mb-3 text-xl font-black text-slate-950">Marta Voz / Vapi</h4>
+              <div className="grid gap-3 xl:grid-cols-2">
               {simulatedVapiCallLogs.slice(0, 2).map((log) => (
                 <div key={log.id} className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1890,8 +1902,11 @@ function DemoPage() {
                   <div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[log.structuredOutput.urgencyLevel] || "violet"}>{log.riskSignal}</Badge><Badge tone="blue">{log.nextStep}</Badge></div>
                 </div>
               ))}
+              </div>
             </div>
-            <div className="grid gap-3 xl:grid-cols-2">
+            <div id="demo-marta-whatsapp" className="scroll-mt-64">
+              <h4 className="mb-3 text-xl font-black text-slate-950">Marta WhatsApp / Texto</h4>
+              <div className="grid gap-3 xl:grid-cols-2">
               {simulatedMartaWhatsAppFollowups.slice(0, 2).map((followup) => (
                 <div key={followup.id} className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1904,18 +1919,7 @@ function DemoPage() {
                   <div className="mt-3 flex flex-wrap gap-2"><Badge tone="blue">{followup.nextStep}</Badge><Badge tone={followup.status === "Simulado" ? "green" : "amber"}>{followup.status}</Badge></div>
                 </div>
               ))}
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              {simulatedIntelligenceSignals.map((signal) => (
-                <div key={signal.id} className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Badge tone={statusTone[signal.priority] || "violet"}>{signal.priority}</Badge>
-                    <span className="text-xs font-black uppercase tracking-[0.16em] text-violet-900">{signal.source}</span>
-                  </div>
-                  <h4 className="mt-3 text-lg font-black text-slate-950">{signal.title}</h4>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{signal.summary}</p>
-                </div>
-              ))}
+              </div>
             </div>
           </div>
         )}
@@ -1923,6 +1927,19 @@ function DemoPage() {
       </div>
 
       <div id="demo-command-evidence" ref={(element) => { phaseSectionRefs.current[3] = element; }} className="scroll-mt-64">
+      <div className="mb-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h3 className="text-3xl font-black text-slate-950">Centro de Mando, Admin y Evidencia Operacional</h3>
+        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Recibe y consolida datos desde Reservas, Operaciones Comerciales, Mensajería Interna y Marta Multicanal.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {[
+            [simulatedReservationClients.length, "Reservas"],
+            [simulatedSellerReports.length, "Reportes"],
+            [simulatedInternalMessages.length, "Mensajes"],
+            [simulatedVapiCallLogs.length, "Llamadas"],
+            [simulatedMartaWhatsAppFollowups.length, "Seguimientos"],
+          ].map(([value, label]) => <div key={label} className="rounded-2xl bg-slate-50 p-4"><div className="text-2xl font-black text-slate-950">{value}</div><div className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-slate-700">{label}</div></div>)}
+        </div>
+      </div>
       <DemoCommandEvidencePanel
         demoContext={activeDemoContext}
         demoRunIdShort={demoRunIdShort}
@@ -1942,36 +1959,12 @@ function DemoPage() {
       />
       </div>
 
-      <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <h3 className="text-3xl font-black text-slate-950">Inventario Demo Reutilizable</h3>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Construir demos reutilizables a partir de información pública del proyecto.</p>
-          </div>
-          <Badge tone="amber">Próxima fase de implementación</Badge>
-        </div>
-        <div className="mt-5 grid gap-5 xl:grid-cols-2">
-          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
-            <h4 className="text-xl font-black text-slate-950">Información prevista</h4>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {["Proyectos", "Torres", "Manzanas", "Niveles", "Modelos", "Apartamentos / lotes", "Amenidades", "Precios y disponibilidad demo"].map((item) => <Badge key={item} tone="slate">{item}</Badge>)}
-            </div>
-          </div>
-          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
-            <h4 className="text-xl font-black text-slate-950">Fuentes previstas</h4>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {["Sitio web del prospecto", "Redes sociales públicas", "Documentación pública", "Carga manual opcional"].map((item) => <Badge key={item} tone="blue">{item}</Badge>)}
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <div ref={(element) => { phaseSectionRefs.current[4] = element; }} className="grid scroll-mt-64 gap-5">
+      <div id="demo-intelligence" ref={(element) => { phaseSectionRefs.current[4] = element; }} className="grid scroll-mt-64 gap-5">
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h3 className="text-3xl font-black text-slate-950">Inyección operacional controlada</h3>
-              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Activa 20 operaciones simuladas para demostrar cómo cambian páginas, prioridades y recomendaciones sin integrar servicios reales.</p>
+              <h3 className="text-3xl font-black text-slate-950">H-OperIA Intelligence</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Transforma señales de Reservas, Vendedoras, Mensajería, Marta WhatsApp y Marta Voz / Vapi en riesgos, oportunidades, prioridades y recomendaciones.</p>
             </div>
             <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Demo activa" : "Sin demo activa"}</Badge>
           </div>
@@ -1995,13 +1988,35 @@ function DemoPage() {
           </div>
           <div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar 20 clientes simulados</button></div>
         </Card>
-        <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Esto cambió aquí; vamos a verlo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mapa breve de páginas impactadas para conducir la demostración después de la inyección.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div><div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{derivedChanges.map((item) => <div key={`${item.phase}-${item.page}`} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">{item.phase}</Badge><Badge tone="blue">{item.page}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><div className="mt-3 text-sm font-black uppercase tracking-[0.16em] text-slate-600">{item.section}</div><h4 className="mt-3 text-xl font-black text-slate-950">{item.change}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700"><span className="font-black text-slate-950">Qué observar:</span> {item.observation}</p><button onClick={() => presentImpactedSection(item.targetId)} className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Ir a esta sección</button></div>)}</div></Card>
+        <Card>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h3 className="text-3xl font-black text-slate-950">Señales operacionales transformadas</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada señal conserva su fuente para distinguir reservas, seguimiento humano, mensajería, WhatsApp y voz / Vapi.</p>
+            </div>
+            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedIntelligenceSignals.length} señales</Badge>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {simulatedIntelligenceSignals.map((signal) => (
+              <div key={signal.id} className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <Badge tone={statusTone[signal.priority] || "violet"}>{signal.priority}</Badge>
+                  <span className="text-xs font-black uppercase tracking-[0.16em] text-violet-900">{signal.source}</span>
+                </div>
+                <h4 className="mt-3 text-lg font-black text-slate-950">{signal.title}</h4>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{signal.summary}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+        <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Esto cambió aquí; vamos a verlo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mapa navegable de páginas y secciones impactadas después de la inyección.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div><div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{derivedChanges.map((item) => <div key={`${item.phase}-${item.page}-${item.source}`} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">{item.phase}</Badge><Badge tone="blue">{item.page}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><div className="mt-3 flex flex-wrap gap-2"><Badge tone="violet">Fuente · {item.source}</Badge></div><div className="mt-3 text-sm font-black uppercase tracking-[0.16em] text-slate-600">{item.section}</div><h4 className="mt-3 text-xl font-black text-slate-950">{item.change}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700"><span className="font-black text-slate-950">Cambio visible:</span> {item.observation}</p><button onClick={() => presentImpactedSection(item.targetId)} className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Ir a {item.page}</button></div>)}</div></Card>
       </div>
 
       <div id="demo-executive-close" ref={(element) => { phaseSectionRefs.current[5] = element; }} className="scroll-mt-64">
         <Card>
         <h3 className="text-3xl font-black text-slate-950">Centro de consultas ejecutivas</h3>
         <p className="mt-3 text-base font-semibold leading-7 text-slate-700">A continuación escriba su pregunta o sus preguntas, una por una. Al terminar cada pregunta presione Enter para agregarla al listado.</p>
+        <p className="mt-3 rounded-2xl bg-slate-50 p-4 text-base font-black leading-7 text-slate-900">Las reservas generan oportunidades. Las personas generan contexto. H-OperIA transforma ambas en decisiones ejecutables.</p>
         <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
           <input value={executiveQuery} onChange={(e) => setExecutiveQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addExecutiveQuestion(); }} className="min-w-0 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold outline-none" placeholder="Escribir pregunta ejecutiva individual" />
           <button onClick={addExecutiveQuestion} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><Bot size={16} className="mr-2 inline" />Ingrese su pregunta individualmente</button>
@@ -2053,6 +2068,32 @@ function DemoPage() {
           </div>
         </div>
         </Card>
+      </div>
+
+      <div id="demo-technical-inventory" className="scroll-mt-64">
+      <Card>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <h3 className="text-3xl font-black text-slate-950">Inventario Demo Reutilizable</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Sección auxiliar técnica para construir demos reutilizables a partir de información pública del proyecto.</p>
+          </div>
+          <Badge tone="slate">Sección auxiliar técnica</Badge>
+        </div>
+        <div className="mt-5 grid gap-5 xl:grid-cols-2">
+          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <h4 className="text-xl font-black text-slate-950">Información prevista</h4>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Proyectos", "Torres", "Manzanas", "Niveles", "Modelos", "Apartamentos / lotes", "Amenidades", "Precios y disponibilidad demo"].map((item) => <Badge key={item} tone="slate">{item}</Badge>)}
+            </div>
+          </div>
+          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <h4 className="text-xl font-black text-slate-950">Fuentes previstas</h4>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Sitio web del prospecto", "Redes sociales públicas", "Documentación pública", "Carga manual opcional"].map((item) => <Badge key={item} tone="blue">{item}</Badge>)}
+            </div>
+          </div>
+        </div>
+      </Card>
       </div>
     </div>
   );
