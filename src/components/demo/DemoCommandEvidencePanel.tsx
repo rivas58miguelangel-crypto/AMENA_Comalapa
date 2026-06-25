@@ -147,14 +147,14 @@ export default function DemoCommandEvidencePanel({
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <div className="text-sm font-black uppercase tracking-[0.22em] text-amber-600">
-            Fase 04
+            FASE 04
           </div>
           <h3 className="mt-2 text-3xl font-black text-slate-950">
-            Centro de Mando y Evidencia Operacional
+            FASE 04 Centro de Mando y Evidencia de la Operación
           </h3>
           <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
-            Vista consolidada de la corrida, su trazabilidad, evidencias y
-            estado de gobierno.
+            Vista consolidada de la operación ampliada después de cargar la
+            Empresa Demo, su trazabilidad, evidencias y estado de gobierno.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -165,73 +165,90 @@ export default function DemoCommandEvidencePanel({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <SummaryItem label="DemoRunId" value={demoRunIdShort} />
-        <SummaryItem
-          label="Empresa"
-          value={demoContext?.prospectCompanyName || "Pendiente"}
-        />
-        <SummaryItem
-          label="Proyecto"
-          value={demoContext?.projectName || "Proyecto Comalapa"}
-        />
-        <SummaryItem
-          label="Fuente"
-          value={demoContext ? "Demo local" : "Pendiente"}
-        />
-        <SummaryItem
-          label="Ultima actualizacion"
-          value={demoContext?.injectedAt || "Pendiente"}
-        />
-      </div>
-
-      <div className="mt-5 rounded-3xl border border-slate-100 bg-slate-50 p-5">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h4 className="text-xl font-black text-slate-950">
-              Cadena de trazabilidad
-            </h4>
-            <p className="mt-1 text-sm font-semibold text-slate-700">
-              Lectura compacta desde la reserva hasta la evidencia revisable.
-            </p>
+      <div className="mt-5 rounded-3xl border border-amber-100 bg-amber-50 p-5">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">
+            Capa 01 · Narrativa ejecutiva
           </div>
-          <StatusBadge tone="blue">
-            {counts.reservations + counts.messages + counts.whatsappFollowups}{" "}
-            eventos visibles
-          </StatusBadge>
+          <h4 className="mt-2 text-xl font-black text-slate-950">
+            Qué está ocurriendo
+          </h4>
+          <p className="mt-1 text-sm font-semibold text-slate-700">
+            Lectura compacta de la operación ampliada y su avance visible.
+          </p>
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-5">
-          {traceabilitySteps.map((step, index) => (
-            <div
-              key={step.label}
-              className="rounded-2xl border border-slate-200 bg-white p-4"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-600">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <StatusBadge tone={step.ready ? "green" : "amber"}>
-                  {step.ready ? "Visible" : "Pendiente"}
-                </StatusBadge>
-              </div>
-              <div className="mt-3 text-base font-black text-slate-950">
-                {step.label}
-              </div>
-              <div className="mt-1 text-sm font-semibold leading-6 text-slate-700">
-                {step.value}
-              </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <SummaryItem label="DemoRunId" value={demoRunIdShort} />
+          <SummaryItem
+            label="Empresa"
+            value={demoContext?.prospectCompanyName || "Pendiente"}
+          />
+          <SummaryItem
+            label="Proyecto"
+            value={demoContext?.projectName || "Proyecto Comalapa"}
+          />
+          <SummaryItem
+            label="Fuente"
+            value={demoContext ? "Demo local" : "Pendiente"}
+          />
+          <SummaryItem
+            label="Ultima actualizacion"
+            value={demoContext?.injectedAt || "Pendiente"}
+          />
+        </div>
+
+        <div className="mt-5 rounded-3xl border border-slate-100 bg-white p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h4 className="text-xl font-black text-slate-950">
+                Cadena de trazabilidad
+              </h4>
+              <p className="mt-1 text-sm font-semibold text-slate-700">
+                Lectura compacta desde la reserva hasta la evidencia revisable.
+              </p>
             </div>
-          ))}
+            <StatusBadge tone="blue">
+              {counts.reservations + counts.messages + counts.whatsappFollowups}{" "}
+              eventos visibles
+            </StatusBadge>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-5">
+            {traceabilitySteps.map((step, index) => (
+              <div
+                key={step.label}
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-600">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <StatusBadge tone={step.ready ? "green" : "amber"}>
+                    {step.ready ? "Visible" : "Pendiente"}
+                  </StatusBadge>
+                </div>
+                <div className="mt-3 text-base font-black text-slate-950">
+                  {step.label}
+                </div>
+                <div className="mt-1 text-sm font-semibold leading-6 text-slate-700">
+                  {step.value}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_0.6fr]">
-        <div>
+        <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-5">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+            Capa 02 · Evidencia de la Operación
+          </div>
           <h4 className="text-xl font-black text-slate-950">
             Evidencia administrativa visible
           </h4>
           <p className="mt-1 text-sm font-semibold text-slate-700">
-            Modulos impactados, evidencia disponible y estado actual.
+            Qué demuestra que ocurrió después de cargar la Empresa Demo:
+            módulos impactados, evidencia disponible y estado actual.
           </p>
           <div className="mt-4 overflow-hidden rounded-3xl border border-slate-200">
             <div className="overflow-x-auto">
@@ -282,12 +299,15 @@ export default function DemoCommandEvidencePanel({
         </div>
 
         <div className="rounded-3xl border border-violet-100 bg-violet-50 p-5">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">
+            Capa 03 · Información técnica de soporte
+          </div>
           <h4 className="text-xl font-black text-slate-950">
             Gobierno de la corrida
           </h4>
           <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">
-            Lectura conceptual. No ejecuta transiciones ni procesos de
-            recuperacion.
+            Qué infraestructura respalda la demostración. Lectura conceptual;
+            no ejecuta transiciones ni procesos de recuperacion.
           </p>
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-white p-4">

@@ -51,7 +51,7 @@ const menu = [
   { id: "campaignDelivery", label: "Campañas", icon: Send },
   { id: "funnels", label: "Embudos", icon: Layers3 },
   { id: "dashboards", label: "Inteligencia Operativa", icon: BarChart3 },
-  { id: "demo", label: "Guía Demo", icon: Smartphone },
+  { id: "demo", label: "Centro Demo", icon: Smartphone },
 ];
 
 const martaSync = {
@@ -201,7 +201,7 @@ const clientOperationalProfile: ClientOperationalProfile = {
     nextActionsDetail: "Llamar antes de 5 PM para confirmar prima; si no responde, contactar a la esposa y enviar resumen por WhatsApp/email.",
   },
   senalesIa: {
-    summary: "Cliente con alta intención de compra. H-Operia Intelligence detectó sensibilidad financiera moderada y sugiere intervención humana hoy mismo, asociando la llamada, la simulación bancaria y los compromisos al expediente operativo. La conversación debe confirmar monto, resolver dudas de crédito y dejar evidencia en el timeline.",
+    summary: "Cliente con alta intención de compra. H-OperIA Intelligence detectó sensibilidad financiera moderada y sugiere intervención humana hoy mismo, asociando la llamada, la simulación bancaria y los compromisos al expediente operativo. La conversación debe confirmar monto, resolver dudas de crédito y dejar evidencia en el timeline.",
     signals: [
       { title: "Intención", value: "Alta", color: "green" },
       { title: "Objeción", value: "Financiamiento", color: "amber" },
@@ -213,14 +213,14 @@ const clientOperationalProfile: ClientOperationalProfile = {
     { title: "WhatsApp", value: "Confirmación enviada" },
     { title: "Email", value: "PDF abierto" },
     { title: "Calendario", value: "Cita creada" },
-    { title: "Evidencia Operacional", value: "Log insertado" },
-    { title: "Operaciones Comerciales", value: "Pipeline actualizado" },
+    { title: "Evidencia de la Operación", value: "Log insertado" },
+    { title: "Registro de Seguimiento Comercial", value: "Pipeline actualizado" },
   ],
   timeline: [
     { time: "10:04", title: "Reserva recibida desde Reservas AMENA", description: "El Centro de Mando crea el expediente operacional vivo." },
     { time: "10:05", title: "WhatsApp enviado", description: "Confirmación de reserva y próximos pasos." },
     { time: "10:06", title: "Email enviado", description: "PDF, brochure y documentos asociados." },
-    { time: "10:08", title: "H-Operia Intelligence analiza señales", description: "Riesgo financiero moderado detectado." },
+    { time: "10:08", title: "H-OperIA Intelligence analiza señales", description: "Riesgo financiero moderado detectado." },
     { time: "10:12", title: "Cita financiera agendada", description: "Reunión mañana 3:30 PM." },
   ],
   comunicaciones: [
@@ -234,7 +234,7 @@ const clientOperationalProfile: ClientOperationalProfile = {
         { from: "Carlos Méndez", time: "10:24 AM", text: "También quisiera que mi esposa reciba el detalle antes de la cita.", tag: "Decisor secundario" },
       ],
       actions: ["Enviar simulación bancaria", "Enviar recordatorio de cita", "Enviar checklist documental"],
-      recommendation: "H-Operia Intelligence sugiere una respuesta tranquila; la vendedora revisa tono, monto pendiente y destinatarios antes de enviar.",
+      recommendation: "H-OperIA Intelligence sugiere una respuesta tranquila; la vendedora revisa tono, monto pendiente y destinatarios antes de enviar.",
     },
     {
       channel: "Email Operacional",
@@ -246,7 +246,7 @@ const clientOperationalProfile: ClientOperationalProfile = {
         { from: "Carlos Méndez", time: "10:18 AM", text: "El cliente abrió el PDF de condiciones y descargó el brochure del proyecto.", tag: "Apertura detectada" },
       ],
       actions: ["Enviar resumen financiero", "Enviar PDF de garantías", "Enviar avance de construcción"],
-      recommendation: "H-Operia Intelligence sugiere preparar un correo ejecutivo con simulación, garantías y próximos pasos antes de la llamada humana.",
+      recommendation: "H-OperIA Intelligence sugiere preparar un correo ejecutivo con simulación, garantías y próximos pasos antes de la llamada humana.",
     },
   ],
   propuestasMarta: [
@@ -386,7 +386,7 @@ function PageHeader({ title, subtitle, icon: Icon, sync = 80, badges = [], syncN
             <div className="h-3 rounded-full bg-emerald-300" style={{ width: `${sync}%` }} />
           </div>
           <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">
-            {syncNote || "Indica qué tanto este módulo conecta información real, señales operativas y criterio humano. Marta acompaña conversaciones; H-Operia Intelligence analiza señales; el equipo humano revisa, decide y ejecuta."}
+            {syncNote || "Indica qué tanto este módulo conecta información real, señales operativas y criterio humano. Marta acompaña conversaciones; H-OperIA Intelligence analiza señales; el equipo humano revisa, decide y ejecuta."}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {badges.map((b) => <Badge key={b} tone="dark">{b}</Badge>)}
@@ -428,7 +428,7 @@ function Metric({ title, value, note, tone = "slate", icon: Icon = Activity, onC
   );
 }
 
-function AiObservation({ title = "Observaciones estratégicas de H-Operia Intelligence", children }) {
+function AiObservation({ title = "Observaciones estratégicas de H-OperIA Intelligence", children }) {
   return (
     <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6">
       <div className="flex items-center gap-3">
@@ -536,23 +536,23 @@ function ExecutivePage() {
     <div className="space-y-5">
       <PageHeader
         title="Centro Ejecutivo"
-        subtitle="Vista semanal para Director General y Director Comercial: prioridades, riesgos, ingresos, acompañamiento del equipo, lectura de H-Operia Intelligence y acciones concretas para decidir con criterio operativo."
+        subtitle="Vista semanal para Director General y Director Comercial: prioridades, riesgos, ingresos, acompañamiento del equipo, lectura de H-OperIA Intelligence y acciones concretas para decidir con criterio operativo."
         icon={MonitorCog}
         sync={martaSync.executive}
         badges={[REPORT_DATE, "Tercera semana de mayo 2026", "Inteligencia estratégica"]}
-        syncNote="Este porcentaje resume qué tanto H-Operia Intelligence cruza señales internas, riesgos, recomendaciones y patrones operativos para que la dirección revise, decida y ejecute con criterio humano."
+        syncNote="Este porcentaje resume qué tanto H-OperIA Intelligence cruza señales internas, riesgos, recomendaciones y patrones operativos para que la dirección revise, decida y ejecute con criterio humano."
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Metric title="Ingresos recibidos" value="$184,500" note="Reserva a entrega · corte 15 mayo 2026" tone="green" icon={BadgeDollarSign} />
         <Metric title="Clientes críticos" value="17" note="Riesgo financiero/documental" tone="red" icon={AlertTriangle} />
-        <Metric title="Integración H-Operia Intelligence" value="86%" note="Promedio operativo" tone="violet" icon={Bot} />
+        <Metric title="Integración H-OperIA Intelligence" value="86%" note="Promedio operativo" tone="violet" icon={Bot} />
         <Metric title="Acciones hoy" value="43" note="Sugeridas para revisión directiva" tone="blue" icon={Target} />
       </div>
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h3 className="text-3xl font-black text-slate-950">Consulta ejecutiva asistida</h3>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">H-Operia Intelligence transforma preguntas directivas en desgloses verificables y conclusiones accionables.</p>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">H-OperIA Intelligence transforma preguntas directivas en desgloses verificables y conclusiones accionables.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {["Texto ejecutivo", "Cuadro comparativo", "Dashboard", "PDF para junta"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
@@ -589,7 +589,7 @@ function ExecutivePage() {
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <DetailStack
           title="Prioridades ejecutivas de la semana"
-          subtitle="Acciones que H-Operia Intelligence recomienda revisar en comité comercial."
+          subtitle="Acciones que H-OperIA Intelligence recomienda revisar en comité comercial."
           items={[
             { title: "Instagram genera volumen, pero formaliza 18% menos que referidos.", text: "Acción: revisar promesas de campaña, calidad de segmentación y consistencia entre anuncio, WhatsApp y seguimiento de vendedoras.", badge: "Marketing", tone: "blue" },
             { title: "Tres vendedoras necesitan más acompañamiento con propuestas asistidas.", text: "Acción: coordinar revisión diaria de propuestas antes de contactar clientes y dar seguimiento claro por vendedora.", badge: "Equipo ventas", tone: "amber" },
@@ -598,7 +598,7 @@ function ExecutivePage() {
           ]}
         />
         <AiObservation>
-          <p>La empresa ya no debe dirigir solo por percepción. H-Operia Intelligence aporta contexto para que los equipos revisen respuestas, analicen documentos, registren compromisos y evalúen campañas por ingresos reales, no solo por leads.</p>
+          <p>La empresa ya no debe dirigir solo por percepción. H-OperIA Intelligence aporta contexto para que los equipos revisen respuestas, analicen documentos, registren compromisos y evalúen campañas por ingresos reales, no solo por leads.</p>
           <p className="mt-3">El nivel de sincronización no mide “actividad decorativa”; muestra cuánta inteligencia operacional real se está usando para decidir mejor, dar seguimiento claro y evitar que cada equipo trabaje con información incompleta.</p>
         </AiObservation>
       </div>
@@ -622,11 +622,11 @@ function ClientPage() {
     <div className="space-y-5">
       <PageHeader
         title="Perfil Operacional del Cliente"
-        subtitle="Expediente vivo desde la reserva hasta la entrega: Marta acompaña conversaciones, H-Operia Intelligence ordena señales y la vendedora revisa tono, prioridad y siguiente paso."
+        subtitle="Expediente vivo desde la reserva hasta la entrega: Marta acompaña conversaciones, H-OperIA Intelligence ordena señales y la vendedora revisa tono, prioridad y siguiente paso."
         icon={UserRound}
         sync={martaSync.client}
         badges={[REPORT_DATE, profile.cliente.name, profile.pipeline.status]}
-        syncNote="Este porcentaje indica qué tan conectado está el expediente post-reserva: Marta acompaña dudas y conversaciones; H-Operia Intelligence interpreta señales; la vendedora revisa y ejecuta el siguiente paso."
+        syncNote="Este porcentaje indica qué tan conectado está el expediente post-reserva: Marta acompaña dudas y conversaciones; H-OperIA Intelligence interpreta señales; la vendedora revisa y ejecuta el siguiente paso."
       />
 
       <Card>
@@ -655,7 +655,7 @@ function ClientPage() {
           <div className="rounded-2xl bg-violet-600 p-3 text-white font-black">IA</div>
           <div>
             <h2 className="text-3xl font-black text-slate-950">Marta · Acompañamiento al Cliente</h2>
-            <p className="text-base font-semibold text-slate-700">Marta acompaña conversaciones, H-Operia Intelligence interpreta señales y la vendedora valida el siguiente paso.</p>
+            <p className="text-base font-semibold text-slate-700">Marta acompaña conversaciones, H-OperIA Intelligence interpreta señales y la vendedora valida el siguiente paso.</p>
           </div>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-4">
@@ -922,7 +922,7 @@ function DocumentsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Documentos del Cliente" subtitle="Gestión documental desde visión general hasta microdetalle: Marta acompaña solicitudes y aclaraciones; H-Operia Intelligence analiza fricciones, vencimientos y prioridades; el equipo valida cada acción." icon={FileText} sync={martaSync.documents} badges={[REPORT_DATE, "Lectura H-Operia Intelligence", "Checklist operativo"]} syncNote="Este porcentaje combina el acompañamiento de Marta en solicitudes y aclaraciones documentales con la lectura de H-Operia Intelligence para que ventas, financiera y legal revisen, decidan y ejecuten próximos pasos." />
+      <PageHeader title="Documentos del Cliente" subtitle="Gestión documental desde visión general hasta microdetalle: Marta acompaña solicitudes y aclaraciones; H-OperIA Intelligence analiza fricciones, vencimientos y prioridades; el equipo valida cada acción." icon={FileText} sync={martaSync.documents} badges={[REPORT_DATE, "Lectura H-OperIA Intelligence", "Checklist operativo"]} syncNote="Este porcentaje combina el acompañamiento de Marta en solicitudes y aclaraciones documentales con la lectura de H-OperIA Intelligence para que ventas, financiera y legal revisen, decidan y ejecuten próximos pasos." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="A la espera" value="147" note="35 reservas con documentos pendientes" tone="slate" icon={ClipboardCheck} onClick={() => setActiveDoc("espera")} active={activeDoc === "espera"} />
         <Metric title="Recibidos" value="96" note="PDF/JPG cargados al expediente" tone="blue" icon={UploadCloud} onClick={() => setActiveDoc("recibidos")} active={activeDoc === "recibidos"} />
@@ -933,10 +933,10 @@ function DocumentsPage() {
         <h3 className="text-3xl font-black text-slate-950">Matriz documental operativa</h3>
         <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Primera capa: visión por tipo de documento, volumen, mora, observación y acción concreta.</p>
         <div className="mt-5">
-          <SimpleTable columns={["Documento", "Cantidad / estado", "Formato", "Observación H-Operia Intelligence", "Acción vendedora", "Evidencia"]} rows={[
+          <SimpleTable columns={["Documento", "Cantidad / estado", "Formato", "Observación H-OperIA Intelligence", "Acción vendedora", "Evidencia"]} rows={[
             ["DUI", "15 recibidos / 4 pendientes", "PDF/JPG", "Legibles en 13 casos; 2 imágenes borrosas", "Solicitar reenvío solo a casos observados", "Archivo"],
             ["Constancias laborales", "18 pendientes / mora promedio 6 días", "PDF", "Retraso recurrente por tiempos internos de empresas", "Enviar carta modelo para solicitar constancia en RRHH", "Propuesta asistida"],
-            ["Comprobante de reserva", "31 recibidos / 3 en revisión", "PDF/Imagen", "2 comprobantes no muestran referencia bancaria", "Pedir comprobante completo", "Evidencia Operacional"],
+            ["Comprobante de reserva", "31 recibidos / 3 en revisión", "PDF/Imagen", "2 comprobantes no muestran referencia bancaria", "Pedir comprobante completo", "Evidencia de la Operación"],
             ["Estados de cuenta", "22 esperados / 9 recibidos", "PDF", "Algunos clientes no entienden qué meses enviar", "Enviar checklist con ejemplo visual", "WhatsApp"],
           ]} />
         </div>
@@ -952,11 +952,11 @@ function DocumentsPage() {
           { title: "Acción masiva", text: "Enviar carta modelo editable para que el cliente la entregue en su puesto de trabajo y reduzca fricción con RRHH.", badge: "Sugerencia para revisión humana", tone: "violet" },
         ]} />
         <DetailStack title="Detalle" subtitle="Seguimiento por cliente." items={[
-          { title: "Carlos Méndez", text: "DUI recibido, constancia laboral pendiente y comprobante parcial. H-Operia Intelligence sugiere llamada breve; Marta puede apoyar el checklist por WhatsApp.", badge: "Prioridad alta", tone: "red" },
+          { title: "Carlos Méndez", text: "DUI recibido, constancia laboral pendiente y comprobante parcial. H-OperIA Intelligence sugiere llamada breve; Marta puede apoyar el checklist por WhatsApp.", badge: "Prioridad alta", tone: "red" },
           { title: "Ana López", text: "Documentos completos, pendiente validación financiera. No requiere presión comercial en este momento.", badge: "Validar", tone: "blue" },
         ]} />
         <AiObservation>
-          <p>La gestión documental debe enseñar al equipo dónde se atasca el cliente. Marta acompaña la solicitud; H-Operia Intelligence explica fricción, prioridad, texto sugerido, escalamiento e impacto sobre la formalización.</p>
+          <p>La gestión documental debe enseñar al equipo dónde se atasca el cliente. Marta acompaña la solicitud; H-OperIA Intelligence explica fricción, prioridad, texto sugerido, escalamiento e impacto sobre la formalización.</p>
         </AiObservation>
       </div>
     </div>
@@ -966,7 +966,7 @@ function DocumentsPage() {
 function PaymentsPage() {
   return (
     <div className="space-y-5">
-      <PageHeader title="Pagos y Compromisos" subtitle="Control del período desde la reserva hasta la entrega: ingresos recibidos, pendientes, atrasos, justificaciones, compromisos, evidencia y prioridades financieras sugeridas por H-Operia Intelligence." icon={CreditCard} sync={martaSync.payments} badges={[REPORT_DATE, "Reserva a entrega", "Revisión humana"]} syncNote="Este porcentaje muestra qué tanto H-Operia Intelligence cruza pagos, compromisos, atrasos, justificaciones y evidencias para sugerir prioridades de seguimiento financiero que el equipo revisa, decide y ejecuta." />
+      <PageHeader title="Pagos y Compromisos" subtitle="Control del período desde la reserva hasta la entrega: ingresos recibidos, pendientes, atrasos, justificaciones, compromisos, evidencia y prioridades financieras sugeridas por H-OperIA Intelligence." icon={CreditCard} sync={martaSync.payments} badges={[REPORT_DATE, "Reserva a entrega", "Revisión humana"]} syncNote="Este porcentaje muestra qué tanto H-OperIA Intelligence cruza pagos, compromisos, atrasos, justificaciones y evidencias para sugerir prioridades de seguimiento financiero que el equipo revisa, decide y ejecuta." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Ingresos recibidos" value="$184,500" note="Etapa reserva-entrega · corte 15 mayo 2026" tone="green" icon={WalletCards} />
         <Metric title="Pendiente" value="$58,200" note="Primas y gastos" tone="amber" icon={Clock} />
@@ -1014,7 +1014,7 @@ function ServicePage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Servicio al Cliente" subtitle="Tickets, incidencias, garantías, acuerdos, tiempos de atención, reclamos, consultas, escalaciones y aprendizaje operativo para directores y vendedoras." icon={Headphones} sync={martaSync.service} badges={[REPORT_DATE, "Tiempos de atención", "Escalaciones"]} syncNote="Este porcentaje combina el apoyo de Marta en respuestas y seguimiento al cliente con la lectura de H-Operia Intelligence para ordenar tickets, escalaciones y aprendizajes repetidos." />
+      <PageHeader title="Servicio al Cliente" subtitle="Tickets, incidencias, garantías, acuerdos, tiempos de atención, reclamos, consultas, escalaciones y aprendizaje operativo para directores y vendedoras." icon={Headphones} sync={martaSync.service} badges={[REPORT_DATE, "Tiempos de atención", "Escalaciones"]} syncNote="Este porcentaje combina el apoyo de Marta en respuestas y seguimiento al cliente con la lectura de H-OperIA Intelligence para ordenar tickets, escalaciones y aprendizajes repetidos." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Tickets abiertos" value="34" note="7 críticos" tone="amber" icon={Headphones} onClick={() => setActiveService("tickets")} active={activeService === "tickets"} />
         <Metric title="Tiempo de atención" value="1h 12m" note="Promedio; meta máxima 4h" tone="green" icon={Clock} onClick={() => setActiveService("tiempo")} active={activeService === "tiempo"} />
@@ -1036,9 +1036,9 @@ function ServicePage() {
           ["ESC-044", "Torre 5", "Diferencia visual vs Torre 3", "Construcción", "Preparar explicación técnica para ventas"],
           ["ESC-047", "Garantía", "Consulta legal repetida", "Legal", "Crear respuesta estándar validada"],
         ]} />
-        <AiObservation title="Aprendizajes operativos de H-Operia Intelligence">
+        <AiObservation title="Aprendizajes operativos de H-OperIA Intelligence">
           <p>Los tickets no deben verse solo como reclamos. Son señales de aprendizaje. Si varios clientes preguntan lo mismo, la empresa debe convertirlo en guion, PDF, respuesta estándar o mejora del reporte semanal.</p>
-          <p className="mt-3">H-Operia Intelligence recomienda explicar internamente cada escalación con pedagogía: qué pasó, por qué importa, cómo responder y qué debe aprender ventas para la próxima conversación.</p>
+          <p className="mt-3">H-OperIA Intelligence recomienda explicar internamente cada escalación con pedagogía: qué pasó, por qué importa, cómo responder y qué debe aprender ventas para la próxima conversación.</p>
         </AiObservation>
       </div>
     </div>
@@ -1048,7 +1048,7 @@ function ServicePage() {
 function SellersPage() {
   return (
     <div className="space-y-5">
-      <PageHeader title="Gestión de Vendedoras" subtitle="Mapa de apoyo comercial por vendedora: seguimiento, uso del acompañamiento Marta, formularios completados, calidad de información capturada y sugerencias para fortalecer al equipo." icon={Users} sync={martaSync.sellers} badges={[REPORT_DATE, "General → vendedora → formulario", "Acompañamiento"]} syncNote="Este porcentaje mide cómo H-Operia Intelligence usa formularios, señales comerciales, seguimientos y resultados para detectar necesidades de apoyo, elevar capacidades humanas y dejar la decisión en manos del equipo comercial." />
+      <PageHeader title="Gestión de Vendedoras" subtitle="Mapa de apoyo comercial por vendedora: seguimiento, uso del acompañamiento Marta, formularios completados, calidad de información capturada y sugerencias para fortalecer al equipo." icon={Users} sync={martaSync.sellers} badges={[REPORT_DATE, "General → vendedora → formulario", "Acompañamiento"]} syncNote="Este porcentaje mide cómo H-OperIA Intelligence usa formularios, señales comerciales, seguimientos y resultados para detectar necesidades de apoyo, elevar capacidades humanas y dejar la decisión en manos del equipo comercial." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Vendedoras" value="8" note="Equipo activo" tone="blue" icon={Users} />
         <Metric title="Uso del acompañamiento Marta" value="76%" note="Promedio equipo" tone="violet" icon={Bot} />
@@ -1076,13 +1076,13 @@ function SellersPage() {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <InfoCard title="Fortaleza" value="Seguimiento claro y constante" detail="Registra acuerdos, llama dentro de ventanas recomendadas y revisa propuestas asistidas." />
             <InfoCard title="Riesgo" value="Carga operativa alta" detail="Tiene 28 clientes activos y 4 con sensibilidad financiera." />
-            <InfoCard title="Sugerencia H-Operia Intelligence" value="Priorizar casos financieros" detail="Atender primero clientes con compromisos en 72h." />
+            <InfoCard title="Sugerencia H-OperIA Intelligence" value="Priorizar casos financieros" detail="Atender primero clientes con compromisos en 72h." />
             <InfoCard title="Seguimiento vendedora" value="En proceso" detail="Campo para que la vendedora confirme qué hizo con la sugerencia asistida." />
           </div>
         </Card>
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Formularios operativos de vendedoras</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">La información no termina en la reserva. Cada contacto posterior genera datos personales, familiares, económicos y comerciales que deben alimentar el expediente y H-Operia Intelligence.</p>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">La información no termina en la reserva. Cada contacto posterior genera datos personales, familiares, económicos y comerciales que deben alimentar el expediente y H-OperIA Intelligence.</p>
           <div className="mt-5 space-y-3">
             <FormItem title="Formulario de llamada de pago" fields="Monto conversado, objeción real, decisor familiar, fecha prometida, tono emocional, evidencia." />
             <FormItem title="Formulario de información familiar" fields="Quién decide, preocupaciones del cónyuge, hijos, prioridades de ubicación, temor principal." />
@@ -1093,7 +1093,7 @@ function SellersPage() {
       </div>
       <AiObservation>
         <p>La página de vendedoras debe funcionar como mapa de acompañamiento: qué hacen bien, dónde necesitan apoyo, qué información falta capturar y cómo eso ayuda a clientes, financiera, construcción y dirección comercial.</p>
-        <p className="mt-3">H-Operia Intelligence ayuda a observar hábitos: registrar información, usar recomendaciones, completar llamadas, documentar objeciones y convertir conversaciones dispersas en inteligencia accionable.</p>
+        <p className="mt-3">H-OperIA Intelligence ayuda a observar hábitos: registrar información, usar recomendaciones, completar llamadas, documentar objeciones y convertir conversaciones dispersas en inteligencia accionable.</p>
       </AiObservation>
     </div>
   );
@@ -1106,7 +1106,7 @@ function CampaignsPage() {
       amount: "$62,000",
       summary: "Mayor volumen de leads, pero formalización más débil que referidos.",
       campaigns: {
-        modeloA: { title: "Campaña Instagram · Modelo A", result: "Alta atracción / formalización baja", diagnosis: "El anuncio promete vida premium, pero el flujo posterior no filtra capacidad financiera ni urgencia real.", action: "Agregar pregunta de presupuesto, CTA a simulación y retargeting a clientes que abrieron PDF.", marta: "H-Operia Intelligence detecta una señal temprana: volumen alto que puede saturar vendedoras si no se filtra intención y capacidad desde el primer contacto." },
+        modeloA: { title: "Campaña Instagram · Modelo A", result: "Alta atracción / formalización baja", diagnosis: "El anuncio promete vida premium, pero el flujo posterior no filtra capacidad financiera ni urgencia real.", action: "Agregar pregunta de presupuesto, CTA a simulación y retargeting a clientes que abrieron PDF.", marta: "H-OperIA Intelligence detecta una señal temprana: volumen alto que puede saturar vendedoras si no se filtra intención y capacidad desde el primer contacto." },
         torre3: { title: "Campaña Instagram · Torre 3 Avance Visible", result: "Buen interés / dudas por comparación", diagnosis: "La pintura exterior genera confianza, pero también preguntas sobre diferencias con otras torres.", action: "Usar reporte de construcción como soporte de campaña y preparar respuestas comparativas.", marta: "Conviene unir marketing con construcción para no prometer visualmente más de lo que ventas puede explicar." },
       },
     },
@@ -1140,7 +1140,7 @@ function CampaignsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Canales y Campañas" subtitle="Radiografía por canal y campaña: H-Operia Intelligence analiza promesas, calidad de lead, conversión y señales tempranas para que Marketing y Ventas decidan qué ajustar." icon={Megaphone} sync={martaSync.campaigns} badges={[REPORT_DATE, "Canales → campañas → análisis", "Recomendaciones"]} syncNote="Este porcentaje refleja qué tanto H-Operia Intelligence analiza canales, campañas, promesas, calidad de lead, conversión y señales tempranas para orientar decisiones comerciales revisadas por el equipo humano." />
+      <PageHeader title="Canales y Campañas" subtitle="Radiografía por canal y campaña: H-OperIA Intelligence analiza promesas, calidad de lead, conversión y señales tempranas para que Marketing y Ventas decidan qué ajustar." icon={Megaphone} sync={martaSync.campaigns} badges={[REPORT_DATE, "Canales → campañas → análisis", "Recomendaciones"]} syncNote="Este porcentaje refleja qué tanto H-OperIA Intelligence analiza canales, campañas, promesas, calidad de lead, conversión y señales tempranas para orientar decisiones comerciales revisadas por el equipo humano." />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <Metric title="Instagram" value="$62,000" note="Mayor volumen" tone="green" icon={BadgeDollarSign} onClick={() => selectChannel("instagram")} active={selectedChannel === "instagram"} />
         <Metric title="Referidos" value="$51,000" note="Mejor calidad" tone="blue" icon={Users} onClick={() => selectChannel("referrals")} active={selectedChannel === "referrals"} />
@@ -1158,7 +1158,7 @@ function CampaignsPage() {
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h3 className="text-3xl font-black text-slate-950">Campañas dentro del canal · {selectedChannelData.channel}</h3>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">{selectedChannelData.summary} Selecciona una campaña para abrir diagnóstico, lectura de H-Operia Intelligence y acciones que el equipo puede revisar y ejecutar.</p>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">{selectedChannelData.summary} Selecciona una campaña para abrir diagnóstico, lectura de H-OperIA Intelligence y acciones que el equipo puede revisar y ejecutar.</p>
           </div>
           <Badge tone="blue">Canal → campañas → lupa operativa</Badge>
         </div>
@@ -1166,10 +1166,10 @@ function CampaignsPage() {
           {Object.entries(selectedChannelData.campaigns as Record<string, { title: string; result: string; diagnosis: string; action: string; marta: string }>).map(([key, campaign]) => <DrillButton key={key} active={selectedCampaign === key} onClick={() => setSelectedCampaign(key)}>{campaign.title}</DrillButton>)}
         </div>
         <div className="mt-5"><CampaignCard title={currentCampaign.title} result={currentCampaign.result} diagnosis={currentCampaign.diagnosis} action={currentCampaign.action} /></div>
-        <div className="mt-5 rounded-3xl border border-violet-100 bg-violet-50 p-5 text-base font-semibold leading-8 text-slate-800"><span className="font-black text-slate-950">Comentario de H-Operia Intelligence:</span> {currentCampaign.marta}</div>
+        <div className="mt-5 rounded-3xl border border-violet-100 bg-violet-50 p-5 text-base font-semibold leading-8 text-slate-800"><span className="font-black text-slate-950">Comentario de H-OperIA Intelligence:</span> {currentCampaign.marta}</div>
       </Card>
       <AiObservation>
-        <p>H-Operia Intelligence recomienda analizar campañas como sistemas completos: promesa del anuncio, calidad del lead, respuesta inicial, conversación con vendedora, documentación, pagos e ingresos reales.</p>
+        <p>H-OperIA Intelligence recomienda analizar campañas como sistemas completos: promesa del anuncio, calidad del lead, respuesta inicial, conversación con vendedora, documentación, pagos e ingresos reales.</p>
         <p className="mt-3">Una señal temprana puede ser una campaña que genera muchos leads baratos pero consume tiempo, satura vendedoras y no formaliza. Ese riesgo operativo debe verse en esta página.</p>
       </AiObservation>
     </div>
@@ -1185,18 +1185,18 @@ function CampaignDeliveryPage() {
         <Metric title="Prospectos cargados" value="1,250" note="Archivo Excel validado" tone="blue" icon={UploadCloud} />
         <Metric title="Listos para envío" value="1,118" note="132 requieren limpieza" tone="green" icon={CheckCircle2} />
         <Metric title="Canales activos" value="3" note="WhatsApp, email y voz" tone="violet" icon={Layers3} />
-        <Metric title="Respuestas esperadas" value="18%" note="Estimación H-Operia Intelligence" tone="amber" icon={Bot} />
+        <Metric title="Respuestas esperadas" value="18%" note="Estimación H-OperIA Intelligence" tone="amber" icon={Bot} />
       </div>
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Carga de base de datos</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Se carga un Excel con nombre, teléfono, correo, fuente, interés, presupuesto estimado y notas. H-Operia Intelligence valida duplicados, campos faltantes y señales de baja calidad antes de que el equipo apruebe el envío.</p>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Se carga un Excel con nombre, teléfono, correo, fuente, interés, presupuesto estimado y notas. H-OperIA Intelligence valida duplicados, campos faltantes y señales de baja calidad antes de que el equipo apruebe el envío.</p>
           <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
             <UploadCloud className="mx-auto text-slate-600" size={42} />
             <h4 className="mt-4 text-2xl font-black text-slate-950">Subir archivo Excel</h4>
             <p className="mt-2 text-base font-semibold text-slate-700">Clientes potenciales · XLSX / CSV · Validación previa al envío.</p>
           </div>
-          <div className="mt-5"><SimpleTable columns={["Campo", "Estado", "Comentario H-Operia Intelligence"]} rows={[["Teléfono", "94% válido", "Normalizar formato +503"], ["Correo", "87% válido", "132 registros sin correo"], ["Interés", "72% clasificado", "Falta categorizar 350 prospectos"], ["Fuente", "Completa", "Lista para atribución de campaña"]]} /></div>
+          <div className="mt-5"><SimpleTable columns={["Campo", "Estado", "Comentario H-OperIA Intelligence"]} rows={[["Teléfono", "94% válido", "Normalizar formato +503"], ["Correo", "87% válido", "132 registros sin correo"], ["Interés", "72% clasificado", "Falta categorizar 350 prospectos"], ["Fuente", "Completa", "Lista para atribución de campaña"]]} /></div>
         </Card>
         <Card>
           <h3 className="text-3xl font-black text-slate-950">Canales de envío</h3>
@@ -1228,18 +1228,18 @@ function CampaignDeliveryPage() {
 function FunnelLibraryPage() {
   const [selectedFunnel, setSelectedFunnel] = useState("reserva");
   const funnels = {
-    reserva: { title: "Embudo de pre-reserva a formalización", stages: [["Lead interesado", "Origen: campaña, referido o Reservas AMENA", "Asignar vendedora y registrar fuente"], ["Pre-reserva", "Unidad seleccionada", "Enviar confirmación y próximos pasos"], ["Documentos", "Checklist en proceso", "H-Operia Intelligence detecta faltantes"], ["Pago", "Prima / gastos legales", "Seguimiento financiero"], ["Formalización", "Validación interna", "Cierre operativo"]] },
+    reserva: { title: "Embudo de pre-reserva a formalización", stages: [["Lead interesado", "Origen: campaña, referido o Reservas AMENA", "Asignar vendedora y registrar fuente"], ["Pre-reserva", "Unidad seleccionada", "Enviar confirmación y próximos pasos"], ["Documentos", "Checklist en proceso", "H-OperIA Intelligence detecta faltantes"], ["Pago", "Prima / gastos legales", "Seguimiento financiero"], ["Formalización", "Validación interna", "Cierre operativo"]] },
     reactivacion: { title: "Embudo de reactivación de prospectos", stages: [["Base histórica", "Excel o expediente operacional", "Limpiar datos"], ["Campaña", "WhatsApp, email o voz", "Medir respuesta"], ["Interés renovado", "Cliente responde", "Crear tarea"], ["Reserva potencial", "Explora unidad", "Agendar llamada"], ["Cierre", "Seguimiento humano", "Medir conversión"]] },
     referidos: { title: "Embudo de referidos", stages: [["Comprador actual", "Cliente satisfecho", "Solicitar referido"], ["Referido recibido", "Alta confianza", "Contacto rápido"], ["Exploración", "Unidad sugerida", "Mostrar avance y evidencia"], ["Pre-reserva", "Decisión más rápida", "Acompañamiento Marta"], ["Formalización", "Cierre con menor fricción", "Registrar aprendizaje"]] },
   };
   const current = funnels[selectedFunnel];
   return (
     <div className="space-y-5">
-      <PageHeader title="Archivo de Embudos de Ventas" subtitle="Biblioteca operativa para guardar, consultar y reutilizar embudos que convierten campañas, reservas, reactivaciones y referidos en aprendizaje comercial accionable." icon={Layers3} sync={martaSync.funnels} badges={[REPORT_DATE, "Plantillas reutilizables", "Aprendizaje comercial"]} syncNote="Este porcentaje indica qué tanto H-Operia Intelligence conserva patrones, etapas, mensajes, criterios de avance y aprendizajes para que el equipo decida qué repetir, ajustar o descartar." />
+      <PageHeader title="Archivo de Embudos de Ventas" subtitle="Biblioteca operativa para guardar, consultar y reutilizar embudos que convierten campañas, reservas, reactivaciones y referidos en aprendizaje comercial accionable." icon={Layers3} sync={martaSync.funnels} badges={[REPORT_DATE, "Plantillas reutilizables", "Aprendizaje comercial"]} syncNote="Este porcentaje indica qué tanto H-OperIA Intelligence conserva patrones, etapas, mensajes, criterios de avance y aprendizajes para que el equipo decida qué repetir, ajustar o descartar." />
       <div className="grid gap-4 md:grid-cols-3">
         <Metric title="Embudos guardados" value="12" note="Plantillas operativas" tone="blue" icon={Layers3} />
         <Metric title="Más efectivo" value="Referidos" note="Mayor conversión" tone="green" icon={Users} />
-        <Metric title="En revisión" value="3" note="Requieren ajuste H-Operia Intelligence" tone="amber" icon={Bot} />
+        <Metric title="En revisión" value="3" note="Requieren ajuste H-OperIA Intelligence" tone="amber" icon={Bot} />
       </div>
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -1257,7 +1257,7 @@ function FunnelLibraryPage() {
         </div>
       </Card>
       <AiObservation>
-        <p>H-Operia Intelligence recomienda guardar los embudos como activos comerciales reutilizables. Cada campaña exitosa debe dejar una plantilla: etapas, mensajes, criterios de avance, responsables, métricas y aprendizajes para futuras ejecuciones.</p>
+        <p>H-OperIA Intelligence recomienda guardar los embudos como activos comerciales reutilizables. Cada campaña exitosa debe dejar una plantilla: etapas, mensajes, criterios de avance, responsables, métricas y aprendizajes para futuras ejecuciones.</p>
       </AiObservation>
     </div>
   );
@@ -1275,7 +1275,7 @@ function DashboardsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Tableros Ejecutivos" subtitle="Tableros base, consultas ejecutivas por texto o voz y respuestas visuales con lupa por canal, modelo, sector o equipo comercial para decidir con contexto, no con vigilancia." icon={BarChart3} sync={martaSync.dashboards} badges={[REPORT_DATE, "Tableros base", "Texto y voz"]} syncNote="Este porcentaje muestra qué tanto H-Operia Intelligence desagrega preguntas ejecutivas, cruza métricas, detecta riesgos y presenta contexto para que la dirección revise, decida y ejecute con mayor claridad." />
+      <PageHeader title="Tableros Ejecutivos" subtitle="Tableros base, consultas ejecutivas por texto o voz y respuestas visuales con lupa por canal, modelo, sector o equipo comercial para decidir con contexto, no con vigilancia." icon={BarChart3} sync={martaSync.dashboards} badges={[REPORT_DATE, "Tableros base", "Texto y voz"]} syncNote="Este porcentaje muestra qué tanto H-OperIA Intelligence desagrega preguntas ejecutivas, cruza métricas, detecta riesgos y presenta contexto para que la dirección revise, decida y ejecute con mayor claridad." />
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Ingresos totales" value="$184,500" note="Por canal, producto y equipo" tone="green" icon={BadgeDollarSign} />
         <Metric title="Mejor canal" value="Instagram" note="$62,000; revisar calidad" tone="blue" icon={Megaphone} />
@@ -1306,8 +1306,8 @@ function DashboardsPage() {
         <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-5">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h4 className="text-xl font-black text-slate-950">Desglose propuesto por H-Operia Intelligence</h4>
-              <p className="mt-3 text-base font-semibold leading-8 text-slate-800">H-Operia Intelligence descompone la pregunta ejecutiva para revisar ingresos, conversión, acompañamiento humano y riesgos operativos antes de generar una conclusión. Puede modificar, eliminar o aceptar cada desglose antes de enviarlo.</p>
+              <h4 className="text-xl font-black text-slate-950">Desglose propuesto por H-OperIA Intelligence</h4>
+              <p className="mt-3 text-base font-semibold leading-8 text-slate-800">H-OperIA Intelligence descompone la pregunta ejecutiva para revisar ingresos, conversión, acompañamiento humano y riesgos operativos antes de generar una conclusión. Puede modificar, eliminar o aceptar cada desglose antes de enviarlo.</p>
             </div>
             <Badge tone="green">2 seleccionados</Badge>
           </div>
@@ -1332,11 +1332,11 @@ function DashboardsPage() {
             <button className="mt-4 rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black text-white">Enviar desgloses</button>
           </div>
           <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50 p-5">
-            <h4 className="text-xl font-black text-slate-950">Respuestas generadas por H-Operia Intelligence</h4>
+            <h4 className="text-xl font-black text-slate-950">Respuestas generadas por H-OperIA Intelligence</h4>
             <div className="mt-4 flex flex-wrap gap-2">
               {["Texto ejecutivo", "Cuadros comparativos", "Dashboard", "PDF descargable", "Imagen ejecutiva"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
             </div>
-            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">Al enviar los desgloses seleccionados, H-Operia Intelligence generará una conclusión ejecutiva en los formatos disponibles.</p>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">Al enviar los desgloses seleccionados, H-OperIA Intelligence generará una conclusión ejecutiva en los formatos disponibles.</p>
             <button className="mt-4 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><ClipboardCheck size={16} className="mr-2 inline" />Copiar conclusión para junta</button>
           </div>
         </div>
@@ -1371,7 +1371,7 @@ function DashboardsPage() {
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <AiObservation>
           <p>Recomendaciones: felicitar a VND-034 por uso criterioso del acompañamiento Marta y resultados; coordinar con Marketing ajustes en Instagram porque genera volumen pero menor calidad; reforzar campañas de referidos por mejor conversión e ingresos reales.</p>
-          <p className="mt-3">Al hacer lupa en Instagram, H-Operia Intelligence debe mostrar campañas concretas, ejemplos de promesas débiles, casos referenciales y acciones para mejorar segmentación, filtro financiero y seguimiento.</p>
+          <p className="mt-3">Al hacer lupa en Instagram, H-OperIA Intelligence debe mostrar campañas concretas, ejemplos de promesas débiles, casos referenciales y acciones para mejorar segmentación, filtro financiero y seguimiento.</p>
         </AiObservation>
         <Card>
           <h3 className="text-2xl font-black text-slate-950">Criterio de gobierno para voz y texto</h3>
@@ -1388,10 +1388,10 @@ function DemoPage() {
   const phases = [
     { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.", nextStep: "validar cliente, unidad, fuente, estado y evidencia visible." },
     { title: "FASE 02", name: "Marta · Acompañamiento Multicanal", text: "Marta acompaña por voz o texto y registra cada interacción como dato estructurado para evidencia, seguimiento e inteligencia.", nextStep: "revisar por separado Marta Voz / Vapi y Marta WhatsApp / Texto." },
-    { title: "FASE 03", name: "Operaciones Comerciales y Mensajería Operacional", text: "Desde clientes reservados mostraremos reportes de vendedoras, objeciones, prioridades, próximos pasos y coordinación interna.", nextStep: "revisar seguimiento comercial y mensajes operacionales del equipo." },
-    { title: "FASE 04", name: "Centro de Mando, Admin y Evidencia Operacional", text: "Consolidaremos datos de Reservas, Operaciones Comerciales, Mensajería Interna y Marta Multicanal.", nextStep: "validar fuentes, conteos, trazabilidad y evidencia administrativa." },
-    { title: "FASE 05", name: "H-OperIA Intelligence", text: "Transformaremos señales de reservas, vendedoras, mensajería y Marta en riesgos, oportunidades, prioridades y recomendaciones.", nextStep: "inyectar operaciones simuladas y revisar señales por fuente." },
-    { title: "FASE 06", name: "Cierre ejecutivo y próximos pasos", text: "Cerraremos con métricas, dashboards e inteligencia ejecutiva derivada de la operación.", nextStep: "generar respuesta ejecutiva y copiar conclusión para junta." },
+    { title: "FASE 03", name: "Registro de Seguimiento Comercial y Mensajes entre el Equipo", text: "Desde clientes reservados mostraremos reportes de vendedoras, objeciones, prioridades, próximos pasos y coordinación interna.", nextStep: "revisar seguimiento comercial y mensajes operacionales del equipo." },
+    { title: "FASE 04", name: "Centro de Mando y Evidencia de la Operación", text: "Consolidaremos datos de Reservas, Registro de Seguimiento Comercial, Mensajes entre el Equipo y Marta Multicanal.", nextStep: "validar fuentes, conteos, trazabilidad y evidencia administrativa." },
+    { title: "FASE 05", name: "H-OperIA Intelligence", text: "Transformaremos la operación ampliada en impactos visibles, riesgos, oportunidades, prioridades y recomendaciones.", nextStep: "cargar Empresa Demo y revisar los impactos generados por la operación." },
+    { title: "FASE 06", name: "Cierre ejecutivo y próximos pasos", text: "Consultaremos el inventario operacional con H-OperIA Intelligence para generar una lectura ejecutiva.", nextStep: "generar respuesta ejecutiva y copiar conclusión para junta." },
   ];
   const emptyVolunteer = { name: "", role: "", company: "", whatsapp: "", email: "" };
   const baseVolunteer = { name: "Andrea López", role: "Gerente comercial", company: "Proyecto Comalapa", whatsapp: "+503 7000-0000", email: "andrea@empresa.com", whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
@@ -1501,17 +1501,17 @@ function DemoPage() {
     { id: "sim-signal-01", demoRunId, source: "Reservas", title: "Flujo de reservas activo", summary: `${clients.length} clientes avanzaron o completaron reserva en la app publica.`, priority: "Media" },
     { id: "sim-signal-02", demoRunId, source: "Mensajeria", title: "Coordinacion interna generada", summary: `${messages.filter((item) => item.priority === "Alta").length} mensajes internos quedaron con prioridad alta.`, priority: "Alta" },
     { id: "sim-signal-03", demoRunId, source: "Vendedoras", title: "Seguimiento humano posterior", summary: `${reports.length} reportes de vendedoras conectan objeciones, necesidades y proximos pasos.`, priority: "Media" },
-    { id: "sim-signal-04", demoRunId, source: "H-Operia Intelligence", title: "Riesgo financiero temprano", summary: `${reports.filter((item) => item.objection === "Monto de prima").length} clientes mencionan prima o claridad financiera.`, priority: "Alta" },
+    { id: "sim-signal-04", demoRunId, source: "H-OperIA Intelligence", title: "Riesgo financiero temprano", summary: `${reports.filter((item) => item.objection === "Monto de prima").length} clientes mencionan prima o claridad financiera.`, priority: "Alta" },
     { id: "sim-signal-05", demoRunId, source: "Marta Voz / Vapi", title: "Intenciones de voz estructuradas", summary: `${vapiLogs.filter((item) => item.structuredOutput.wantsFinancing).length} llamadas detectan interes en financiamiento y salida estructurada lista para revision.`, priority: "Alta" },
     { id: "sim-signal-06", demoRunId, source: "Marta WhatsApp", title: "Seguimientos conversacionales activos", summary: `${whatsappFollowups.filter((item) => item.status === "Requiere respuesta humana").length} seguimientos de texto requieren intervencion humana posterior.`, priority: "Media" },
   ];
   const createSimulatedOperationalEvidence = (demoRunId, clients, messages, reports, signals, vapiLogs, whatsappFollowups) => [
     { id: "sim-evidence-01", demoRunId, page: "Aplicacion de Reservas", section: "Clientes/reservas", summary: `${clients.length} registros de reserva simulados`, status: "Visible" },
-    { id: "sim-evidence-02", demoRunId, page: "Mensajeria Operacional", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: "Visible" },
+    { id: "sim-evidence-02", demoRunId, page: "Mensajes entre el Equipo", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: "Visible" },
     { id: "sim-evidence-03", demoRunId, page: "Aplicacion de Vendedoras", section: "Reportes humanos", summary: `${reports.length} reportes de interacciones posteriores`, status: "Visible" },
     { id: "sim-evidence-04", demoRunId, page: "Marta Voz / Vapi", section: "Logs de llamadas", summary: `${vapiLogs.length} logs de voz simulados con salida estructurada`, status: "Visible" },
     { id: "sim-evidence-05", demoRunId, page: "Marta WhatsApp Texto", section: "Seguimientos conversacionales", summary: `${whatsappFollowups.length} seguimientos de texto simulados`, status: "Visible" },
-    { id: "sim-evidence-06", demoRunId, page: "H-Operia Intelligence", section: "Senales derivadas", summary: `${signals.length} senales ejecutivas generadas`, status: "Generado" },
+    { id: "sim-evidence-06", demoRunId, page: "H-OperIA Intelligence", section: "Senales derivadas", summary: `${signals.length} senales ejecutivas generadas`, status: "Generado" },
   ];
   const [activePhase, setActivePhase] = useState(0);
   const [completedPhases, setCompletedPhases] = useState([]);
@@ -1700,20 +1700,20 @@ function DemoPage() {
     : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
   const messageRows = simulatedDataInjected
     ? simulatedInternalMessages.slice(0, 5).map((message) => [message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt, message.relatedClientName])
-    : [["H-Operia Intelligence", "Vendedora asignada", "Interno", "Nueva reserva lista para revisión", "Enviado", "Hoy 3:01 PM", "Timeline"], ["María Fernanda", "Coordinación comercial", "Interno", "Cliente Andrea López inició reserva y requiere confirmación documental.", "En revisión", "Hoy 3:07 PM", "Coordinación"]];
+    : [["H-OperIA Intelligence", "Vendedora asignada", "Interno", "Nueva reserva lista para revisión", "Enviado", "Hoy 3:01 PM", "Timeline"], ["María Fernanda", "Coordinación comercial", "Interno", "Cliente Andrea López inició reserva y requiere confirmación documental.", "En revisión", "Hoy 3:07 PM", "Coordinación"]];
   const adminEvidence = simulatedDataInjected
     ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
     : [
         ["Perfil Operacional", "Expediente del cliente", "Reserva vinculada", "Datos, comunicación y seguimiento quedan visibles para revisión.", reservationStatus.evidence === "Generada" ? "Visible" : "Pendiente", "Ver evidencia"],
-        ["Operaciones Comerciales", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", "Pendiente", "Abrir página"],
-        ["Mensajería Operacional", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", "Pendiente", "Abrir página"],
+        ["Registro de Seguimiento Comercial", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", "Pendiente", "Abrir página"],
+        ["Mensajes entre el Equipo", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", "Pendiente", "Abrir página"],
       ];
   const derivedChanges = [
     { phase: "Fase 01", source: "Reservas", page: "Reserva pública", section: "Cliente, unidad, fuente y estado", change: `${simulatedReservationClients.length} reservas disponibles para seguimiento`, observation: "Clientes operacionales y unidades que originan el ciclo.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-reservation-live" },
     { phase: "Fase 02", source: "Marta Voz / Vapi", page: "Marta Multicanal", section: "Voz, llamadas y structured output", change: `${simulatedVapiCallLogs.length} logs de llamadas disponibles`, observation: "Intenciones, bloqueos, urgencia y casos que requieren intervención humana.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-vapi-voice" },
     { phase: "Fase 02", source: "Marta WhatsApp", page: "Marta Multicanal", section: "WhatsApp / Texto", change: `${simulatedMartaWhatsAppFollowups.length} seguimientos conversacionales`, observation: "Respuestas, intención detectada y siguiente acción por texto.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-whatsapp" },
-    { phase: "Fase 03", source: "Vendedoras", page: "Operaciones Comerciales", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
-    { phase: "Fase 03", source: "Mensajería interna", page: "Mensajería Operacional", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
+    { phase: "Fase 03", source: "Vendedoras", page: "Registro de Seguimiento Comercial", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
+    { phase: "Fase 03", source: "Mensajes entre el Equipo", page: "Mensajes entre el Equipo", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
     { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias agregadas a la corrida`, observation: "Reservas, reportes, mensajes, llamadas y seguimientos consolidados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
     { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Intelligence", section: "Riesgos, oportunidades y recomendaciones", change: `${simulatedIntelligenceSignals.length} señales derivadas por fuente`, observation: "La actividad operacional se transforma en prioridades ejecutables.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
     { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Consultas y conclusión", change: `${simulatedIntelligenceSignals.length} señales disponibles para lectura ejecutiva`, observation: "Las señales se convierten en criterios y una conclusión para junta.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-executive-close" },
@@ -1749,12 +1749,12 @@ function DemoPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Centro Demo" subtitle="Tablero de mando escénico para ejecutar una demostración ejecutiva en vivo: reserva, mensajería, Marta, evidencia operacional, simulación e inteligencia." icon={Smartphone} sync={martaSync.demo} badges={["Operación viva", "Demo ejecutiva", "Evidencia Operacional"]} syncNote="Mide el avance visible de la demostración: fases completadas, estados operacionales y señales generadas durante la presentación." />
+      <PageHeader title="Centro Demo" subtitle="Tablero de mando escénico para ejecutar una demostración ejecutiva en vivo: reserva, mensajería, Marta, evidencia operacional, simulación e inteligencia." icon={Smartphone} sync={martaSync.demo} badges={["Operación viva", "Demo ejecutiva", "Evidencia de la Operación"]} syncNote="Mide el avance visible de la demostración: fases completadas, estados operacionales y señales generadas durante la presentación." />
       <Card>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <InfoCard title="Empresa Activa" value={activeDemoContext?.prospectCompanyName || "AMENA"} />
           <InfoCard title="Proyecto Activo" value={activeDemoContext?.projectName || "AMENA Comalapa"} />
-          <InfoCard title="Escenario Activo" value={activeDemoContext?.scenarioName || "Centro Demo operacional"} />
+          <InfoCard title="Escenario Activo" value={activeDemoContext?.scenarioName || "Centro Demo"} />
           <InfoCard title="Estado" value={activeDemoContext?.status || "Preparado"} />
           <InfoCard title="Última actualización" value={activeDemoContext?.injectedAt || "Pendiente de inyección"} />
         </div>
@@ -1779,7 +1779,7 @@ function DemoPage() {
                 <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-700">Evidencia operacional de envío</div>
                 <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Solicitud enviada al backend local. Esto confirma envío solicitado, no recepción final del destinatario.</p>
               </div>
-              <Badge tone="violet">Marta acompaña · H-Operia Intelligence analiza · humano decide</Badge>
+              <Badge tone="violet">Marta acompaña · H-OperIA Intelligence analiza · humano decide</Badge>
             </div>
             <div className="mt-3 grid gap-2">
               {deliveryEvidence.length === 0 && <div className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-700">Sin envíos solicitados todavía.</div>}
@@ -1804,7 +1804,7 @@ function DemoPage() {
         </Card>
         <div id="demo-reservation-live" className="scroll-mt-64">
         <Card>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Reserva pública en vivo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.</p></div><div className="flex flex-wrap gap-2"><Badge tone="slate">Reserva base preparada</Badge><Badge tone="blue">Preparado para Evidencia Operacional</Badge></div></div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.</p></div><div className="flex flex-wrap gap-2"><Badge tone="slate">Reserva base preparada</Badge><Badge tone="blue">Preparado para Evidencia de la Operación</Badge></div></div>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><Database size={16} className="mr-2 inline" />Buscar reserva en Supabase</button><button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir registro en Supabase</button></div>
           <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-600">Última actualización: hace 12 segundos</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -1832,7 +1832,7 @@ function DemoPage() {
 
       <div id="demo-marta-vapi" ref={(element) => { phaseSectionRefs.current[1] = element; }} className="scroll-mt-64">
         <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Marta · Acompañamiento Multicanal</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Toda interacción de Marta se registra como dato estructurado para evidencia, expediente, seguimiento e inteligencia.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 02 Marta · Acompañamiento Multicanal</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La interacción real con Marta se registra como dato estructurado para evidencia, expediente, seguimiento e inteligencia.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
         <div className="mt-4 flex flex-wrap gap-2">
           <Badge tone="green">Activo · Voz / Vapi</Badge>
           <Badge tone="green">Activo · WhatsApp</Badge>
@@ -1901,8 +1901,8 @@ function DemoPage() {
       <div ref={(element) => { phaseSectionRefs.current[2] = element; }} className="grid scroll-mt-64 gap-5 xl:grid-cols-[1fr_1fr]">
         <div id="demo-commercial-operations" className="scroll-mt-64">
         <Card>
-          <h3 className="text-3xl font-black text-slate-950">Operaciones Comerciales</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Reportes de vendedoras nacidos desde clientes reservados: interacciones, objeciones, prioridades y próximos pasos.</p>
+          <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial y Mensajes entre el Equipo</h3>
+          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Seguimiento comercial realizado en vivo desde clientes reservados: interacciones, objeciones, prioridades y próximos pasos.</p>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
             <input value={commercialSearch} onChange={(e) => setCommercialSearch(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por cliente o teléfono" />
             <button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><Search size={16} className="mr-2 inline" />Buscar informes de vendedora</button>
@@ -1915,7 +1915,7 @@ function DemoPage() {
         </div>
         <div id="demo-operational-messaging" className="scroll-mt-64">
         <Card>
-          <h3 className="text-3xl font-black text-slate-950">Mensajería Operacional</h3>
+          <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial y Mensajes entre el Equipo</h3>
           <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Coordinación interna nacida desde clientes reservados: mensajes operacionales, responsables, prioridad y evidencia.</p>
           <div className="mt-5 grid gap-3">
             {messageRows.map(([from, to, channel, message, state, time, evidence]) => (
@@ -1934,11 +1934,21 @@ function DemoPage() {
         </Card>
         </div>
       </div>
+      <Card>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <h3 className="text-3xl font-black text-slate-950">Cargar Empresa Demo</h3>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Hasta este momento se ha demostrado el funcionamiento del modelo operativo con un caso real.</p>
+            <p className="mt-3 text-base font-semibold leading-7 text-slate-700">No se trata de generar datos simulados. Se trata de cargar una empresa demostrativa completa para observar el comportamiento de H-OperIA sobre una operación empresarial representativa.</p>
+          </div>
+          <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Empresa Demo cargada" : "Momento escénico central"}</Badge>
+        </div>
+      </Card>
 
       <div id="demo-command-evidence" ref={(element) => { phaseSectionRefs.current[3] = element; }} className="scroll-mt-64">
       <div className="mb-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="text-3xl font-black text-slate-950">Centro de Mando, Admin y Evidencia Operacional</h3>
-        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Recibe y consolida datos desde Reservas, Operaciones Comerciales, Mensajería Interna y Marta Multicanal.</p>
+        <h3 className="text-3xl font-black text-slate-950">FASE 04 Centro de Mando y Evidencia de la Operación</h3>
+        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Recibe y consolida la evidencia de la operación ampliada después de cargar la Empresa Demo, conectando Reservas, Registro de Seguimiento Comercial, Mensajes entre el Equipo y Marta Multicanal.</p>
         {!simulatedDataInjected && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Sin corrida simulada inyectada</div>}
         {simulatedDataInjected && <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {[
@@ -1973,8 +1983,8 @@ function DemoPage() {
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h3 className="text-3xl font-black text-slate-950">H-OperIA Intelligence</h3>
-              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Transforma señales de Reservas, Vendedoras, Mensajería, Marta WhatsApp y Marta Voz / Vapi en riesgos, oportunidades, prioridades y recomendaciones.</p>
+              <h3 className="text-3xl font-black text-slate-950">FASE 05 H-OperIA Intelligence</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Presenta impactos generados por la operación ampliada y transforma esas señales en riesgos, oportunidades, prioridades y recomendaciones.</p>
             </div>
             <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Demo activa" : "Sin demo activa"}</Badge>
           </div>
@@ -1997,7 +2007,7 @@ function DemoPage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {injectionResults.map(([value, label]) => <div key={label} className="min-w-0 rounded-2xl bg-slate-50 p-4"><div className="text-3xl font-black text-slate-950">{value}</div><div className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-slate-700">{label}</div></div>)}
           </div>
-          <div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Inyectar 20 clientes simulados</button></div>
+          <div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Cargar Empresa Demo</button></div>
         </Card>
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -2020,12 +2030,12 @@ function DemoPage() {
             ))}
           </div>
         </Card>
-        <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Esto cambió aquí; vamos a verlo</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Mapa navegable de páginas y secciones impactadas después de la inyección.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div>{!simulatedDataInjected && <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Mapa pendiente de generación</div>}{simulatedDataInjected && <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{derivedChanges.map((item) => <div key={`${item.phase}-${item.page}-${item.source}`} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">{item.phase}</Badge><Badge tone="blue">{item.page}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><div className="mt-3 flex flex-wrap gap-2"><Badge tone="violet">Fuente · {item.source}</Badge></div><div className="mt-3 text-sm font-black uppercase tracking-[0.16em] text-slate-600">{item.section}</div><h4 className="mt-3 text-xl font-black text-slate-950">{item.change}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700"><span className="font-black text-slate-950">Cambio visible:</span> {item.observation}</p><button onClick={() => presentImpactedSection(item.targetId)} className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Ir a {item.page}</button></div>)}</div>}</Card>
+        <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Impactos generados por la operación</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada impacto muestra el módulo afectado, el cambio generado y el acceso directo a la página correspondiente.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div>{!simulatedDataInjected && <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Impactos pendientes de la carga de Empresa Demo</div>}{simulatedDataInjected && <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{derivedChanges.map((item) => <div key={`${item.phase}-${item.page}-${item.source}`} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">{item.phase}</Badge><Badge tone="blue">{item.page}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><div className="mt-3 text-sm font-black uppercase tracking-[0.16em] text-slate-600">{item.section}</div><h4 className="mt-3 text-xl font-black text-slate-950">{item.page}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{item.change}. {item.observation}</p><button onClick={() => presentImpactedSection(item.targetId)} className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir página</button></div>)}</div>}</Card>
       </div>
 
       <div id="demo-executive-close" ref={(element) => { phaseSectionRefs.current[5] = element; }} className="scroll-mt-64">
         <Card>
-        <h3 className="text-3xl font-black text-slate-950">Centro de consultas ejecutivas</h3>
+        <h3 className="text-3xl font-black text-slate-950">FASE 06 Cierre ejecutivo y próximos pasos</h3>
         <p className="mt-3 text-base font-semibold leading-7 text-slate-700">A continuación escriba su pregunta o sus preguntas, una por una. Al terminar cada pregunta presione Enter para agregarla al listado.</p>
         <p className="mt-3 rounded-2xl bg-slate-50 p-4 text-base font-black leading-7 text-slate-900">Las reservas generan oportunidades. Las personas generan contexto. H-OperIA transforma ambas en decisiones ejecutables.</p>
         <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
@@ -2041,8 +2051,8 @@ function DemoPage() {
         <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-5">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h4 className="text-xl font-black text-slate-950">Desglose propuesto por H-Operia Intelligence</h4>
-              <p className="mt-3 text-base font-semibold leading-8 text-slate-800">H-Operia Intelligence descompone la pregunta ejecutiva para revisar ingresos, conversión, acompañamiento humano y riesgos operativos antes de generar una conclusión. Puede modificar, eliminar o aceptar cada desglose antes de enviarlo.</p>
+              <h4 className="text-xl font-black text-slate-950">Desglose propuesto por H-OperIA Intelligence</h4>
+              <p className="mt-3 text-base font-semibold leading-8 text-slate-800">H-OperIA Intelligence descompone la pregunta ejecutiva para revisar ingresos, conversión, acompañamiento humano y riesgos operativos antes de generar una conclusión. Puede modificar, eliminar o aceptar cada desglose antes de enviarlo.</p>
             </div>
             <Badge tone={selectedBreakdowns.length ? "green" : "amber"}>{selectedBreakdowns.length} seleccionados</Badge>
           </div>
@@ -2068,13 +2078,13 @@ function DemoPage() {
           </div>
           <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50 p-5">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-              <h4 className="text-xl font-black text-slate-950">Respuestas generadas por H-Operia Intelligence</h4>
+              <h4 className="text-xl font-black text-slate-950">Respuestas generadas por H-OperIA Intelligence</h4>
               <Badge tone={executiveResponseReady ? "green" : "amber"}>{executiveResponseReady ? "Posterior al envío" : "Esperando desgloses"}</Badge>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {["Texto ejecutivo", "Cuadros comparativos", "Dashboard", "PDF descargable", "Imagen ejecutiva"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
             </div>
-            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">{executiveResponseReady ? "Resultado mock posterior al envío de desgloses: referidos concentra el mejor balance entre ingresos netos, conversión y menor atraso operativo. Instagram mantiene volumen, pero necesita filtro financiero temprano y seguimiento humano documentado. Para junta, la conclusión es reforzar referidos, ajustar pauta digital y pedir evidencia semanal por vendedora." : "Al enviar los desgloses seleccionados, H-Operia Intelligence generará una conclusión ejecutiva en los formatos disponibles."}</p>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">{executiveResponseReady ? "Resultado mock posterior al envío de desgloses: referidos concentra el mejor balance entre ingresos netos, conversión y menor atraso operativo. Instagram mantiene volumen, pero necesita filtro financiero temprano y seguimiento humano documentado. Para junta, la conclusión es reforzar referidos, ajustar pauta digital y pedir evidencia semanal por vendedora." : "Al enviar los desgloses seleccionados, H-OperIA Intelligence generará una conclusión ejecutiva en los formatos disponibles."}</p>
             <button className="mt-4 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><ClipboardCheck size={16} className="mr-2 inline" />Copiar conclusión para junta</button>
           </div>
         </div>
@@ -2141,11 +2151,11 @@ function CommunicationChannel({ channel, badge, tone, inboxTitle, messages, acti
 }
 
 function MartaProposalReviewCenter({ proposals }) {
-  return <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm"><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Bandeja de Respuestas Asistidas</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Marta recibe conversaciones; H-Operia Intelligence estructura sugerencias para que la vendedora revise, edite, apruebe y envíe.</p></div><div className="flex flex-wrap gap-2"><Badge tone="violet">4 propuestas pendientes</Badge><Badge tone="slate">Revisión humana requerida</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-3">{proposals.map((proposal) => <MartaProposalCard key={`${proposal.type}-${proposal.title}`} type={proposal.type} title={proposal.title} analysis={proposal.analysis} proposal={proposal.proposal} />)}</div></div>;
+  return <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm"><div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><h2 className="text-3xl font-black text-slate-950">Bandeja de Respuestas Asistidas</h2><p className="mt-2 max-w-4xl text-base font-semibold text-slate-700 leading-7">Marta recibe conversaciones; H-OperIA Intelligence estructura sugerencias para que la vendedora revise, edite, apruebe y envíe.</p></div><div className="flex flex-wrap gap-2"><Badge tone="violet">4 propuestas pendientes</Badge><Badge tone="slate">Revisión humana requerida</Badge></div></div><div className="mt-6 grid gap-5 xl:grid-cols-3">{proposals.map((proposal) => <MartaProposalCard key={`${proposal.type}-${proposal.title}`} type={proposal.type} title={proposal.title} analysis={proposal.analysis} proposal={proposal.proposal} />)}</div></div>;
 }
 
 function MartaProposalCard({ type, title, analysis, proposal }: { type: any; title: any; analysis: any; proposal: any; key?: React.Key }) {
-  return <div className="rounded-3xl border border-violet-100 bg-white p-5 shadow-sm"><div className="text-sm uppercase tracking-[0.22em] text-violet-600 font-black">{type}</div><h3 className="mt-2 text-xl font-black text-slate-950">{title}</h3><div className="mt-4 rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Lectura H-Operia Intelligence:</span> {analysis}</div><div className="mt-4 rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Propuesta:</span> {proposal}</div><div className="mt-5 flex flex-wrap gap-2"><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Revisar</button><button className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-800">Editar</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Aprobar</button></div></div>;
+  return <div className="rounded-3xl border border-violet-100 bg-white p-5 shadow-sm"><div className="text-sm uppercase tracking-[0.22em] text-violet-600 font-black">{type}</div><h3 className="mt-2 text-xl font-black text-slate-950">{title}</h3><div className="mt-4 rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Lectura H-OperIA Intelligence:</span> {analysis}</div><div className="mt-4 rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black">Propuesta:</span> {proposal}</div><div className="mt-5 flex flex-wrap gap-2"><button className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-black text-white">Revisar</button><button className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-800">Editar</button><button className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Aprobar</button></div></div>;
 }
 
 function TrackingBlock({ tracking }) {
