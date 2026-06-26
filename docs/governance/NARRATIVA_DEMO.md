@@ -6,44 +6,56 @@ Este documento registra decisiones narrativas cerradas de la demostración.
 
 No reinterpretar fases ya acordadas sin autorización expresa.
 
-## FASE 04 — Preparación y resumen de Empresa Demo
+## FASE 04 — Centro de Mando y Evidencia de la Operación
 
 Estado: Decisión narrativa cerrada.
 
-La FASE 04 no debe mezclar contenidos propios de FASE 03 ni de FASE 05.
+Esta fase está compuesta por dos capas claramente diferenciadas.
 
-### Objetivo de FASE 04
+### CAPA 01 — Preparación e Inyección de Datos Simulados
 
-Preparar una Empresa Demo completa, creíble, validada y lista para demostración.
+#### Propósito
 
-### Capa 1 — Generación y gobierno de datos simulados
+Preparar la operación demostrativa que posteriormente será utilizada por H-OperIA Intelligence.
 
 Debe permitir:
 
-- seleccionar o preparar la Empresa Demo;
-- definir cantidad de registros por aplicación;
-- generar datos simulados para Reservas;
-- generar datos simulados para Registro de Seguimiento Comercial;
-- generar datos simulados para Mensajes entre el Equipo;
-- generar interacciones simuladas con Marta;
-- validar calidad;
-- auditar consistencia;
-- regenerar cuando sea necesario;
-- dejar el set completo listo para demostración.
+- generar datos simulados;
+- validar la calidad de los datos;
+- regenerarlos cuando no cumplan los criterios;
+- configurar la cantidad de registros por categoría;
+- ejecutar la inyección de datos.
 
-### Capa 2 — Resumen ejecutivo de Empresa Demo
+Las categorías son únicamente:
 
-Debe mostrar únicamente el resumen de lo generado en Capa 1:
+- Gestión de Reservas.
+- Marta.
+- Vapi (logs y structured outputs).
+- Registro de Seguimiento Comercial.
+- Mensajes entre el Equipo.
 
-- nombre de la empresa;
+H-OperIA Intelligence NO genera datos simulados.
+Su función comienza en la FASE 05, donde interpreta la información generada por estas aplicaciones.
+
+### CAPA 02 — Estado Consolidado de la Corrida
+
+Debe mostrar el estado posterior a la inyección:
+
+- empresa demo;
 - proyecto;
-- cantidad de datos generados;
-- estado de validación;
-- estado de preparación;
-- estado listo para demostración.
+- DemoRunId;
+- fuente;
+- última actualización;
+- cantidades inyectadas por categoría;
+- evidencias generadas;
+- aplicaciones impactadas;
+- trazabilidad;
+- estado visible de Supabase como "No verificado" cuando no exista conexión real.
 
 ### Restricciones
 
-No incluir aquí análisis comercial, objeciones, prioridades, próximos pasos ni interpretación de casos.
-
-Eso no pertenece a FASE 04.
+- No duplicar encabezados de FASE 04.
+- Debe existir un único encabezado para toda la fase.
+- No simular conexión real con Supabase.
+- No convertir esta fase en interpretación comercial.
+- La interpretación corresponde exclusivamente a la FASE 05.
