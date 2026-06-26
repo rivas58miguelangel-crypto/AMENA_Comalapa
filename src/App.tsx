@@ -1668,13 +1668,14 @@ function DemoPage() {
     setMartaStatus("Conversación analizada");
     setVapiStatus("Abierto");
   };
-  const injectSimulatedData = () => {
+  const injectSimulatedData = (quantities = { reservations: 20, messages: 20, sellerReports: 20, vapiLogs: 20 }) => {
     const nextDemoRunId = createDemoRunId();
-    const nextReservationClients = createSimulatedReservationClients(nextDemoRunId);
-    const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, nextReservationClients);
-    const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, nextReservationClients);
-    const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, nextReservationClients);
-    const nextMartaWhatsAppFollowups = createSimulatedMartaWhatsAppFollowups(nextDemoRunId, nextReservationClients);
+    const baseReservationClients = createSimulatedReservationClients(nextDemoRunId);
+    const nextReservationClients = baseReservationClients.slice(0, quantities.reservations);
+    const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, baseReservationClients).slice(0, quantities.messages);
+    const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, baseReservationClients).slice(0, quantities.sellerReports);
+    const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, baseReservationClients).slice(0, quantities.vapiLogs);
+    const nextMartaWhatsAppFollowups = [];
     const nextIntelligenceSignals = createSimulatedIntelligenceSignals(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextVapiCallLogs, nextMartaWhatsAppFollowups);
     const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
     setSimulatedReservationClients(nextReservationClients);
@@ -1688,7 +1689,7 @@ function DemoPage() {
       demoRunId: nextDemoRunId,
       prospectCompanyName: selectedVolunteer.company || volunteerForm.company || "Empresa demo local",
       projectName: "AMENA Comalapa",
-      scenarioName: "Centro Demo local sin Supabase",
+      scenarioName: "Lanzamiento comercial de proyecto habitacional",
       status: "injected",
       injectedAt: new Date().toLocaleString("es-SV", { dateStyle: "short", timeStyle: "short" }),
     });
@@ -1698,9 +1699,6 @@ function DemoPage() {
   const commercialRows = simulatedDataInjected
     ? simulatedSellerReports.slice(0, 5).map((report) => [report.clientName, report.sellerName, report.interactionType, `${report.summary} Necesidad: ${report.detectedNeed}. Objecion: ${report.objection}.`, report.priority, report.nextStep, report.createdAt, "Activo"])
     : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
-  const messageRows = simulatedDataInjected
-    ? simulatedInternalMessages.slice(0, 5).map((message) => [message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt, message.relatedClientName])
-    : [["H-OperIA Intelligence", "Vendedora asignada", "Interno", "Nueva reserva lista para revisión", "Enviado", "Hoy 3:01 PM", "Timeline"], ["María Fernanda", "Coordinación comercial", "Interno", "Cliente Andrea López inició reserva y requiere confirmación documental.", "En revisión", "Hoy 3:07 PM", "Coordinación"]];
   const adminEvidence = simulatedDataInjected
     ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
     : [
@@ -1898,7 +1896,7 @@ function DemoPage() {
         </Card>
       </div>
 
-      <div ref={(element) => { phaseSectionRefs.current[2] = element; }} className="grid scroll-mt-64 gap-5 xl:grid-cols-[1fr_1fr]">
+      <div ref={(element) => { phaseSectionRefs.current[2] = element; }} className="scroll-mt-64">
         <div id="demo-commercial-operations" className="scroll-mt-64">
         <Card>
           <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial y Mensajes entre el Equipo</h3>
@@ -1913,59 +1911,11 @@ function DemoPage() {
           <div className="mt-5"><SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /></div>
         </Card>
         </div>
-        <div id="demo-operational-messaging" className="scroll-mt-64">
-        <Card>
-          <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial y Mensajes entre el Equipo</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Coordinación interna nacida desde clientes reservados: mensajes operacionales, responsables, prioridad y evidencia.</p>
-          <div className="mt-5 grid gap-3">
-            {messageRows.map(([from, to, channel, message, state, time, evidence]) => (
-              <div key={`${from}-${time}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2"><Badge tone={statusTone[state] || "slate"}>{state}</Badge><span className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{time} · {evidence}</span></div>
-                <div className="mt-3 grid gap-2 text-sm font-semibold leading-6 text-slate-800 md:grid-cols-2">
-                  <div><span className="font-black text-slate-950">De:</span> {from}</div>
-                  <div><span className="font-black text-slate-950">Para:</span> {to}</div>
-                  <div><span className="font-black text-slate-950">Tema:</span> {channel}</div>
-                  <div><span className="font-black text-slate-950">Prioridad:</span> {state}</div>
-                </div>
-                <p className="mt-3 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Mensaje:</span> {message}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-        </div>
       </div>
-      <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <h3 className="text-3xl font-black text-slate-950">Cargar Empresa Demo</h3>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Hasta este momento se ha demostrado el funcionamiento del modelo operativo con un caso real.</p>
-            <p className="mt-3 text-base font-semibold leading-7 text-slate-700">No se trata de generar datos simulados. Se trata de cargar una empresa demostrativa completa para observar el comportamiento de H-OperIA sobre una operación empresarial representativa.</p>
-          </div>
-          <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Empresa Demo cargada" : "Momento escénico central"}</Badge>
-        </div>
-      </Card>
 
       <div id="demo-command-evidence" ref={(element) => { phaseSectionRefs.current[3] = element; }} className="scroll-mt-64">
-      <div className="mb-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="text-3xl font-black text-slate-950">FASE 04 Centro de Mando y Evidencia de la Operación</h3>
-        <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Recibe y consolida la evidencia de la operación ampliada después de cargar la Empresa Demo, conectando Reservas, Registro de Seguimiento Comercial, Mensajes entre el Equipo y Marta Multicanal.</p>
-        {!simulatedDataInjected && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Sin corrida simulada inyectada</div>}
-        {simulatedDataInjected && <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          {[
-            [simulatedReservationClients.length, "Reservas"],
-            [simulatedSellerReports.length, "Reportes"],
-            [simulatedInternalMessages.length, "Mensajes"],
-            [simulatedVapiCallLogs.length, "Llamadas"],
-            [simulatedMartaWhatsAppFollowups.length, "Seguimientos"],
-          ].map(([value, label]) => <div key={label} className="rounded-2xl bg-slate-50 p-4"><div className="text-2xl font-black text-slate-950">{value}</div><div className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-slate-700">{label}</div></div>)}
-        </div>}
-      </div>
       <DemoCommandEvidencePanel
         demoContext={activeDemoContext}
-        demoRunIdShort={demoRunIdShort}
-        reservationStatus={reservationStatus}
-        martaStatus={martaStatus}
-        vapiStatus={vapiStatus}
         simulatedDataInjected={simulatedDataInjected}
         counts={{
           reservations: simulatedReservationClients.length,
@@ -1975,7 +1925,7 @@ function DemoPage() {
           whatsappFollowups: simulatedMartaWhatsAppFollowups.length,
           evidence: simulatedOperationalEvidence.length,
         }}
-        evidence={adminEvidence}
+        onInjectSimulatedData={injectSimulatedData}
       />
       </div>
 
@@ -2007,7 +1957,6 @@ function DemoPage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {injectionResults.map(([value, label]) => <div key={label} className="min-w-0 rounded-2xl bg-slate-50 p-4"><div className="text-3xl font-black text-slate-950">{value}</div><div className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-slate-700">{label}</div></div>)}
           </div>
-          <div className="mt-5 flex flex-wrap gap-2"><button onClick={injectSimulatedData} className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"><UploadCloud size={18} className="mr-2 inline" />Cargar Empresa Demo</button></div>
         </Card>
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
