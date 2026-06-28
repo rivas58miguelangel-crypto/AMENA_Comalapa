@@ -41,6 +41,13 @@ type DemoInjectionQuantities = {
 };
 
 type Tone = "slate" | "green" | "amber" | "blue" | "violet";
+type ScenicFlowStatus =
+  | "idle"
+  | "generated"
+  | "audited"
+  | "regenerated"
+  | "approved"
+  | "injected";
 
 const toneClasses: Record<Tone, string> = {
   slate: "border-slate-200 bg-slate-100 text-slate-900",
@@ -92,6 +99,7 @@ export default function DemoCommandEvidencePanel({
   onInjectSimulatedData,
 }: DemoCommandEvidencePanelProps) {
   const [auditStatus, setAuditStatus] = useState("Pendiente de auditoria");
+  const [flowStatus, setFlowStatus] = useState<ScenicFlowStatus>("idle");
   const [quantities, setQuantities] = useState<DemoInjectionQuantities>({
     reservations: 20,
     vapiLogs: 20,
@@ -105,6 +113,7 @@ export default function DemoCommandEvidencePanel({
     const nextValue = Math.max(0, Number(value) || 0);
     setQuantities((current) => ({ ...current, [key]: nextValue }));
     setAuditStatus("Pendiente de auditoria");
+    setFlowStatus("idle");
   };
   const injectionCategories = [
     {
@@ -133,19 +142,52 @@ export default function DemoCommandEvidencePanel({
     counts.vapiLogs +
     counts.sellerReports +
     counts.messages;
+  const hasGeneratedData = flowStatus !== "idle";
+  const hasAuditedData =
+    flowStatus === "audited" ||
+    flowStatus === "regenerated" ||
+    flowStatus === "approved" ||
+    flowStatus === "injected";
+  const hasApprovedData = flowStatus === "approved" || flowStatus === "injected";
   const auditRows = injectionCategories.map((category) => {
     const configured = quantities[category.key];
-    const valid = simulatedDataInjected ? Math.min(category.sent, configured) : 0;
+    const valid =
+      hasGeneratedData || simulatedDataInjected
+        ? Math.min(category.sent || configured, configured)
+        : 0;
     const defective = Math.max(configured - valid, 0);
     const status =
-      !simulatedDataInjected
-        ? "Pendiente de auditoria"
+      !hasGeneratedData && !simulatedDataInjected
+        ? "Pendiente de generacion"
+        : !hasAuditedData && !simulatedDataInjected
+          ? "Pendiente de auditoria"
         : defective > 0
           ? "Requiere regeneracion"
-          : "Aprobado";
+          : hasApprovedData || simulatedDataInjected
+            ? "Aprobado"
+            : "Auditado";
 
     return { ...category, configured, valid, defective, status };
   });
+  const hasRejectedRows = auditRows.some((row) => row.defective > 0);
+  const flowLabel =
+    flowStatus === "idle"
+      ? "Pendiente de generacion"
+      : flowStatus === "generated"
+        ? "Datos generados"
+        : flowStatus === "audited"
+          ? hasRejectedRows
+            ? "Auditoria con rechazos"
+            : "Auditoria aprobable"
+          : flowStatus === "regenerated"
+            ? "Rechazados regenerados"
+            : flowStatus === "approved"
+              ? "Datos aprobados"
+              : "Empresa Demo inyectada";
+  const actionButtonClass =
+    "rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600";
+  const secondaryButtonClass =
+    "rounded-2xl bg-slate-200 px-5 py-4 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
 
   return (
     <section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -210,6 +252,66 @@ export default function DemoCommandEvidencePanel({
           Generar datos → Auditar calidad → Regenerar categoría si falla →
           Volver a auditar → Aprobar → Inyectar Empresa Demo
         </div>
+        <div className="mt-5 rounded-3xl border border-amber-100 bg-white p-5">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">
+                Flujo escénico de preparación
+              </div>
+              <h4 className="mt-2 text-xl font-black text-slate-950">
+                {flowLabel}
+              </h4>
+              <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">
+                Estos pasos preparan la demostración. La inyección real solo se
+                ejecuta al presionar Inyectar Empresa Demo.
+              </p>
+            </div>
+            <StatusBadge tone={hasApprovedData ? "green" : hasGeneratedData ? "amber" : "slate"}>
+              {flowLabel}
+            </StatusBadge>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              onClick={() => {
+                setFlowStatus("generated");
+                setAuditStatus("Datos generados");
+              }}
+              className={actionButtonClass}
+            >
+              Generar datos simulados
+            </button>
+            <button
+              disabled={!hasGeneratedData}
+              onClick={() => {
+                setFlowStatus("audited");
+                setAuditStatus("Auditoria ejecutada");
+              }}
+              className={secondaryButtonClass}
+            >
+              Auditar calidad
+            </button>
+            <button
+              disabled={!hasAuditedData}
+              onClick={() => {
+                setFlowStatus("regenerated");
+                setAuditStatus("Rechazados regenerados");
+              }}
+              className={secondaryButtonClass}
+            >
+              Regenerar rechazados
+            </button>
+            <button
+              disabled={!hasAuditedData}
+              onClick={() => {
+                setFlowStatus("approved");
+                setAuditStatus("Datos aprobados");
+              }}
+              className={actionButtonClass}
+            >
+              Aprobar datos
+            </button>
+          </div>
+        </div>
         <div className="mt-5 overflow-hidden rounded-3xl border border-amber-100 bg-white">
           <div className="overflow-x-auto">
             <div className="grid min-w-[860px] grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr_1fr_1fr] bg-amber-100/70 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-950">
@@ -236,10 +338,14 @@ export default function DemoCommandEvidencePanel({
                 </div>
                 <div className="p-4">
                   <button
-                    onClick={() => setAuditStatus("Pendiente de auditoria")}
+                    disabled={!hasAuditedData}
+                    onClick={() => {
+                      setFlowStatus("regenerated");
+                      setAuditStatus("Rechazados regenerados");
+                    }}
                     className="rounded-2xl bg-slate-200 px-4 py-3 text-xs font-black text-slate-950"
                   >
-                    Regenerar rechazados y auditar nuevamente
+                    Regenerar rechazados
                   </button>
                 </div>
               </div>
@@ -250,22 +356,19 @@ export default function DemoCommandEvidencePanel({
           Los registros válidos se conservan. Solo los rechazados se regeneran
           y se auditan nuevamente antes de la inyección.
         </p>
-        <div className="mt-5 flex justify-end">
-          <button
-            onClick={() => setAuditStatus("Pendiente de auditoria")}
-            className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"
-          >
-            Regenerar empresa demo completa
-          </button>
-        </div>
         <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-amber-100 bg-white p-5 xl:flex-row xl:items-center xl:justify-between">
           <p className="text-sm font-semibold leading-6 text-slate-700">
             H-OperIA Intelligence no genera datos simulados en esta fase; su
             interpretación comienza en la FASE 05.
           </p>
           <button
-            onClick={() => onInjectSimulatedData(quantities)}
-            className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white"
+            disabled={!hasApprovedData}
+            onClick={() => {
+              onInjectSimulatedData(quantities);
+              setFlowStatus("injected");
+              setAuditStatus("Empresa Demo inyectada");
+            }}
+            className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
           >
             <UploadCloud size={18} className="mr-2 inline" />
             Inyectar Empresa Demo

@@ -505,7 +505,7 @@ function AppShell() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-amber-50 text-slate-950">
       <div className="mx-auto max-w-[1800px] space-y-5 p-3 sm:p-5">
         <TopNav active={active} setActive={setActive} />
-        <Page />
+        <Page setActive={setActive} />
       </div>
     </div>
   );
@@ -1383,7 +1383,7 @@ function DashboardsPage() {
   );
 }
 
-function DemoPage() {
+function DemoPage({ setActive }) {
   const DEMO_BACKEND_URL = "http://localhost:4000";
   const phases = [
     { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.", nextStep: "validar cliente, unidad, fuente, estado y evidencia visible." },
@@ -1498,12 +1498,118 @@ function DemoPage() {
     }));
   };
   const createSimulatedIntelligenceSignals = (demoRunId, clients, messages, reports, vapiLogs, whatsappFollowups) => [
-    { id: "sim-signal-01", demoRunId, source: "Reservas", title: "Flujo de reservas activo", summary: `${clients.length} clientes avanzaron o completaron reserva en la app publica.`, priority: "Media" },
-    { id: "sim-signal-02", demoRunId, source: "Mensajeria", title: "Coordinacion interna generada", summary: `${messages.filter((item) => item.priority === "Alta").length} mensajes internos quedaron con prioridad alta.`, priority: "Alta" },
-    { id: "sim-signal-03", demoRunId, source: "Vendedoras", title: "Seguimiento humano posterior", summary: `${reports.length} reportes de vendedoras conectan objeciones, necesidades y proximos pasos.`, priority: "Media" },
-    { id: "sim-signal-04", demoRunId, source: "H-OperIA Intelligence", title: "Riesgo financiero temprano", summary: `${reports.filter((item) => item.objection === "Monto de prima").length} clientes mencionan prima o claridad financiera.`, priority: "Alta" },
-    { id: "sim-signal-05", demoRunId, source: "Marta Voz / Vapi", title: "Intenciones de voz estructuradas", summary: `${vapiLogs.filter((item) => item.structuredOutput.wantsFinancing).length} llamadas detectan interes en financiamiento y salida estructurada lista para revision.`, priority: "Alta" },
-    { id: "sim-signal-06", demoRunId, source: "Marta WhatsApp", title: "Seguimientos conversacionales activos", summary: `${whatsappFollowups.filter((item) => item.status === "Requiere respuesta humana").length} seguimientos de texto requieren intervencion humana posterior.`, priority: "Media" },
+    {
+      id: "sim-finding-01",
+      demoRunId,
+      number: 1,
+      adminPage: "Centro Ejecutivo",
+      adminTarget: "executive",
+      section: "Prioridades de dirección",
+      finding: "La operación posterior a la reserva concentra riesgos comerciales, financieros y de servicio que requieren revisión ejecutiva antes de la siguiente junta.",
+      source: "Mensajes entre el Equipo",
+      adminLink: "Centro Ejecutivo -> Prioridades de dirección",
+      externalVerification: null,
+      supabaseTable: "demo_executive_priorities",
+      status: "Pendiente de verificación",
+      priorityReason: "Impacto transversal sobre decisiones directivas y seguimiento interáreas.",
+      priority: "Alta",
+    },
+    {
+      id: "sim-finding-02",
+      demoRunId,
+      number: 2,
+      adminPage: "Expediente Vivo",
+      adminTarget: "client",
+      section: "Timeline del cliente",
+      finding: `${clients[0]?.name || "Cliente prioritario"} acumula señales de intención, dudas financieras y seguimiento humano que deben quedar visibles en un solo expediente.`,
+      source: "Web Widget",
+      adminLink: "Expediente Vivo -> Timeline del cliente",
+      externalVerification: "Supabase",
+      supabaseTable: "demo_customer_profiles",
+      status: "Pendiente de verificación",
+      priorityReason: "Evita pérdida de contexto entre reserva, conversación y seguimiento comercial.",
+      priority: "Alta",
+    },
+    {
+      id: "sim-finding-03",
+      demoRunId,
+      number: 3,
+      adminPage: "Inventario / Construcción",
+      adminTarget: "construction",
+      section: "Unidades con presión comercial",
+      finding: "La preferencia por modelos familiares debe cruzarse con disponibilidad y avance de construcción antes de prometer fechas o alternativas.",
+      source: "Registro de Seguimiento Comercial",
+      adminLink: "Inventario / Construcción -> Unidades con presión comercial",
+      externalVerification: "Supabase",
+      supabaseTable: "demo_inventory_units",
+      status: "Pendiente de verificación",
+      priorityReason: "Reduce riesgo de prometer inventario o fechas sin evidencia operacional.",
+      priority: "Alta",
+    },
+    {
+      id: "sim-finding-04",
+      demoRunId,
+      number: 4,
+      adminPage: "Documentos",
+      adminTarget: "documents",
+      section: "Checklist documental crítico",
+      finding: "Hay expedientes con documentación parcial que pueden bloquear formalización si no se solicita el faltante correcto en la próxima interacción.",
+      source: "Documentos",
+      adminLink: "Documentos -> Checklist documental crítico",
+      externalVerification: "Supabase",
+      supabaseTable: "demo_document_checklists",
+      status: "Pendiente de verificación",
+      priorityReason: "Afecta directamente velocidad de formalización y calidad del expediente.",
+      priority: "Alta",
+    },
+    {
+      id: "sim-finding-05",
+      demoRunId,
+      number: 5,
+      adminPage: "Finanzas / Pagos",
+      adminTarget: "payments",
+      section: "Compromisos de pago sensibles",
+      finding: `${reports.filter((item) => item.objection === "Monto de prima").length || "Varios"} casos mencionan prima, cuota o claridad financiera como bloqueo para avanzar.`,
+      source: "Registro de Seguimiento Comercial",
+      adminLink: "Finanzas / Pagos -> Compromisos de pago sensibles",
+      externalVerification: "Supabase",
+      supabaseTable: "demo_payment_commitments",
+      status: "Pendiente de verificación",
+      priorityReason: "Riesgo directo sobre ingresos, atrasos y confianza del cliente.",
+      priority: "Alta",
+    },
+    {
+      id: "sim-finding-06",
+      demoRunId,
+      number: 6,
+      adminPage: "Servicio Cliente",
+      adminTarget: "service",
+      section: "Alertas críticas del cliente",
+      finding: "Carlos Armando Domínguez manifestó intención de presentar una demanda judicial por inconsistencias entre la información comercial recibida y el contrato firmado.",
+      source: "Registro de Seguimiento Comercial",
+      adminLink: "Servicio Cliente -> Alertas críticas",
+      externalVerification: "Supabase",
+      supabaseTable: "demo_customer_service_cases",
+      status: "Pendiente de verificación",
+      priorityReason: "Riesgo legal y reputacional.",
+      priority: "Alta",
+    },
+    {
+      id: "sim-finding-07",
+      demoRunId,
+      number: 7,
+      adminPage: "Ventas / Vendedoras",
+      adminTarget: "sellers",
+      section: "Seguimientos que requieren intervención humana",
+      finding: `${whatsappFollowups.filter((item) => item.status === "Requiere respuesta humana").length || "Algunos"} seguimientos conversacionales requieren que una vendedora revise tono, prioridad y siguiente paso antes de responder.`,
+      source: "Marta Voz / VAPI",
+      adminLink: "Ventas / Vendedoras -> Seguimientos prioritarios",
+      externalVerification: "VAPI Logs",
+      supabaseTable: "demo_seller_followups",
+      status: "Pendiente de verificación",
+      priorityReason: "Evita respuestas automáticas en casos donde debe decidir una persona.",
+      priority: "Alta",
+    },
   ];
   const createSimulatedOperationalEvidence = (demoRunId, clients, messages, reports, signals, vapiLogs, whatsappFollowups) => [
     { id: "sim-evidence-01", demoRunId, page: "Aplicacion de Reservas", section: "Clientes/reservas", summary: `${clients.length} registros de reserva simulados`, status: "Visible" },
@@ -1539,9 +1645,18 @@ function DemoPage() {
   const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
   const phaseSectionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", Alta: "red", Media: "amber", Baja: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
+  const adminTargetsByPage = {
+    "Centro Ejecutivo": "executive",
+    "Expediente Vivo": "client",
+    "Inventario / Construcción": "construction",
+    Documentos: "documents",
+    "Finanzas / Pagos": "payments",
+    "Servicio Cliente": "service",
+    "Ventas / Vendedoras": "sellers",
+  };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
-  const simulatedDataInjected = activeDemoContext?.status === "injected" && simulatedReservationClients.length > 0 && simulatedInternalMessages.length > 0 && simulatedSellerReports.length > 0 && simulatedVapiCallLogs.length > 0 && simulatedMartaWhatsAppFollowups.length > 0;
+  const simulatedDataInjected = activeDemoContext?.status === "injected" && simulatedReservationClients.length > 0 && simulatedInternalMessages.length > 0 && simulatedSellerReports.length > 0 && simulatedVapiCallLogs.length > 0;
   const demoRunIdShort = activeDemoContext ? activeDemoContext.demoRunId.replace("demo-", "").slice(0, 8) : "Sin demo activa";
   const demoStatusBefore = activeDemoContext ? "Sin demo activa" : "Pendiente";
   const demoStatusAfter = activeDemoContext?.status || "Pendiente";
@@ -1572,6 +1687,11 @@ function DemoPage() {
       behavior: "smooth",
       block: "start",
     });
+  };
+  const openAdminFinding = (finding) => {
+    const target = finding?.adminTarget || adminTargetsByPage[finding?.adminPage];
+    if (!menu.some((item) => item.id === target)) return;
+    setActive(target);
   };
   const completePhase = (index) => {
     setCompletedPhases((current) => current.includes(index) ? current : [...current, index]);
@@ -1713,7 +1833,7 @@ function DemoPage() {
     { phase: "Fase 03", source: "Vendedoras", page: "Registro de Seguimiento Comercial", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
     { phase: "Fase 03", source: "Mensajes entre el Equipo", page: "Mensajes entre el Equipo", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
     { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias agregadas a la corrida`, observation: "Reservas, reportes, mensajes, llamadas y seguimientos consolidados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
-    { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Intelligence", section: "Riesgos, oportunidades y recomendaciones", change: `${simulatedIntelligenceSignals.length} señales derivadas por fuente`, observation: "La actividad operacional se transforma en prioridades ejecutables.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
+    { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Inteligencia Operativa", section: "Hallazgos prioritarios inyectados", change: `${simulatedIntelligenceSignals.length} hallazgos priorizados dentro del Admin`, observation: "La actividad operacional se interpreta como hallazgos verificables en páginas internas.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
     { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Consultas y conclusión", change: `${simulatedIntelligenceSignals.length} señales disponibles para lectura ejecutiva`, observation: "Las señales se convierten en criterios y una conclusión para junta.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-executive-close" },
     { phase: "Auxiliar", source: "Información pública", page: "Inventario Demo", section: "Sección auxiliar técnica", change: "8 categorías de inventario previstas", observation: "Soporte reutilizable fuera de la ruta escénica principal.", status: "Visible", targetId: "demo-technical-inventory" },
   ];
@@ -1934,52 +2054,79 @@ function DemoPage() {
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
               <h3 className="text-3xl font-black text-slate-950">FASE 05 H-OperIA Intelligence</h3>
-              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Presenta impactos generados por la operación ampliada y transforma esas señales en riesgos, oportunidades, prioridades y recomendaciones.</p>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Índice escénico de hallazgos prioritarios que H-OperIA Intelligence interpreta después de la Empresa Demo y ubica dentro de páginas internas del Admin.</p>
             </div>
             <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Demo activa" : "Sin demo activa"}</Badge>
           </div>
           {!simulatedDataInjected && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Esperando corrida simulada</div>}
-          <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="grid gap-3 md:grid-cols-2">
-              <InfoCard title="Empresa demo activa" value={activeDemoContext?.prospectCompanyName || "Sin demo activa"} />
-              <InfoCard title="Proyecto demo activo" value={activeDemoContext?.projectName || "Proyecto Comalapa"} />
-              <InfoCard title="DemoRunId corto" value={demoRunIdShort} />
-              <InfoCard title="Reservas/clientes simulados" value={String(simulatedReservationClients.length)} />
-              <InfoCard title="Mensajes internos simulados" value={String(simulatedInternalMessages.length)} />
-              <InfoCard title="Reportes de vendedoras" value={String(simulatedSellerReports.length)} />
-              <InfoCard title="Logs Marta Voz / Vapi" value={String(simulatedVapiCallLogs.length)} />
-              <InfoCard title="Seguimientos Marta WhatsApp" value={String(simulatedMartaWhatsAppFollowups.length)} />
-              <InfoCard title="Estado antes" value={demoStatusBefore} />
-              <InfoCard title="Estado despues" value={demoStatusAfter} />
-            </div>
-            {activeDemoContext && <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Escenario: {activeDemoContext.scenarioName} · Inyectado: {activeDemoContext.injectedAt}</p>}
-          </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {injectionResults.map(([value, label]) => <div key={label} className="min-w-0 rounded-2xl bg-slate-50 p-4"><div className="text-3xl font-black text-slate-950">{value}</div><div className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-slate-700">{label}</div></div>)}
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <InfoCard title="Empresa demo activa" value={activeDemoContext?.prospectCompanyName || "Sin demo activa"} detail="Contexto escénico posterior a FASE 04." />
+            <InfoCard title="Proyecto demo activo" value={activeDemoContext?.projectName || "Proyecto Comalapa"} detail="Base operativa interpretada por H-OperIA Intelligence." />
+            <InfoCard title="Estado de hallazgos" value={simulatedDataInjected ? "Pendiente de verificación" : "Pendiente de corrida"} detail="Los enlaces son simulados y no activan rutas reales." />
           </div>
         </Card>
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h3 className="text-3xl font-black text-slate-950">Señales operacionales transformadas</h3>
-              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada señal conserva su fuente para distinguir reservas, seguimiento humano, mensajería, WhatsApp y voz / Vapi.</p>
+              <h3 className="text-3xl font-black text-slate-950">Hallazgos prioritarios inyectados en Admin</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada hallazgo muestra dónde debe revisarse dentro del Admin, de qué fuente nace y qué verificación externa corresponde antes de tratarlo como hecho.</p>
             </div>
-            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedIntelligenceSignals.length} señales</Badge>
+            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedIntelligenceSignals.length} hallazgos</Badge>
           </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <div className="mt-5 grid gap-4">
             {simulatedIntelligenceSignals.map((signal) => (
-              <div key={signal.id} className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Badge tone={statusTone[signal.priority] || "violet"}>{signal.priority}</Badge>
-                  <span className="text-xs font-black uppercase tracking-[0.16em] text-violet-900">{signal.source}</span>
+              <div key={signal.id} className="rounded-3xl border border-violet-100 bg-violet-50 p-5">
+                <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge tone="dark">Hallazgo {signal.number}</Badge>
+                      <Badge tone="blue">{signal.adminPage}</Badge>
+                      <Badge tone={statusTone[signal.priority] || "violet"}>{signal.priority}</Badge>
+                    </div>
+                    <h4 className="mt-3 text-xl font-black text-slate-950">{signal.section}</h4>
+                  </div>
+                  <Badge tone="amber">{signal.status}</Badge>
                 </div>
-                <h4 className="mt-3 text-lg font-black text-slate-950">{signal.title}</h4>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{signal.summary}</p>
+                <div className="mt-4 grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
+                  <div className="rounded-2xl bg-white p-4">
+                    <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Hallazgo detectado</div>
+                    <p className="mt-2 text-base font-semibold leading-7 text-slate-800">{signal.finding}</p>
+                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Motivo de priorización</div>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{signal.priorityReason}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white p-4">
+                    <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Fuente del dato</div>
+                    <p className="mt-2 text-base font-black text-slate-950">{signal.source}</p>
+                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Ver en Admin</div>
+                    <button type="button" onClick={() => openAdminFinding(signal)} className="mt-2 inline-flex items-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">
+                      <ExternalLink size={16} className="mr-2" />{signal.adminLink}
+                    </button>
+                    {(signal.externalVerification || signal.supabaseTable) && (
+                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                        {signal.externalVerification && (
+                          <>
+                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Verificación externa</div>
+                            <button type="button" onClick={(event) => event.preventDefault()} className="mt-2 inline-flex items-center rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
+                              <ExternalLink size={15} className="mr-2" />{signal.externalVerification}
+                            </button>
+                          </>
+                        )}
+                        {signal.supabaseTable && (
+                          <div className="mt-3">
+                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Tabla Supabase prevista</div>
+                            <div className="mt-2 inline-flex items-center rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
+                              <Database size={15} className="mr-2" />{signal.supabaseTable}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </Card>
-        <Card><div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">Impactos generados por la operación</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada impacto muestra el módulo afectado, el cambio generado y el acceso directo a la página correspondiente.</p></div><Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Visible" : "Pendiente"}</Badge></div>{!simulatedDataInjected && <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Impactos pendientes de la carga de Empresa Demo</div>}{simulatedDataInjected && <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{derivedChanges.map((item) => <div key={`${item.phase}-${item.page}-${item.source}`} className="rounded-3xl border border-slate-100 bg-slate-50 p-5"><div className="flex flex-wrap gap-2"><Badge tone="dark">{item.phase}</Badge><Badge tone="blue">{item.page}</Badge><Badge tone={statusTone[item.status] || "slate"}>{item.status}</Badge></div><div className="mt-3 text-sm font-black uppercase tracking-[0.16em] text-slate-600">{item.section}</div><h4 className="mt-3 text-xl font-black text-slate-950">{item.page}</h4><p className="mt-2 text-base font-semibold leading-7 text-slate-700">{item.change}. {item.observation}</p><button onClick={() => presentImpactedSection(item.targetId)} className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir página</button></div>)}</div>}</Card>
       </div>
 
       <div id="demo-executive-close" ref={(element) => { phaseSectionRefs.current[5] = element; }} className="scroll-mt-64">
