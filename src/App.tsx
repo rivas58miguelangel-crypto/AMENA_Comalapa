@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import DemoCommandEvidencePanel from "./components/demo/DemoCommandEvidencePanel";
 import DemoScenarioRoute from "./components/demo/DemoScenarioRoute";
+import {
+  getPrimaryFindingForAdminPage,
+  hasDemoFindingsForAdminPage,
+} from "./demo/bridge/demoFindingsBridge";
 import { createDemoInjectedFindings } from "./demo/fixtures/demoFindingsFixtures";
 import {
   Activity,
@@ -471,6 +475,7 @@ function AppShell() {
     if (menu.some((item) => item.id === fromStorage)) return fromStorage;
     return "executive";
   });
+  const [demoFindings, setDemoFindings] = useState([]);
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("amena.activeSection", active);
@@ -506,7 +511,11 @@ function AppShell() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-amber-50 text-slate-950">
       <div className="mx-auto max-w-[1800px] space-y-5 p-3 sm:p-5">
         <TopNav active={active} setActive={setActive} />
-        <Page setActive={setActive} />
+        <Page
+          demoFindings={demoFindings}
+          onDemoFindingsInjected={setDemoFindings}
+          setActive={setActive}
+        />
       </div>
     </div>
   );
@@ -532,7 +541,16 @@ function DetailStack({ title, subtitle, items }) {
   );
 }
 
-function ExecutivePage() {
+function ExecutivePage({ demoFindings = [], setActive }) {
+  const hasExecutiveDemoFinding = hasDemoFindingsForAdminPage(
+    demoFindings,
+    "executive",
+  );
+  const executiveDemoFinding = getPrimaryFindingForAdminPage(
+    demoFindings,
+    "executive",
+  );
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -549,6 +567,29 @@ function ExecutivePage() {
         <Metric title="Integración H-OperIA Intelligence" value="86%" note="Promedio operativo" tone="violet" icon={Bot} />
         <Metric title="Acciones hoy" value="43" note="Sugeridas para revisión directiva" tone="blue" icon={Target} />
       </div>
+      {hasExecutiveDemoFinding && executiveDemoFinding && (
+        <Card>
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <div className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">Evidencia Demo</div>
+              <h3 className="mt-2 text-2xl font-black text-slate-950">{executiveDemoFinding.title}</h3>
+              <p className="mt-3 text-base font-semibold leading-7 text-slate-700">{executiveDemoFinding.summary}</p>
+            </div>
+            <button type="button" onClick={() => setActive("demo")} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white">
+              <ExternalLink size={16} className="mr-2 inline" />Volver al Centro Demo
+            </button>
+          </div>
+          <div className="mt-5 rounded-2xl border border-violet-100 bg-violet-50 p-4">
+            <div className="text-sm font-black uppercase tracking-[0.18em] text-violet-700">RecomendaciÃ³n operacional</div>
+            <p className="mt-2 text-base font-semibold leading-7 text-slate-800">{executiveDemoFinding.operationalRecommendation}</p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {executiveDemoFinding.associatedEvidence.map((evidence) => (
+              <Badge key={evidence.id} tone="blue">{evidence.label}</Badge>
+            ))}
+          </div>
+        </Card>
+      )}
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
@@ -1384,7 +1425,7 @@ function DashboardsPage() {
   );
 }
 
-function DemoPage({ setActive }) {
+function DemoPage({ setActive, onDemoFindingsInjected }) {
   const DEMO_BACKEND_URL = "http://localhost:4000";
   const phases = [
     { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.", nextStep: "validar cliente, unidad, fuente, estado y evidencia visible." },
@@ -1851,6 +1892,7 @@ function DemoPage({ setActive }) {
     setSimulatedVapiCallLogs(nextVapiCallLogs);
     setSimulatedMartaWhatsAppFollowups(nextMartaWhatsAppFollowups);
     setSimulatedIntelligenceSignals(nextIntelligenceSignals);
+    onDemoFindingsInjected?.(nextIntelligenceSignals);
     setSimulatedOperationalEvidence(nextOperationalEvidence);
     setActiveDemoContext({
       demoRunId: nextDemoRunId,
