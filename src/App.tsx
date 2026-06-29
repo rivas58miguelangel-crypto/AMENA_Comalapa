@@ -476,6 +476,7 @@ function AppShell() {
     return "executive";
   });
   const [demoFindings, setDemoFindings] = useState([]);
+  const [demoContext, setDemoContext] = useState(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("amena.activeSection", active);
@@ -512,7 +513,9 @@ function AppShell() {
       <div className="mx-auto max-w-[1800px] space-y-5 p-3 sm:p-5">
         <TopNav active={active} setActive={setActive} />
         <Page
+          demoContext={demoContext}
           demoFindings={demoFindings}
+          onDemoContextInjected={setDemoContext}
           onDemoFindingsInjected={setDemoFindings}
           setActive={setActive}
         />
@@ -1425,7 +1428,13 @@ function DashboardsPage() {
   );
 }
 
-function DemoPage({ setActive, onDemoFindingsInjected }) {
+function DemoPage({
+  demoContext,
+  demoFindings = [],
+  onDemoContextInjected,
+  onDemoFindingsInjected,
+  setActive,
+}) {
   const DEMO_BACKEND_URL = "http://localhost:4000";
   const phases = [
     { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.", nextStep: "validar cliente, unidad, fuente, estado y evidencia visible." },
@@ -1742,7 +1751,13 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
   const simulatedDataInjected = activeDemoContext?.status === "injected" && simulatedReservationClients.length > 0 && simulatedInternalMessages.length > 0 && simulatedSellerReports.length > 0 && simulatedVapiCallLogs.length > 0;
-  const demoRunIdShort = activeDemoContext ? activeDemoContext.demoRunId.replace("demo-", "").slice(0, 8) : "Sin demo activa";
+  const effectiveDemoContext = activeDemoContext || demoContext;
+  const phaseFiveFindings = simulatedIntelligenceSignals.length
+    ? simulatedIntelligenceSignals
+    : demoFindings;
+  const phaseFiveHasFindings = phaseFiveFindings.length > 0;
+  const phaseFiveDemoActive = simulatedDataInjected || phaseFiveHasFindings;
+  const demoRunIdShort = effectiveDemoContext ? effectiveDemoContext.demoRunId.replace("demo-", "").slice(0, 8) : "Sin demo activa";
   const demoStatusBefore = activeDemoContext ? "Sin demo activa" : "Pendiente";
   const demoStatusAfter = activeDemoContext?.status || "Pendiente";
   const normalizeSalvadoranPhone = (value) => {
@@ -1886,22 +1901,24 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
     const nextMartaWhatsAppFollowups = [];
     const nextIntelligenceSignals = createDemoInjectedFindings(nextDemoRunId);
     const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
-    setSimulatedReservationClients(nextReservationClients);
-    setSimulatedInternalMessages(nextInternalMessages);
-    setSimulatedSellerReports(nextSellerReports);
-    setSimulatedVapiCallLogs(nextVapiCallLogs);
-    setSimulatedMartaWhatsAppFollowups(nextMartaWhatsAppFollowups);
-    setSimulatedIntelligenceSignals(nextIntelligenceSignals);
-    onDemoFindingsInjected?.(nextIntelligenceSignals);
-    setSimulatedOperationalEvidence(nextOperationalEvidence);
-    setActiveDemoContext({
+    const nextDemoContext = {
       demoRunId: nextDemoRunId,
       prospectCompanyName: selectedVolunteer.company || volunteerForm.company || "Empresa demo local",
       projectName: "AMENA Comalapa",
       scenarioName: "Lanzamiento comercial de proyecto habitacional",
       status: "injected",
       injectedAt: new Date().toLocaleString("es-SV", { dateStyle: "short", timeStyle: "short" }),
-    });
+    };
+    setSimulatedReservationClients(nextReservationClients);
+    setSimulatedInternalMessages(nextInternalMessages);
+    setSimulatedSellerReports(nextSellerReports);
+    setSimulatedVapiCallLogs(nextVapiCallLogs);
+    setSimulatedMartaWhatsAppFollowups(nextMartaWhatsAppFollowups);
+    setSimulatedIntelligenceSignals(nextIntelligenceSignals);
+    onDemoContextInjected?.(nextDemoContext);
+    onDemoFindingsInjected?.(nextIntelligenceSignals);
+    setSimulatedOperationalEvidence(nextOperationalEvidence);
+    setActiveDemoContext(nextDemoContext);
     setReservationStatus({ reservation: "Validada", whatsapp: "Confirmado", email: "Confirmado", evidence: "Generada" });
     completePhase(4);
   };
@@ -1922,8 +1939,8 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
     { phase: "Fase 03", source: "Vendedoras", page: "Registro de Seguimiento Comercial", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
     { phase: "Fase 03", source: "Mensajes entre el Equipo", page: "Mensajes entre el Equipo", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
     { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias agregadas a la corrida`, observation: "Reservas, reportes, mensajes, llamadas y seguimientos consolidados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
-    { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Inteligencia Operativa", section: "Hallazgos prioritarios inyectados", change: `${simulatedIntelligenceSignals.length} hallazgos priorizados dentro del Admin`, observation: "La actividad operacional se interpreta como hallazgos verificables en páginas internas.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
-    { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Consultas y conclusión", change: `${simulatedIntelligenceSignals.length} señales disponibles para lectura ejecutiva`, observation: "Las señales se convierten en criterios y una conclusión para junta.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-executive-close" },
+    { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Inteligencia Operativa", section: "Hallazgos prioritarios inyectados", change: `${phaseFiveFindings.length} hallazgos priorizados dentro del Admin`, observation: "La actividad operacional se interpreta como hallazgos verificables en páginas internas.", status: phaseFiveDemoActive ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
+    { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Consultas y conclusión", change: `${phaseFiveFindings.length} señales disponibles para lectura ejecutiva`, observation: "Las señales se convierten en criterios y una conclusión para junta.", status: phaseFiveDemoActive ? "Generado" : "Pendiente", targetId: "demo-executive-close" },
     { phase: "Auxiliar", source: "Información pública", page: "Inventario Demo", section: "Sección auxiliar técnica", change: "8 categorías de inventario previstas", observation: "Soporte reutilizable fuera de la ruta escénica principal.", status: "Visible", targetId: "demo-technical-inventory" },
   ];
   const injectionResults = [
@@ -1932,7 +1949,7 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
     [String(simulatedSellerReports.length), "reportes vendedoras"],
     [String(simulatedVapiCallLogs.length), "logs Marta Voz / Vapi"],
     [String(simulatedMartaWhatsAppFollowups.length), "seguimientos Marta WhatsApp"],
-    [String(simulatedIntelligenceSignals.length), "señales H-OperIA Intelligence"],
+    [String(phaseFiveFindings.length), "señales H-OperIA Intelligence"],
     [String(simulatedOperationalEvidence.length), "evidencias operacionales"],
   ];
   const breakdownItems = executiveBreakdown.split("\n").map((item) => item.trim()).filter(Boolean).slice(0, 4);
@@ -1959,11 +1976,11 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
       <PageHeader title="Centro Demo" subtitle="Tablero de mando escénico para ejecutar una demostración ejecutiva en vivo: reserva, mensajería, Marta, evidencia operacional, simulación e inteligencia." icon={Smartphone} sync={martaSync.demo} badges={["Operación viva", "Demo ejecutiva", "Evidencia de la Operación"]} syncNote="Mide el avance visible de la demostración: fases completadas, estados operacionales y señales generadas durante la presentación." />
       <Card>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <InfoCard title="Empresa Activa" value={activeDemoContext?.prospectCompanyName || "AMENA"} />
-          <InfoCard title="Proyecto Activo" value={activeDemoContext?.projectName || "AMENA Comalapa"} />
-          <InfoCard title="Escenario Activo" value={activeDemoContext?.scenarioName || "Centro Demo"} />
-          <InfoCard title="Estado" value={activeDemoContext?.status || "Preparado"} />
-          <InfoCard title="Última actualización" value={activeDemoContext?.injectedAt || "Pendiente de inyección"} />
+          <InfoCard title="Empresa Activa" value={effectiveDemoContext?.prospectCompanyName || "AMENA"} />
+          <InfoCard title="Proyecto Activo" value={effectiveDemoContext?.projectName || "AMENA Comalapa"} />
+          <InfoCard title="Escenario Activo" value={effectiveDemoContext?.scenarioName || "Centro Demo"} />
+          <InfoCard title="Estado" value={effectiveDemoContext?.status || "Preparado"} />
+          <InfoCard title="Última actualización" value={effectiveDemoContext?.injectedAt || "Pendiente de inyección"} />
         </div>
       </Card>
       <DemoScenarioRoute phases={phases} progress={progress} phaseStatus={phaseStatus} onPresentPhase={presentPhase} onCompletePhase={completePhase} />
@@ -2124,7 +2141,7 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
 
       <div id="demo-command-evidence" ref={(element) => { phaseSectionRefs.current[3] = element; }} className="scroll-mt-64">
       <DemoCommandEvidencePanel
-        demoContext={activeDemoContext}
+        demoContext={effectiveDemoContext}
         simulatedDataInjected={simulatedDataInjected}
         counts={{
           reservations: simulatedReservationClients.length,
@@ -2145,13 +2162,13 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
               <h3 className="text-3xl font-black text-slate-950">FASE 05 H-OperIA Intelligence</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Índice escénico de hallazgos prioritarios que H-OperIA Intelligence interpreta después de la Empresa Demo y ubica dentro de páginas internas del Admin.</p>
             </div>
-            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedDataInjected ? "Demo activa" : "Sin demo activa"}</Badge>
+            <Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveDemoActive ? "Demo activa" : "Sin demo activa"}</Badge>
           </div>
-          {!simulatedDataInjected && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Esperando corrida simulada</div>}
+          {!phaseFiveDemoActive && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Esperando corrida simulada</div>}
           <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <InfoCard title="Empresa demo activa" value={activeDemoContext?.prospectCompanyName || "Sin demo activa"} detail="Contexto escénico posterior a FASE 04." />
-            <InfoCard title="Proyecto demo activo" value={activeDemoContext?.projectName || "Proyecto Comalapa"} detail="Base operativa interpretada por H-OperIA Intelligence." />
-            <InfoCard title="Estado de hallazgos" value={simulatedDataInjected ? "Pendiente de verificación" : "Pendiente de corrida"} detail="Los enlaces son simulados y no activan rutas reales." />
+            <InfoCard title="Empresa demo activa" value={effectiveDemoContext?.prospectCompanyName || "Sin demo activa"} detail="Contexto escénico posterior a FASE 04." />
+            <InfoCard title="Proyecto demo activo" value={effectiveDemoContext?.projectName || "Proyecto Comalapa"} detail="Base operativa interpretada por H-OperIA Intelligence." />
+            <InfoCard title="Estado de hallazgos" value={phaseFiveDemoActive ? "Pendiente de verificación" : "Pendiente de corrida"} detail="Los enlaces son simulados y no activan rutas reales." />
           </div>
         </Card>
         <Card>
@@ -2160,10 +2177,10 @@ function DemoPage({ setActive, onDemoFindingsInjected }) {
               <h3 className="text-3xl font-black text-slate-950">Hallazgos prioritarios inyectados en Admin</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada hallazgo muestra dónde debe revisarse dentro del Admin, de qué fuente nace y qué verificación externa corresponde antes de tratarlo como hecho.</p>
             </div>
-            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedIntelligenceSignals.length} hallazgos</Badge>
+            <Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveFindings.length} hallazgos</Badge>
           </div>
           <div className="mt-5 grid gap-4">
-            {simulatedIntelligenceSignals.map((signal, index) => (
+            {phaseFiveFindings.map((signal, index) => (
               <div key={signal.id} className="rounded-3xl border border-violet-100 bg-violet-50 p-5">
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
