@@ -52,6 +52,16 @@ La transicion entre chats debe preparar la apertura efectiva del siguiente chat.
 
 ---
 
+# Prerrequisito para proyectos nuevos
+
+Si el chat pertenece a un proyecto nuevo o recien creado, primero debe verificarse que GOV-0002 haya sido aplicado.
+
+La Transicion entre Chats opera plenamente unicamente sobre Proyectos Operativamente Inicializados (POI).
+
+Si el Bootstrap Metodologico no esta completo y el proyecto aun no alcanza estado POI, el chat debe priorizar completar GOV-0002 antes de continuar cualquier desarrollo funcional.
+
+---
+
 # Ciclo conceptual de continuidad
 
 La continuidad entre chats debe entenderse como un ciclo.

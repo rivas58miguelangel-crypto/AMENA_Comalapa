@@ -19,6 +19,7 @@ Este documento registra ejecucion viva. No define la gobernanza del sistema, el 
 Antes de trabajar, consultar este indice y luego los documentos asociados segun corresponda:
 
 * GOV-0001: reglas permanentes del sistema de continuidad;
+* GOV-0002: protocolo oficial para inicializar nuevos proyectos mediante Bootstrap Metodologico;
 * KB-0004: modelo conceptual de madurez del conocimiento;
 * OPS-0001: protocolo operativo PC/Laptop/Git;
 * ADR: decisiones arquitectonicas cuando un tema afecte arquitectura.
@@ -107,6 +108,7 @@ Al abrir un nuevo chat del mismo proyecto debe localizarse el chat inmediatament
 | IME-006 | KB-0004 | Base de Conocimiento | Modulo futuro | Idea | Pendiente | Alta | Media | H-OperIA producto futuro | Definir alcance cuando el producto requiera gestion interna de conocimiento | Futuro modulo/pagina Base de Conocimiento en H-OperIA. |
 | IME-007 | OPS-0001 | Operacion de repositorio | Regla operativa | Iniciativa | Pendiente | Media | Alta | Centro Demo | Usar OPS-0001 como protocolo base y validar su aplicacion antes de trabajar | Regla permanente de sincronizacion PC/Laptop antes de trabajar. |
 | IME-008 | GOV-0001 | Continuidad documental | Respaldo / espejo | Idea | Pendiente | Alta | Media | Ambos | Definir si se requiere espejo en Google Drive y responsable de actualizacion | Acceso futuro o espejo en Google Drive. Git sigue siendo fuente rectora. |
+| IME-009 | GOV-0002 | Gobernanza | Sistema documental | Implementado | En validacion inicial | Alta | Alta | Ambos | Usar GOV-0002 como protocolo rector al iniciar proyectos nuevos bajo metodologia H-OperIA | Protocolo oficial de Bootstrap Metodologico previo a cualquier desarrollo funcional. El Bootstrap concluye cuando el proyecto alcanza estado POI. |
 
 ---
 

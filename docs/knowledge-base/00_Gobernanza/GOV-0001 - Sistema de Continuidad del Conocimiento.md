@@ -30,6 +30,12 @@ En caso de diferencia entre Git/GitHub y una copia externa, prevalece Git/GitHub
 
 La continuidad del conocimiento funciona como un ciclo completo, no como eventos aislados.
 
+GOV-0001 gobierna la continuidad del conocimiento durante la vida de un Proyecto Operativamente Inicializado (POI).
+
+GOV-0002 gobierna la inicializacion de nuevos proyectos antes de que exista continuidad operativa.
+
+Ningun proyecto nuevo debe entrar al sistema de continuidad descrito por GOV-0001 sin haber alcanzado el estado Proyecto Operativamente Inicializado (POI) segun GOV-0002.
+
 El protocolo no asume que un chat se cierra formalmente. Un chat puede permanecer abierto indefinidamente.
 
 El evento que dispara el ciclo es la apertura de un nuevo chat del mismo proyecto.
@@ -173,6 +179,7 @@ Cuando exista duda, el elemento debe conservarse con estado operativo "Requiere 
 El sistema separa responsabilidades documentales:
 
 * GOV define reglas permanentes;
+* GOV-0002 define el Bootstrap Metodologico obligatorio para proyectos nuevos;
 * KB define modelos conceptuales;
 * OPS define protocolos operativos;
 * IME registra ejecucion viva;
