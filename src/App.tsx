@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import DemoCommandEvidencePanel from "./components/demo/DemoCommandEvidencePanel";
 import DemoScenarioRoute from "./components/demo/DemoScenarioRoute";
 import {
-  getPrimaryFindingForAdminPage,
-  hasDemoFindingsForAdminPage,
+  getFindingsForAdminPage,
 } from "./demo/bridge/demoFindingsBridge";
 import { createDemoInjectedFindings } from "./demo/fixtures/demoFindingsFixtures";
 import {
@@ -544,16 +543,44 @@ function DetailStack({ title, subtitle, items }) {
   );
 }
 
-function ExecutivePage({ demoFindings = [], setActive }) {
-  const hasExecutiveDemoFinding = hasDemoFindingsForAdminPage(
-    demoFindings,
-    "executive",
-  );
-  const executiveDemoFinding = getPrimaryFindingForAdminPage(
-    demoFindings,
-    "executive",
-  );
+function AdminOperationalEvidenceAnchors({ demoFindings = [], targetPage }) {
+  const pageFindings = getFindingsForAdminPage(demoFindings, targetPage);
+  const mirrorBlocks = pageFindings.flatMap((finding) => {
+    const evidenceItems = finding.associatedEvidence.length
+      ? finding.associatedEvidence
+      : [{
+          id: `${finding.id}-admin-target`,
+          label: finding.adminTargetSection,
+          summary: finding.title || finding.adminTargetSection,
+          source: finding.source,
+          adminTargetPage: finding.adminTargetPage,
+          adminTargetSection: finding.adminTargetSection,
+          adminTargetDetail: finding.title || finding.adminTargetSection,
+          adminTargetAnchor: `${finding.id}-${finding.adminTargetPage}`,
+        }];
 
+    return evidenceItems
+      .filter((evidence) => (evidence.adminTargetPage || finding.adminTargetPage) === targetPage)
+      .map((evidence) => ({ finding, evidence }));
+  });
+
+  if (!mirrorBlocks.length) return null;
+
+  return (
+    <div className="space-y-4">
+      {mirrorBlocks.map(({ finding, evidence }) => (
+        <div key={`${finding.id}-${evidence.id}`} id={evidence.adminTargetAnchor} className="scroll-mt-64">
+          <AiObservation title={evidence.adminTargetDetail || evidence.adminTargetSection || finding.title}>
+            <p>{finding.summary}</p>
+            <p className="mt-3"><span className="font-black text-slate-950">Recomendación operacional:</span> {finding.operationalRecommendation}</p>
+          </AiObservation>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ExecutivePage({ demoFindings = [], setActive }) {
   return (
     <div className="space-y-5">
       <PageHeader
@@ -570,29 +597,7 @@ function ExecutivePage({ demoFindings = [], setActive }) {
         <Metric title="Integración H-OperIA Intelligence" value="86%" note="Promedio operativo" tone="violet" icon={Bot} />
         <Metric title="Acciones hoy" value="43" note="Sugeridas para revisión directiva" tone="blue" icon={Target} />
       </div>
-      {hasExecutiveDemoFinding && executiveDemoFinding && (
-        <Card>
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div>
-              <div className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">Evidencia Demo</div>
-              <h3 className="mt-2 text-2xl font-black text-slate-950">{executiveDemoFinding.title}</h3>
-              <p className="mt-3 text-base font-semibold leading-7 text-slate-700">{executiveDemoFinding.summary}</p>
-            </div>
-            <button type="button" onClick={() => setActive("demo")} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white">
-              <ExternalLink size={16} className="mr-2 inline" />Volver al Centro Demo
-            </button>
-          </div>
-          <div className="mt-5 rounded-2xl border border-violet-100 bg-violet-50 p-4">
-            <div className="text-sm font-black uppercase tracking-[0.18em] text-violet-700">RecomendaciÃ³n operacional</div>
-            <p className="mt-2 text-base font-semibold leading-7 text-slate-800">{executiveDemoFinding.operationalRecommendation}</p>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {executiveDemoFinding.associatedEvidence.map((evidence) => (
-              <Badge key={evidence.id} tone="blue">{evidence.label}</Badge>
-            ))}
-          </div>
-        </Card>
-      )}
+      <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="executive" />
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
@@ -660,8 +665,9 @@ function ExecutivePage({ demoFindings = [], setActive }) {
   );
 }
 
-function ClientPage() {
+function ClientPage({ demoFindings = [], setActive }) {
   const profile = clientOperationalProfile;
+  const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="client" />;
 
   return (
     <div className="space-y-5">
@@ -673,6 +679,7 @@ function ClientPage() {
         badges={[REPORT_DATE, profile.cliente.name, profile.pipeline.status]}
         syncNote="Este porcentaje indica qué tan conectado está el expediente post-reserva: Marta acompaña dudas y conversaciones; H-OperIA Intelligence interpreta señales; la vendedora revisa y ejecuta el siguiente paso."
       />
+      {demoEvidenceMirror}
 
       <Card>
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
@@ -783,7 +790,8 @@ const constructionHierarchy = [
   },
 ];
 
-function ConstructionPage() {
+function ConstructionPage({ demoFindings = [], setActive }) {
+  const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="construction" />;
   const [mode, setMode] = useState("explore");
   const [reservationQuery, setReservationQuery] = useState("HOP-RES-000784");
   const [selectedType, setSelectedType] = useState(constructionHierarchy[0].type);
@@ -824,6 +832,7 @@ function ConstructionPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Avances de Construcción" subtitle="Control operativo de casas y apartamentos: obra, ventas y servicio trabajan con evidencias visuales, reportes privados y explicaciones claras para clientes, vendedoras y dirección." icon={HardHat} sync={martaSync.construction} badges={[REPORT_DATE, "Tipo → sector → torre/manzana → nivel/lote", "Reportes privados"]} syncNote="Este porcentaje mide qué tan conectados están obra, ventas, evidencias visuales, reportes privados y comunicación al cliente para que el equipo humano revise, decida y comunique con claridad por sector, torre, nivel o unidad." />
+      {demoEvidenceMirror}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Metric title="Avance promedio" value="64%" note="Apartamentos y casas" tone="blue" icon={Building2} />
         <Metric title="Reservantes informados" value="128" note="Con reporte semanal privado" tone="green" icon={Home} />
@@ -943,7 +952,8 @@ function ConstructionPage() {
   );
 }
 
-function DocumentsPage() {
+function DocumentsPage({ demoFindings = [], setActive }) {
+  const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="documents" />;
   const [activeDoc, setActiveDoc] = useState("espera");
   const docDetails = {
     espera: {
@@ -968,6 +978,7 @@ function DocumentsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Documentos del Cliente" subtitle="Gestión documental desde visión general hasta microdetalle: Marta acompaña solicitudes y aclaraciones; H-OperIA Intelligence analiza fricciones, vencimientos y prioridades; el equipo valida cada acción." icon={FileText} sync={martaSync.documents} badges={[REPORT_DATE, "Lectura H-OperIA Intelligence", "Checklist operativo"]} syncNote="Este porcentaje combina el acompañamiento de Marta en solicitudes y aclaraciones documentales con la lectura de H-OperIA Intelligence para que ventas, financiera y legal revisen, decidan y ejecuten próximos pasos." />
+      {demoEvidenceMirror}
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="A la espera" value="147" note="35 reservas con documentos pendientes" tone="slate" icon={ClipboardCheck} onClick={() => setActiveDoc("espera")} active={activeDoc === "espera"} />
         <Metric title="Recibidos" value="96" note="PDF/JPG cargados al expediente" tone="blue" icon={UploadCloud} onClick={() => setActiveDoc("recibidos")} active={activeDoc === "recibidos"} />
@@ -1008,10 +1019,12 @@ function DocumentsPage() {
   );
 }
 
-function PaymentsPage() {
+function PaymentsPage({ demoFindings = [], setActive }) {
+  const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="payments" />;
   return (
     <div className="space-y-5">
       <PageHeader title="Pagos y Compromisos" subtitle="Control del período desde la reserva hasta la entrega: ingresos recibidos, pendientes, atrasos, justificaciones, compromisos, evidencia y prioridades financieras sugeridas por H-OperIA Intelligence." icon={CreditCard} sync={martaSync.payments} badges={[REPORT_DATE, "Reserva a entrega", "Revisión humana"]} syncNote="Este porcentaje muestra qué tanto H-OperIA Intelligence cruza pagos, compromisos, atrasos, justificaciones y evidencias para sugerir prioridades de seguimiento financiero que el equipo revisa, decide y ejecuta." />
+      {demoEvidenceMirror}
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Ingresos recibidos" value="$184,500" note="Etapa reserva-entrega · corte 15 mayo 2026" tone="green" icon={WalletCards} />
         <Metric title="Pendiente" value="$58,200" note="Primas y gastos" tone="amber" icon={Clock} />
@@ -1035,7 +1048,7 @@ function PaymentsPage() {
   );
 }
 
-function ServicePage() {
+function ServicePage({ demoFindings = [], setActive }) {
   const [activeService, setActiveService] = useState("tickets");
   const serviceDetails = {
     tickets: {
@@ -1056,10 +1069,12 @@ function ServicePage() {
     },
   };
   const currentService = serviceDetails[activeService];
+  const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="service" />;
 
   return (
     <div className="space-y-5">
       <PageHeader title="Servicio al Cliente" subtitle="Tickets, incidencias, garantías, acuerdos, tiempos de atención, reclamos, consultas, escalaciones y aprendizaje operativo para directores y vendedoras." icon={Headphones} sync={martaSync.service} badges={[REPORT_DATE, "Tiempos de atención", "Escalaciones"]} syncNote="Este porcentaje combina el apoyo de Marta en respuestas y seguimiento al cliente con la lectura de H-OperIA Intelligence para ordenar tickets, escalaciones y aprendizajes repetidos." />
+      {demoEvidenceMirror}
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Tickets abiertos" value="34" note="7 críticos" tone="amber" icon={Headphones} onClick={() => setActiveService("tickets")} active={activeService === "tickets"} />
         <Metric title="Tiempo de atención" value="1h 12m" note="Promedio; meta máxima 4h" tone="green" icon={Clock} onClick={() => setActiveService("tiempo")} active={activeService === "tiempo"} />
@@ -1090,10 +1105,13 @@ function ServicePage() {
   );
 }
 
-function SellersPage() {
+function SellersPage({ demoFindings = [], setActive }) {
+  const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="sellers" />;
+
   return (
     <div className="space-y-5">
       <PageHeader title="Gestión de Vendedoras" subtitle="Mapa de apoyo comercial por vendedora: seguimiento, uso del acompañamiento Marta, formularios completados, calidad de información capturada y sugerencias para fortalecer al equipo." icon={Users} sync={martaSync.sellers} badges={[REPORT_DATE, "General → vendedora → formulario", "Acompañamiento"]} syncNote="Este porcentaje mide cómo H-OperIA Intelligence usa formularios, señales comerciales, seguimientos y resultados para detectar necesidades de apoyo, elevar capacidades humanas y dejar la decisión en manos del equipo comercial." />
+      {demoEvidenceMirror}
       <div className="grid gap-4 md:grid-cols-4">
         <Metric title="Vendedoras" value="8" note="Equipo activo" tone="blue" icon={Users} />
         <Metric title="Uso del acompañamiento Marta" value="76%" note="Promedio equipo" tone="violet" icon={Bot} />
@@ -1708,7 +1726,7 @@ function DemoPage({
   const demoAdminPageLabels = {
     executive: "Centro Ejecutivo",
     client: "Expediente Vivo",
-    construction: "Inventario / ConstrucciÃ³n",
+    construction: "Inventario / Construcción",
     documents: "Documentos",
     payments: "Finanzas / Pagos",
     service: "Servicio Cliente",
@@ -1795,6 +1813,14 @@ function DemoPage({
       adminTargetsByPage[finding?.adminPage];
     if (!menu.some((item) => item.id === target)) return;
     setActive(target);
+    if (finding?.adminTargetAnchor) {
+      window.setTimeout(() => {
+        document.getElementById(finding.adminTargetAnchor)?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 80);
+    }
   };
   const completePhase = (index) => {
     setCompletedPhases((current) => current.includes(index) ? current : [...current, index]);
@@ -2209,7 +2235,7 @@ function DemoPage({
                       <Badge tone="blue">{demoAdminPageLabels[signal.adminTargetPage] || signal.adminTargetPage}</Badge>
                       <Badge tone={demoFindingSeverityTone[signal.severity] || "violet"}>{demoFindingSeverityLabels[signal.severity] || signal.severity}</Badge>
                     </div>
-                    <h4 className="mt-3 text-xl font-black text-slate-950">{signal.adminTargetSection}</h4>
+                    <h4 className="mt-3 text-xl font-black text-slate-950">{signal.title || signal.adminTargetSection}</h4>
                   </div>
                   <Badge tone="amber">{demoVisibleStatusLabels[signal.visibleStatus] || signal.visibleStatus}</Badge>
                 </div>
@@ -2223,10 +2249,34 @@ function DemoPage({
                   <div className="rounded-2xl bg-white p-4">
                     <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Fuente del dato</div>
                     <p className="mt-2 text-base font-black text-slate-950">{demoFindingSourceLabels[signal.source] || signal.source}</p>
-                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Ver en Admin</div>
-                    <button type="button" onClick={() => openAdminFinding(signal)} className="mt-2 inline-flex items-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">
-                      <ExternalLink size={16} className="mr-2" />{demoAdminPageLabels[signal.adminTargetPage] || signal.adminTargetPage} -&gt; {signal.adminTargetSection}
-                    </button>
+                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Ver evidencias en Admin</div>
+                    <div className="mt-2 grid gap-2">
+                      {(signal.associatedEvidence.length ? signal.associatedEvidence : [{
+                        id: `${signal.id}-admin-target`,
+                        label: signal.adminTargetSection,
+                        summary: signal.title || signal.adminTargetSection,
+                        source: signal.source,
+                        adminTargetPage: signal.adminTargetPage,
+                        adminTargetSection: signal.adminTargetSection,
+                      }]).map((evidence, evidenceIndex) => {
+                        const evidenceTarget = {
+                          ...signal,
+                          adminTargetPage: evidence.adminTargetPage || signal.adminTargetPage,
+                          adminTargetAnchor: evidence.adminTargetAnchor,
+                        };
+                        const targetPageLabel = demoAdminPageLabels[evidence.adminTargetPage || signal.adminTargetPage] || evidence.adminTargetPage || signal.adminTargetPage;
+                        const targetSectionLabel = evidence.adminTargetSection || signal.adminTargetSection;
+                        const targetDetailLabel = evidence.adminTargetDetail || evidence.summary;
+                        return (
+                          <button key={evidence.id} type="button" onClick={() => openAdminFinding(evidenceTarget)} className="flex items-start gap-3 rounded-2xl bg-slate-950 px-4 py-3 text-left text-sm font-black leading-6 text-white">
+                            <span className="shrink-0 text-white/70">{evidenceIndex + 1}.</span>
+                            <span className="min-w-0">
+                              <ExternalLink size={16} className="mr-2 inline" />{targetPageLabel} -&gt; {targetSectionLabel}{targetDetailLabel ? ` -> ${targetDetailLabel}` : ""}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                     {signal.associatedEvidence.length > 0 && (
                       <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3">
                         <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Evidencia asociada</div>

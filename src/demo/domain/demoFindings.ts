@@ -40,6 +40,10 @@ export interface DemoInjectedFinding {
     label: string;
     summary: string;
     source: DemoFindingSource;
+    adminTargetPage?: DemoAdminTargetPage;
+    adminTargetSection?: string;
+    adminTargetDetail?: string;
+    adminTargetAnchor?: string;
   }>;
   visibleStatus: "pending" | "visible" | "acknowledged" | "hidden";
   timestamp: string;
