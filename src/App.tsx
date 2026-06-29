@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import DemoCommandEvidencePanel from "./components/demo/DemoCommandEvidencePanel";
 import DemoScenarioRoute from "./components/demo/DemoScenarioRoute";
+import { createDemoInjectedFindings } from "./demo/fixtures/demoFindingsFixtures";
 import {
   Activity,
   AlertTriangle,
@@ -1654,6 +1655,49 @@ function DemoPage({ setActive }) {
     "Servicio Cliente": "service",
     "Ventas / Vendedoras": "sellers",
   };
+  const demoAdminPageLabels = {
+    executive: "Centro Ejecutivo",
+    client: "Expediente Vivo",
+    construction: "Inventario / ConstrucciÃ³n",
+    documents: "Documentos",
+    payments: "Finanzas / Pagos",
+    service: "Servicio Cliente",
+    sellers: "Ventas / Vendedoras",
+    campaigns: "Marketing / Canales",
+    campaignDelivery: "CampaÃ±as",
+    funnels: "Embudos",
+    dashboards: "Inteligencia Operativa",
+  };
+  const demoFindingSourceLabels = {
+    reservations: "Reservas",
+    marta_voice_vapi: "Marta Voz / VAPI",
+    marta_text_whatsapp: "Marta WhatsApp / Texto",
+    commercial_follow_up: "Registro de Seguimiento Comercial",
+    team_messages: "Mensajes entre el Equipo",
+    documents: "Documentos",
+    payments: "Finanzas / Pagos",
+    customer_service: "Servicio Cliente",
+    h_operia_intelligence: "H-OperIA Intelligence",
+    manual_demo: "Demo manual",
+  };
+  const demoFindingSeverityLabels = {
+    low: "Baja",
+    medium: "Media",
+    high: "Alta",
+    critical: "CrÃ­tica",
+  };
+  const demoFindingSeverityTone = {
+    low: "green",
+    medium: "amber",
+    high: "red",
+    critical: "red",
+  };
+  const demoVisibleStatusLabels = {
+    pending: "Pendiente de verificaciÃ³n",
+    visible: "Visible",
+    acknowledged: "Revisado",
+    hidden: "Oculto",
+  };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
   const simulatedDataInjected = activeDemoContext?.status === "injected" && simulatedReservationClients.length > 0 && simulatedInternalMessages.length > 0 && simulatedSellerReports.length > 0 && simulatedVapiCallLogs.length > 0;
@@ -1689,7 +1733,10 @@ function DemoPage({ setActive }) {
     });
   };
   const openAdminFinding = (finding) => {
-    const target = finding?.adminTarget || adminTargetsByPage[finding?.adminPage];
+    const target =
+      finding?.adminTargetPage ||
+      finding?.adminTarget ||
+      adminTargetsByPage[finding?.adminPage];
     if (!menu.some((item) => item.id === target)) return;
     setActive(target);
   };
@@ -1796,7 +1843,7 @@ function DemoPage({ setActive }) {
     const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, baseReservationClients).slice(0, quantities.sellerReports);
     const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, baseReservationClients).slice(0, quantities.vapiLogs);
     const nextMartaWhatsAppFollowups = [];
-    const nextIntelligenceSignals = createSimulatedIntelligenceSignals(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextVapiCallLogs, nextMartaWhatsAppFollowups);
+    const nextIntelligenceSignals = createDemoInjectedFindings(nextDemoRunId);
     const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
     setSimulatedReservationClients(nextReservationClients);
     setSimulatedInternalMessages(nextInternalMessages);
@@ -2074,33 +2121,43 @@ function DemoPage({ setActive }) {
             <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedIntelligenceSignals.length} hallazgos</Badge>
           </div>
           <div className="mt-5 grid gap-4">
-            {simulatedIntelligenceSignals.map((signal) => (
+            {simulatedIntelligenceSignals.map((signal, index) => (
               <div key={signal.id} className="rounded-3xl border border-violet-100 bg-violet-50 p-5">
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge tone="dark">Hallazgo {signal.number}</Badge>
-                      <Badge tone="blue">{signal.adminPage}</Badge>
-                      <Badge tone={statusTone[signal.priority] || "violet"}>{signal.priority}</Badge>
+                      <Badge tone="dark">Hallazgo {index + 1}</Badge>
+                      <Badge tone="blue">{demoAdminPageLabels[signal.adminTargetPage] || signal.adminTargetPage}</Badge>
+                      <Badge tone={demoFindingSeverityTone[signal.severity] || "violet"}>{demoFindingSeverityLabels[signal.severity] || signal.severity}</Badge>
                     </div>
-                    <h4 className="mt-3 text-xl font-black text-slate-950">{signal.section}</h4>
+                    <h4 className="mt-3 text-xl font-black text-slate-950">{signal.adminTargetSection}</h4>
                   </div>
-                  <Badge tone="amber">{signal.status}</Badge>
+                  <Badge tone="amber">{demoVisibleStatusLabels[signal.visibleStatus] || signal.visibleStatus}</Badge>
                 </div>
                 <div className="mt-4 grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
                   <div className="rounded-2xl bg-white p-4">
                     <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Hallazgo detectado</div>
-                    <p className="mt-2 text-base font-semibold leading-7 text-slate-800">{signal.finding}</p>
+                    <p className="mt-2 text-base font-semibold leading-7 text-slate-800">{signal.summary}</p>
                     <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Motivo de priorización</div>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{signal.priorityReason}</p>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{signal.operationalRecommendation}</p>
                   </div>
                   <div className="rounded-2xl bg-white p-4">
                     <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Fuente del dato</div>
-                    <p className="mt-2 text-base font-black text-slate-950">{signal.source}</p>
+                    <p className="mt-2 text-base font-black text-slate-950">{demoFindingSourceLabels[signal.source] || signal.source}</p>
                     <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Ver en Admin</div>
                     <button type="button" onClick={() => openAdminFinding(signal)} className="mt-2 inline-flex items-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">
-                      <ExternalLink size={16} className="mr-2" />{signal.adminLink}
+                      <ExternalLink size={16} className="mr-2" />{demoAdminPageLabels[signal.adminTargetPage] || signal.adminTargetPage} -&gt; {signal.adminTargetSection}
                     </button>
+                    {signal.associatedEvidence.length > 0 && (
+                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                        <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Evidencia asociada</div>
+                        {signal.associatedEvidence.map((evidence) => (
+                          <div key={evidence.id} className="mt-2 rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
+                            <Database size={15} className="mr-2 inline" />{evidence.label}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     {(signal.externalVerification || signal.supabaseTable) && (
                       <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3">
                         {signal.externalVerification && (
