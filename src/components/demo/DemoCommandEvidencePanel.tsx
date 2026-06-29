@@ -100,6 +100,7 @@ export default function DemoCommandEvidencePanel({
 }: DemoCommandEvidencePanelProps) {
   const [auditStatus, setAuditStatus] = useState("Pendiente de auditoria");
   const [flowStatus, setFlowStatus] = useState<ScenicFlowStatus>("idle");
+  const [rejectedRegenerated, setRejectedRegenerated] = useState(false);
   const [quantities, setQuantities] = useState<DemoInjectionQuantities>({
     reservations: 20,
     vapiLogs: 20,
@@ -114,6 +115,12 @@ export default function DemoCommandEvidencePanel({
     setQuantities((current) => ({ ...current, [key]: nextValue }));
     setAuditStatus("Pendiente de auditoria");
     setFlowStatus("idle");
+    setRejectedRegenerated(false);
+  };
+  const resetGeneration = () => {
+    setAuditStatus("Pendiente de auditoria");
+    setFlowStatus("idle");
+    setRejectedRegenerated(false);
   };
   const injectionCategories = [
     {
@@ -145,31 +152,45 @@ export default function DemoCommandEvidencePanel({
   const hasGeneratedData = flowStatus !== "idle";
   const hasAuditedData =
     flowStatus === "audited" ||
-    flowStatus === "regenerated" ||
     flowStatus === "approved" ||
     flowStatus === "injected";
   const hasApprovedData = flowStatus === "approved" || flowStatus === "injected";
   const auditRows = injectionCategories.map((category) => {
     const configured = quantities[category.key];
-    const valid =
-      hasGeneratedData || simulatedDataInjected
-        ? Math.min(category.sent || configured, configured)
-        : 0;
-    const defective = Math.max(configured - valid, 0);
+    const rejectedBeforeRegeneration = Math.min(
+      configured,
+      category.key === "reservations"
+        ? 1
+        : category.key === "vapiLogs"
+          ? 2
+          : 1,
+    );
+    const wasAudited = flowStatus === "audited" || flowStatus === "approved" || flowStatus === "injected";
+    const defective = wasAudited && !rejectedRegenerated ? rejectedBeforeRegeneration : 0;
+    const valid = wasAudited ? Math.max(configured - defective, 0) : 0;
     const status =
-      !hasGeneratedData && !simulatedDataInjected
+      flowStatus === "idle"
         ? "Pendiente de generacion"
-        : !hasAuditedData && !simulatedDataInjected
+        : flowStatus === "generated"
           ? "Pendiente de auditoria"
-        : defective > 0
-          ? "Requiere regeneracion"
-          : hasApprovedData || simulatedDataInjected
-            ? "Aprobado"
-            : "Auditado";
+          : flowStatus === "regenerated"
+            ? "Rechazados regenerados"
+            : defective > 0
+              ? "Requiere regeneracion"
+              : flowStatus === "injected"
+                ? "Inyeccion realizada"
+                : hasApprovedData
+                  ? "Aprobado"
+                  : "Auditado";
 
     return { ...category, configured, valid, defective, status };
   });
   const hasRejectedRows = auditRows.some((row) => row.defective > 0);
+  const hasRegeneratedRejectedRows = flowStatus === "regenerated" && rejectedRegenerated;
+  const canApproveData = (hasAuditedData || hasRegeneratedRejectedRows) && !hasRejectedRows;
+  const canInjectDemo =
+    (flowStatus === "approved" || flowStatus === "injected") &&
+    !hasRejectedRows;
   const flowLabel =
     flowStatus === "idle"
       ? "Pendiente de generacion"
@@ -180,7 +201,7 @@ export default function DemoCommandEvidencePanel({
             ? "Auditoria con rechazos"
             : "Auditoria aprobable"
           : flowStatus === "regenerated"
-            ? "Rechazados regenerados"
+            ? "Rechazados regenerados; pendiente de auditoria"
             : flowStatus === "approved"
               ? "Datos aprobados"
               : "Empresa Demo inyectada";
@@ -275,6 +296,7 @@ export default function DemoCommandEvidencePanel({
               onClick={() => {
                 setFlowStatus("generated");
                 setAuditStatus("Datos generados");
+                setRejectedRegenerated(false);
               }}
               className={actionButtonClass}
             >
@@ -291,17 +313,18 @@ export default function DemoCommandEvidencePanel({
               Auditar calidad
             </button>
             <button
-              disabled={!hasAuditedData}
+              disabled={!hasRejectedRows}
               onClick={() => {
                 setFlowStatus("regenerated");
                 setAuditStatus("Rechazados regenerados");
+                setRejectedRegenerated(true);
               }}
               className={secondaryButtonClass}
             >
               Regenerar rechazados
             </button>
             <button
-              disabled={!hasAuditedData}
+              disabled={!canApproveData}
               onClick={() => {
                 setFlowStatus("approved");
                 setAuditStatus("Datos aprobados");
@@ -309,6 +332,12 @@ export default function DemoCommandEvidencePanel({
               className={actionButtonClass}
             >
               Aprobar datos
+            </button>
+            <button
+              onClick={resetGeneration}
+              className={secondaryButtonClass}
+            >
+              Nueva generación demo
             </button>
           </div>
         </div>
@@ -338,10 +367,11 @@ export default function DemoCommandEvidencePanel({
                 </div>
                 <div className="p-4">
                   <button
-                    disabled={!hasAuditedData}
+                    disabled={!hasRejectedRows}
                     onClick={() => {
                       setFlowStatus("regenerated");
                       setAuditStatus("Rechazados regenerados");
+                      setRejectedRegenerated(true);
                     }}
                     className="rounded-2xl bg-slate-200 px-4 py-3 text-xs font-black text-slate-950"
                   >
@@ -362,7 +392,7 @@ export default function DemoCommandEvidencePanel({
             interpretación comienza en la FASE 05.
           </p>
           <button
-            disabled={!hasApprovedData}
+            disabled={!canInjectDemo}
             onClick={() => {
               onInjectSimulatedData(quantities);
               setFlowStatus("injected");
