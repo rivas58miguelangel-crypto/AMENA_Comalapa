@@ -23,6 +23,10 @@ Antes de trabajar, consultar este indice y luego los documentos asociados segun 
 * OPS-0001: protocolo operativo PC/Laptop/Git;
 * ADR: decisiones arquitectonicas cuando un tema afecte arquitectura.
 
+El IME no sustituye los documentos fuente. Consultar el IME obliga a leer los documentos asociados aplicables antes de diagnosticar, proponer o modificar trabajo relacionado.
+
+Al abrir un nuevo chat del mismo proyecto debe localizarse el chat inmediatamente anterior, generarse el documento de transicion correspondiente en `98_Work_In_Progress` y leerse ese documento antes de diagnosticar, proponer o modificar trabajo relacionado.
+
 ---
 
 # Matriz rectora
