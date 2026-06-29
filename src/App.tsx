@@ -1925,6 +1925,9 @@ function DemoPage({
   const commercialRows = simulatedDataInjected
     ? simulatedSellerReports.slice(0, 5).map((report) => [report.clientName, report.sellerName, report.interactionType, `${report.summary} Necesidad: ${report.detectedNeed}. Objecion: ${report.objection}.`, report.priority, report.nextStep, report.createdAt, "Activo"])
     : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
+  const internalMessageRows = simulatedDataInjected
+    ? simulatedInternalMessages.slice(0, 5).map((message) => [message.relatedClientName, message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt])
+    : [["Andrea López", "Coordinación comercial", "Vendedora responsable", "Coordinación con vendedora", "Revisar reserva creada y dejar evidencia del siguiente movimiento.", "Media", "Hoy 3:08 PM"]];
   const adminEvidence = simulatedDataInjected
     ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
     : [
@@ -2125,8 +2128,13 @@ function DemoPage({
       <div ref={(element) => { phaseSectionRefs.current[2] = element; }} className="scroll-mt-64">
         <div id="demo-commercial-operations" className="scroll-mt-64">
         <Card>
-          <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial y Mensajes entre el Equipo</h3>
-          <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Seguimiento comercial realizado en vivo desde clientes reservados: interacciones, objeciones, prioridades y próximos pasos.</p>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia de actividades realizadas en la app de vendedoras: interacciones, objeciones, prioridades y próximos pasos.</p>
+            </div>
+            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedSellerReports.length} registros comerciales</Badge>
+          </div>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
             <input value={commercialSearch} onChange={(e) => setCommercialSearch(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por cliente o teléfono" />
             <button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><Search size={16} className="mr-2 inline" />Buscar informes de vendedora</button>
@@ -2135,6 +2143,18 @@ function DemoPage({
             <button className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir app vendedoras</button>
           </div>
           <div className="mt-5"><SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /></div>
+        </Card>
+        </div>
+        <div id="demo-operational-messaging" className="mt-5 scroll-mt-64">
+        <Card>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <h3 className="text-3xl font-black text-slate-950">FASE 03 Mensajes entre el Equipo</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia separada de mensajería interna posterior a la reserva: responsables, destinatarios, temas y prioridad operativa.</p>
+            </div>
+            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedInternalMessages.length} mensajes internos</Badge>
+          </div>
+          <div className="mt-5"><SimpleTable columns={["Cliente", "Origen", "Destino", "Tema", "Mensaje", "Prioridad", "Fecha/hora"]} rows={internalMessageRows} /></div>
         </Card>
         </div>
       </div>
