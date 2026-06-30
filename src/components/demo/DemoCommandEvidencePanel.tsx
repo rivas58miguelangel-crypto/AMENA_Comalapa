@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { UploadCloud } from "lucide-react";
 
 type DemoContext = {
@@ -38,6 +38,9 @@ type DemoInjectionQuantities = {
   vapiLogs: number;
   sellerReports: number;
   messages: number;
+  prospectCompanyName?: string;
+  projectName?: string;
+  scenarioName?: string;
 };
 
 type Tone = "slate" | "green" | "amber" | "blue" | "violet";
@@ -101,12 +104,22 @@ export default function DemoCommandEvidencePanel({
   const [auditStatus, setAuditStatus] = useState("Pendiente de auditoria");
   const [flowStatus, setFlowStatus] = useState<ScenicFlowStatus>("idle");
   const [rejectedRegenerated, setRejectedRegenerated] = useState(false);
+  const layerTwoRef = useRef<HTMLDivElement | null>(null);
   const [quantities, setQuantities] = useState<DemoInjectionQuantities>({
     reservations: 20,
     vapiLogs: 20,
     sellerReports: 20,
     messages: 20,
   });
+  const [prospectCompanyName, setProspectCompanyName] = useState(
+    demoContext?.prospectCompanyName || "Empresa demo local",
+  );
+  const [projectName, setProjectName] = useState(
+    demoContext?.projectName || "AMENA Comalapa",
+  );
+  const [scenarioName, setScenarioName] = useState(
+    demoContext?.scenarioName || "Lanzamiento comercial de proyecto habitacional",
+  );
   const updateQuantity = (
     key: keyof DemoInjectionQuantities,
     value: string,
@@ -121,6 +134,15 @@ export default function DemoCommandEvidencePanel({
     setAuditStatus("Pendiente de auditoria");
     setFlowStatus("idle");
     setRejectedRegenerated(false);
+    setQuantities({
+      reservations: 20,
+      vapiLogs: 20,
+      sellerReports: 20,
+      messages: 20,
+    });
+    setProspectCompanyName("");
+    setProjectName("");
+    setScenarioName("");
   };
   const injectionCategories = [
     {
@@ -157,6 +179,7 @@ export default function DemoCommandEvidencePanel({
   const hasApprovedData = flowStatus === "approved" || flowStatus === "injected";
   const auditRows = injectionCategories.map((category) => {
     const configured = quantities[category.key];
+    const generated = hasGeneratedData ? configured : 0;
     const rejectedBeforeRegeneration = Math.min(
       configured,
       category.key === "reservations"
@@ -167,7 +190,7 @@ export default function DemoCommandEvidencePanel({
     );
     const wasAudited = flowStatus === "audited" || flowStatus === "approved" || flowStatus === "injected";
     const defective = wasAudited && !rejectedRegenerated ? rejectedBeforeRegeneration : 0;
-    const valid = wasAudited ? Math.max(configured - defective, 0) : 0;
+    const valid = wasAudited ? Math.max(generated - defective, 0) : 0;
     const status =
       flowStatus === "idle"
         ? "Pendiente de generacion"
@@ -183,7 +206,7 @@ export default function DemoCommandEvidencePanel({
                   ? "Aprobado"
                   : "Auditado";
 
-    return { ...category, configured, valid, defective, status };
+    return { ...category, configured, generated, valid, defective, status };
   });
   const hasRejectedRows = auditRows.some((row) => row.defective > 0);
   const hasRegeneratedRejectedRows = flowStatus === "regenerated" && rejectedRegenerated;
@@ -244,9 +267,47 @@ export default function DemoCommandEvidencePanel({
           </p>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <SummaryItem label="Empresa demo" value={demoContext?.prospectCompanyName || "Empresa demo local"} />
-          <SummaryItem label="Proyecto" value={demoContext?.projectName || "AMENA Comalapa"} />
-          <SummaryItem label="Escenario demo" value={demoContext?.scenarioName || "Lanzamiento comercial de proyecto habitacional"} />
+          <div className="rounded-2xl border border-slate-100 bg-white p-4">
+            <label className="text-xs font-black uppercase tracking-[0.16em] text-slate-600">
+              Empresa constructora (Empresa demo)
+            </label>
+            <input
+              value={prospectCompanyName}
+              onChange={(event) => setProspectCompanyName(event.target.value)}
+              placeholder="Empresa demo local"
+              className="mt-2 w-full rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base font-black text-slate-950 outline-none"
+            />
+          </div>
+          <div className="rounded-2xl border border-slate-100 bg-white p-4">
+            <label className="text-xs font-black uppercase tracking-[0.16em] text-slate-600">
+              Proyecto
+            </label>
+            <input
+              value={projectName}
+              onChange={(event) => setProjectName(event.target.value)}
+              placeholder="AMENA Comalapa"
+              className="mt-2 w-full rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base font-black text-slate-950 outline-none"
+            />
+          </div>
+          <div className="rounded-2xl border border-slate-100 bg-white p-4">
+            <label className="text-xs font-black uppercase tracking-[0.16em] text-slate-600">
+              Descripción del escenario demo
+            </label>
+            <input
+              value={scenarioName}
+              onChange={(event) => setScenarioName(event.target.value)}
+              placeholder="Lanzamiento comercial de proyecto habitacional"
+              className="mt-2 w-full rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base font-black text-slate-950 outline-none"
+            />
+          </div>
+        </div>
+        <div className="mt-6">
+          <h4 className="text-lg font-black text-slate-950">
+            Cantidad deseada de datos a generar
+          </h4>
+          <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">
+            Define cuántos datos simulados deseas generar en cada aplicación al ejecutar la inyección.
+          </p>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-4">
           {injectionCategories.map((category) => (
@@ -273,14 +334,26 @@ export default function DemoCommandEvidencePanel({
           Generar datos → Auditar calidad → Regenerar categoría si falla →
           Volver a auditar → Aprobar → Inyectar Empresa Demo
         </div>
-        <div className="mt-5 rounded-3xl border border-amber-100 bg-white p-5">
+        <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-amber-100 bg-white p-5 xl:flex-row xl:items-center xl:justify-between">
+          <p className="text-sm font-semibold leading-6 text-slate-700">
+            Cuando la configuración esté lista, baja a la Capa 02 para ejecutar el proceso de generación, auditoría y aprobación.
+          </p>
+          <button
+            type="button"
+            onClick={() => layerTwoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className={secondaryButtonClass}
+          >
+            Siguiente paso: Capa 02
+          </button>
+        </div>
+        <div ref={layerTwoRef} className="mt-5 scroll-mt-64 rounded-3xl border border-amber-100 bg-white p-5">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">
-                Flujo escénico de preparación
+                Capa 02 · Flujo escénico de preparación
               </div>
               <h4 className="mt-2 text-xl font-black text-slate-950">
-                {flowLabel}
+                Proceso de generación
               </h4>
               <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">
                 Estos pasos preparan la demostración. La inyección real solo se
@@ -343,9 +416,10 @@ export default function DemoCommandEvidencePanel({
         </div>
         <div className="mt-5 overflow-hidden rounded-3xl border border-amber-100 bg-white">
           <div className="overflow-x-auto">
-            <div className="grid min-w-[860px] grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr_1fr_1fr] bg-amber-100/70 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-950">
+            <div className="grid min-w-[980px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr_0.9fr_1fr_1fr] bg-amber-100/70 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-950">
               <div className="p-4">Aplicacion</div>
-              <div className="p-4">Configurados</div>
+              <div className="p-4">Cantidad solicitada</div>
+              <div className="p-4">Cantidad generada</div>
               <div className="p-4">Validos</div>
               <div className="p-4">Defectuosos</div>
               <div className="p-4">Estado</div>
@@ -354,10 +428,11 @@ export default function DemoCommandEvidencePanel({
             {auditRows.map((row) => (
               <div
                 key={row.label}
-                className="grid min-w-[860px] grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr_1fr_1fr] border-t border-amber-100 text-sm font-semibold text-slate-800"
+                className="grid min-w-[980px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr_0.9fr_1fr_1fr] border-t border-amber-100 text-sm font-semibold text-slate-800"
               >
                 <div className="p-4 font-black text-slate-950">{row.label}</div>
                 <div className="p-4">{row.configured}</div>
+                <div className="p-4">{row.generated}</div>
                 <div className="p-4">{row.valid}</div>
                 <div className="p-4">{row.defective}</div>
                 <div className="p-4">
@@ -394,7 +469,12 @@ export default function DemoCommandEvidencePanel({
           <button
             disabled={!canInjectDemo}
             onClick={() => {
-              onInjectSimulatedData(quantities);
+              onInjectSimulatedData({
+                ...quantities,
+                prospectCompanyName: prospectCompanyName.trim() || "Empresa demo local",
+                projectName: projectName.trim() || "AMENA Comalapa",
+                scenarioName: scenarioName.trim() || "Lanzamiento comercial de proyecto habitacional",
+              });
               setFlowStatus("injected");
               setAuditStatus("Empresa Demo inyectada");
             }}
@@ -408,7 +488,7 @@ export default function DemoCommandEvidencePanel({
 
       <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-5">
         <div className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
-          Capa 02 · Estado consolidado de la corrida
+          Estado consolidado de la corrida
         </div>
         <h4 className="mt-2 text-xl font-black text-slate-950">
           Resumen de Datos Enviados

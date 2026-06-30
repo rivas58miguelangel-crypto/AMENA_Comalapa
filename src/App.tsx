@@ -1696,7 +1696,6 @@ function DemoPage({
   const [reservationStatus, setReservationStatus] = useState({ reservation: "Pendiente", whatsapp: "Pendiente", email: "Pendiente", evidence: "Pendiente" });
   const [deliveryEvidence, setDeliveryEvidence] = useState([]);
   const [visibleSendStatus, setVisibleSendStatus] = useState({ whatsappStatus: "Pendiente", emailStatus: "Pendiente" });
-  const [commercialSearch, setCommercialSearch] = useState("");
   const [martaStatus, setMartaStatus] = useState("Conversación pendiente");
   const [vapiStatus, setVapiStatus] = useState("Pendiente");
   const [activeDemoContext, setActiveDemoContext] = useState(null as null | { demoRunId: string; prospectCompanyName: string; projectName: string; scenarioName: string; status: string; injectedAt: string });
@@ -1917,7 +1916,15 @@ function DemoPage({
     setMartaStatus("Conversación analizada");
     setVapiStatus("Abierto");
   };
-  const injectSimulatedData = (quantities = { reservations: 20, messages: 20, sellerReports: 20, vapiLogs: 20 }) => {
+  const injectSimulatedData = (quantities: {
+    reservations: number;
+    messages: number;
+    sellerReports: number;
+    vapiLogs: number;
+    prospectCompanyName?: string;
+    projectName?: string;
+    scenarioName?: string;
+  } = { reservations: 20, messages: 20, sellerReports: 20, vapiLogs: 20 }) => {
     const nextDemoRunId = createDemoRunId();
     const baseReservationClients = createSimulatedReservationClients(nextDemoRunId);
     const nextReservationClients = baseReservationClients.slice(0, quantities.reservations);
@@ -1929,9 +1936,9 @@ function DemoPage({
     const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
     const nextDemoContext = {
       demoRunId: nextDemoRunId,
-      prospectCompanyName: selectedVolunteer.company || volunteerForm.company || "Empresa demo local",
-      projectName: "AMENA Comalapa",
-      scenarioName: "Lanzamiento comercial de proyecto habitacional",
+      prospectCompanyName: quantities.prospectCompanyName || selectedVolunteer.company || volunteerForm.company || "Empresa demo local",
+      projectName: quantities.projectName || "AMENA Comalapa",
+      scenarioName: quantities.scenarioName || "Lanzamiento comercial de proyecto habitacional",
       status: "injected",
       injectedAt: new Date().toLocaleString("es-SV", { dateStyle: "short", timeStyle: "short" }),
     };
@@ -1952,8 +1959,8 @@ function DemoPage({
     ? simulatedSellerReports.slice(0, 5).map((report) => [report.clientName, report.sellerName, report.interactionType, `${report.summary} Necesidad: ${report.detectedNeed}. Objecion: ${report.objection}.`, report.priority, report.nextStep, report.createdAt, "Activo"])
     : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
   const internalMessageRows = simulatedDataInjected
-    ? simulatedInternalMessages.slice(0, 5).map((message) => [message.relatedClientName, message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt])
-    : [["Andrea López", "Coordinación comercial", "Vendedora responsable", "Coordinación con vendedora", "Revisar reserva creada y dejar evidencia del siguiente movimiento.", "Media", "Hoy 3:08 PM"]];
+    ? simulatedInternalMessages.slice(0, 5).map((message) => [message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt])
+    : [["Coordinación comercial", "Vendedora responsable", "Coordinación con vendedora", "Revisar reserva creada y dejar evidencia del siguiente movimiento.", "Media", "Hoy 3:08 PM"]];
   const adminEvidence = simulatedDataInjected
     ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
     : [
@@ -2161,13 +2168,6 @@ function DemoPage({
             </div>
             <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedSellerReports.length} registros comerciales</Badge>
           </div>
-          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
-            <input value={commercialSearch} onChange={(e) => setCommercialSearch(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por cliente o teléfono" />
-            <button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><Search size={16} className="mr-2 inline" />Buscar informes de vendedora</button>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir app vendedoras</button>
-          </div>
           <div className="mt-5"><SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /></div>
         </Card>
         </div>
@@ -2178,9 +2178,8 @@ function DemoPage({
               <h3 className="text-3xl font-black text-slate-950">FASE 03 Mensajes entre el Equipo</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia separada de mensajería interna posterior a la reserva: responsables, destinatarios, temas y prioridad operativa.</p>
             </div>
-            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedInternalMessages.length} mensajes internos</Badge>
           </div>
-          <div className="mt-5"><SimpleTable columns={["Cliente", "Origen", "Destino", "Tema", "Mensaje", "Prioridad", "Fecha/hora"]} rows={internalMessageRows} /></div>
+          <div className="mt-5"><SimpleTable columns={["Origen", "Destino", "Tema", "Mensaje", "Prioridad", "Fecha/hora"]} rows={internalMessageRows} /></div>
         </Card>
         </div>
       </div>
