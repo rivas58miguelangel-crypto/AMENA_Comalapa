@@ -1961,6 +1961,24 @@ function DemoPage({
   const internalMessageRows = simulatedDataInjected
     ? simulatedInternalMessages.slice(0, 5).map((message) => [message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt])
     : [["Coordinación comercial", "Vendedora responsable", "Coordinación con vendedora", "Revisar reserva creada y dejar evidencia del siguiente movimiento.", "Media", "Hoy 3:08 PM"]];
+  const latestSellerReport = simulatedDataInjected && simulatedSellerReports.length
+    ? simulatedSellerReports[simulatedSellerReports.length - 1]
+    : {
+        sellerName: "María Fernanda",
+        clientName: "Andrea López",
+        summary: "Validación inicial registrada desde seguimiento comercial.",
+        detectedNeed: "Confirmar recepción",
+        interactionType: "Validación inicial",
+      };
+  const latestTeamMessage = simulatedDataInjected && simulatedInternalMessages.length
+    ? simulatedInternalMessages[simulatedInternalMessages.length - 1]
+    : {
+        fromRole: "Coordinación comercial",
+        toRole: "Vendedora responsable",
+        topic: "Coordinación con vendedora",
+        messageText: "Revisar reserva creada y dejar evidencia del siguiente movimiento.",
+      };
+  const recentActivityTime = simulatedDataInjected ? "Hace un momento" : "Recientemente";
   const adminEvidence = simulatedDataInjected
     ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
     : [
@@ -2166,7 +2184,18 @@ function DemoPage({
               <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia de actividades realizadas en la app de vendedoras: interacciones, objeciones, prioridades y próximos pasos.</p>
             </div>
-            <Badge tone={simulatedDataInjected ? "green" : "amber"}>{simulatedSellerReports.length} registros comerciales</Badge>
+            {simulatedDataInjected && (
+              <Badge tone="green">{simulatedSellerReports.length} registros comerciales</Badge>
+            )}
+          </div>
+          <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Actividad reciente</div>
+            <div className="mt-3 grid gap-3 text-sm font-semibold text-slate-700 md:grid-cols-4">
+              <div><span className="font-black text-slate-950">Asesora:</span> {latestSellerReport.sellerName}</div>
+              <div><span className="font-black text-slate-950">Cliente:</span> {latestSellerReport.clientName}</div>
+              <div><span className="font-black text-slate-950">Última gestión:</span> {latestSellerReport.interactionType || latestSellerReport.summary}</div>
+              <div><span className="font-black text-slate-950">Actualizado:</span> {recentActivityTime}</div>
+            </div>
           </div>
           <div className="mt-5"><SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /></div>
         </Card>
@@ -2177,6 +2206,15 @@ function DemoPage({
             <div>
               <h3 className="text-3xl font-black text-slate-950">FASE 03 Mensajes entre el Equipo</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia separada de mensajería interna posterior a la reserva: responsables, destinatarios, temas y prioridad operativa.</p>
+            </div>
+          </div>
+          <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Actividad reciente</div>
+            <div className="mt-3 grid gap-3 text-sm font-semibold text-slate-700 md:grid-cols-4">
+              <div><span className="font-black text-slate-950">Remitente:</span> {latestTeamMessage.fromRole}</div>
+              <div><span className="font-black text-slate-950">Destinatario:</span> {latestTeamMessage.toRole}</div>
+              <div><span className="font-black text-slate-950">Último asunto:</span> {latestTeamMessage.topic || latestTeamMessage.messageText}</div>
+              <div><span className="font-black text-slate-950">Actualizado:</span> {recentActivityTime}</div>
             </div>
           </div>
           <div className="mt-5"><SimpleTable columns={["Origen", "Destino", "Tema", "Mensaje", "Prioridad", "Fecha/hora"]} rows={internalMessageRows} /></div>
