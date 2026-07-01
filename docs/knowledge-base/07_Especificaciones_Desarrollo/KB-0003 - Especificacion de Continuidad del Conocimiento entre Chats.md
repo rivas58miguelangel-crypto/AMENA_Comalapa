@@ -62,6 +62,26 @@ Si el Bootstrap Metodologico no esta completo y el proyecto aun no alcanza estad
 
 ---
 
+# Fase de Cierre del Chat (Obligatoria)
+
+Cuando un chat operativo va a finalizar su intervencion y entregar instrucciones para abrir o continuar en un nuevo chat, debe ejecutar una fase de cierre antes de emitir dichas instrucciones.
+
+Esta fase no reemplaza el modelo general de transicion entre chats ni modifica el principio de que un chat puede permanecer abierto indefinidamente. Define una obligacion adicional para los casos en que el cierre operativo si es identificado o solicitado.
+
+El chat que termina debe:
+
+* escanear completamente la conversacion, no solo los ultimos mensajes;
+* identificar decisiones, commits, restricciones, pendientes, riesgos, documentos leidos, documentos creados, validaciones realizadas y advertencias relevantes;
+* generar el Documento de Transicion correspondiente;
+* almacenarlo en `docs/knowledge-base/98_Work_In_Progress`;
+* verificar que el Documento de Transicion exista en esa ubicacion;
+* confirmar que el documento contiene los insumos necesarios para que el siguiente chat reconstruya contexto desde la Base de Conocimiento;
+* y unicamente despues entregar las instrucciones para abrir o iniciar el nuevo chat.
+
+El Documento de Transicion debe quedar disponible antes de que el nuevo chat sea creado o usado como continuidad operativa.
+
+---
+
 # Ciclo conceptual de continuidad
 
 La continuidad entre chats debe entenderse como un ciclo.
