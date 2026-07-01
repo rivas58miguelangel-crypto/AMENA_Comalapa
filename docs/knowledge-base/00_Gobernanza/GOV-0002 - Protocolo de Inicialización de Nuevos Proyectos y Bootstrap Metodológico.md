@@ -35,6 +35,22 @@ El documento es independiente de cualquier proyecto especifico. No depende de AM
 
 ---
 
+## Etapa 0 - Reconstruccion del Contexto (obligatoria)
+
+Antes de iniciar cualquier diagnostico, propuesta, modificacion documental, modificacion tecnica o desarrollo funcional, toda sesion o proyecto debe reconstruir primero el contexto desde la Base de Conocimiento oficial de H-OperIA.
+
+La Base de Conocimiento oficial reside actualmente en:
+
+`C:\Amena\Codex\AMENA_Comalapa\docs\knowledge-base`
+
+Esta ubicacion aplica como fuente rectora para todos los repositorios del ecosistema H-OperIA.
+
+El procedimiento rector para esta reconstruccion es KB-0003, que define la continuidad del conocimiento entre chats, la lectura del IME, los documentos asociados aplicables y los documentos de transicion correspondientes.
+
+Solo despues de completar esta etapa podra cambiarse al repositorio operativo correspondiente, sea Admin, Reservas, Vendedoras, Mensajeria, Demo API u otro repositorio relacionado.
+
+---
+
 ## Definicion del Bootstrap Metodologico
 
 El Bootstrap Metodologico es el proceso inicial mediante el cual un proyecto instala sus reglas de gobernanza, continuidad, trazabilidad, operacion documental y gobierno tecnico minimo.
@@ -267,6 +283,14 @@ La relacion documental esperada es:
 * IME registra ejecucion viva, prioridades, estados y proximas acciones.
 
 GOV-0002 no reemplaza esos documentos. Define el proceso para instalarlos correctamente al iniciar un proyecto nuevo.
+
+---
+
+## Nota sobre futura migracion de la Base de Conocimiento
+
+Cualquier futura migracion de la Base de Conocimiento a otra carpeta o repositorio debera realizarse mediante una microcirugia documental especifica.
+
+Esa migracion debera preservar el versionamiento Git, la trazabilidad historica y la actualizacion coordinada de todas las referencias documentales, rutas operativas e instrucciones de continuidad afectadas.
 
 ---
 
