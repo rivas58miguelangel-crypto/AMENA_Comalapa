@@ -52,6 +52,20 @@ La transicion entre chats debe preparar la apertura efectiva del siguiente chat.
 
 ---
 
+# Ubicacion rectora de la Base de Conocimiento
+
+La Base de Conocimiento oficial de H-OperIA reside actualmente en:
+
+`C:\Amena\Codex\AMENA_Comalapa\docs\knowledge-base`
+
+Esta ubicacion aplica como fuente rectora para todos los repositorios del ecosistema H-OperIA, independientemente de si el desarrollo operativo se realiza en Reservas, Admin, Vendedoras, Mensajeria, Demo API u otro repositorio relacionado.
+
+No se debe buscar la Base de Conocimiento dentro del repositorio de trabajo salvo que ese repositorio sea AMENA_Comalapa. Primero se reconstruye contexto desde AMENA_Comalapa y solo despues se cambia al repositorio operativo correspondiente.
+
+La eventual migracion de la Base de Conocimiento a una carpeta o repositorio independiente debera realizarse solo mediante una microcirugia documental/tecnica especifica, garantizando versionamiento Git, trazabilidad historica y actualizacion de todas las rutas de referencia.
+
+---
+
 # Prerrequisito para proyectos nuevos
 
 Si el chat pertenece a un proyecto nuevo o recien creado, primero debe verificarse que GOV-0002 haya sido aplicado.
