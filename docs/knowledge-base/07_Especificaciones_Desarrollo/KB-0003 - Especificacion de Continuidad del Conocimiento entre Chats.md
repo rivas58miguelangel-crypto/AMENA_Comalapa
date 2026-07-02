@@ -112,7 +112,7 @@ La transicion genera un documento de transicion en `docs/knowledge-base/98_Work_
 
 ## Fase de apertura efectiva
 
-El chat entrante verifica Git, consulta el IME, lee los documentos fuente aplicables, lee el documento de transicion recien generado, ejecuta la Auditoria de Reconstruccion, emite el Semaforo de Continuidad, reconstruye el Estado Operativo del Proyecto y solamente entonces puede proponer un Plan de Trabajo, diagnostico o intervencion tecnica.
+El chat entrante verifica Git, consulta el IME, lee los documentos fuente aplicables, lee el documento de transicion recien generado, ejecuta la Auditoria de Reconstruccion, emite el Semaforo de Continuidad, reconstruye el Estado Operativo del Proyecto, emite el Contexto Operativo Certificado segun FO-COC-0001 y solamente entonces puede proponer un Plan de Trabajo, diagnostico o intervencion tecnica.
 
 ## Resultado del ciclo
 
@@ -138,8 +138,9 @@ La continuidad operativa debe seguir este flujo general:
 2. Auditoria de Reconstruccion.
 3. Semaforo de Continuidad.
 4. Estado Operativo del Proyecto.
-5. Plan de Trabajo.
-6. Microcirugias.
+5. Contexto Operativo Certificado segun FO-COC-0001.
+6. Plan de Trabajo.
+7. Microcirugias.
 
 ## Separacion de responsabilidades
 
@@ -259,6 +260,12 @@ No deberan mantenerse pendientes duplicados ni contradictorios.
 
 Cuando exista ambiguedad, el asistente debera reportar la discrepancia y proponer la actualizacion documental correspondiente antes de reclasificar el pendiente.
 
+### Contexto Operativo Certificado
+
+El Contexto Operativo Certificado es el formato obligatorio de salida de la reconstruccion certificada.
+
+Debe emitirse conforme a FO-COC-0001 despues del Semaforo de Continuidad y del Estado Operativo del Proyecto, y antes de cualquier Plan de Trabajo o microcirugia.
+
 ### Plan de Trabajo
 
 El Plan de Trabajo organiza tacticamente la ejecucion inmediata.
@@ -340,4 +347,5 @@ Cuando no exista, podra proponerse una nueva especificacion para futura incorpor
 * Mantener coherencia metodologica.
 * Facilitar proyectos de larga duracion.
 * Separar claramente conocimiento, arquitectura y codigo.
+
 
