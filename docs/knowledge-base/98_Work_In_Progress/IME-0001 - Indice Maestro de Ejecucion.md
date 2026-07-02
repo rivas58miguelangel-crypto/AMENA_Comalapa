@@ -109,6 +109,7 @@ Al abrir un nuevo chat del mismo proyecto debe localizarse el chat inmediatament
 | IME-007 | OPS-0001 | Operacion de repositorio | Regla operativa | Iniciativa | Pendiente | Media | Alta | Centro Demo | Usar OPS-0001 como protocolo base y validar su aplicacion antes de trabajar | Regla permanente de sincronizacion PC/Laptop antes de trabajar. |
 | IME-008 | GOV-0001 | Continuidad documental | Respaldo / espejo | Idea | Pendiente | Alta | Media | Ambos | Definir si se requiere espejo en Google Drive y responsable de actualizacion | Acceso futuro o espejo en Google Drive. Git sigue siendo fuente rectora. |
 | IME-009 | GOV-0002 | Gobernanza | Sistema documental | Implementado | En validacion inicial | Alta | Alta | Ambos | Usar GOV-0002 como protocolo rector al iniciar proyectos nuevos bajo metodologia H-OperIA | Protocolo oficial de Bootstrap Metodologico previo a cualquier desarrollo funcional. El Bootstrap concluye cuando el proyecto alcanza estado POI. |
+| IME-010 | VAPI-0001 | Marta / Vapi | Compromiso tecnico | Planificado | Pendiente | Alta | Alta | Ambos | Auditar integracion Vapi/Marta inmediatamente despues de estabilizar Centro Demo y antes del 15 de julio de 2026 | VAPI-0001 - Auditoria y migracion de descarga autenticada de grabaciones de Marta. No implementar aun. No exponer API keys. Verificar endpoints autenticados, redirects 302 y repositorios/flujos externos relacionados. |
 
 ---
 
@@ -121,3 +122,4 @@ Las reglas de auditoria, certeza y no eliminacion estan definidas en GOV-0001.
 Los criterios de madurez estan definidos en KB-0004.
 
 Los protocolos operativos recurrentes deben referenciar documentos OPS.
+
