@@ -46,6 +46,8 @@ La reconstruccion puede estar correctamente ejecutada, pero si el artefacto fina
 
 La salida del procedimiento no debe limitarse a un resumen narrativo. Debe funcionar como una interfaz operativa certificada entre la Base de Conocimiento y la siguiente intervencion tecnica, documental o funcional.
 
+La Base de Conocimiento y Git son las fuentes rectoras de la reconstruccion certificada. El Documento de Transicion es una fuente auxiliar de continuidad entre sesiones: complementa el contexto operativo, pero no sustituye la Base de Conocimiento, los documentos rectores, el IME ni el estado Git certificado.
+
 ---
 
 ## Uso obligatorio
@@ -118,6 +120,16 @@ Transicion:
 * el documento de transicion mas reciente disponible.
 
 Debe declararse que documentos fueron revisados y si existen contradicciones, omisiones o limitaciones.
+
+Si el Documento de Transicion esta ausente, nominalmente desfasado o desactualizado, debe registrarse como observacion documental o pendiente de regularizacion cuando:
+
+* Git esta certificado y sincronizado;
+* la Base de Conocimiento fue reconstruida integramente;
+* los documentos rectores fueron leidos;
+* no existen contradicciones sustantivas;
+* no existen decisiones posteriores que dependan exclusivamente del documento de transicion ausente o desfasado.
+
+En esas condiciones, el desfase no degrada por si solo el Semaforo de Continuidad.
 
 ### Paso 3 - Reconstruccion arquitectonica
 
@@ -217,6 +229,8 @@ Resultado:
 * Verde: reconstruccion completa, repositorios alineados, sin bloqueadores y condiciones suficientes para planificar o modificar.
 * Amarillo: reconstruccion suficiente, pero existen cambios locales, validaciones pendientes, advertencias o decisiones que requieren confirmacion antes de modificar.
 * Rojo: no se pudo reconstruir contexto, existe divergencia no resuelta, conflicto Git, contradiccion critica o riesgo de perdida de trabajo.
+
+La ausencia, desfase nominal o desactualizacion del Documento de Transicion no degrada por si sola el resultado del Semaforo cuando las fuentes rectoras fueron reconstruidas, Git esta certificado y no existen decisiones posteriores dependientes exclusivamente de ese documento. En ese caso debe declararse como observacion documental o pendiente de regularizacion.
 
 ---
 

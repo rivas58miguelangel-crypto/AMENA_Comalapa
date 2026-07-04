@@ -43,6 +43,8 @@ Como consecuencia, al abrir un nuevo chat pueden perderse decisiones estrategica
 
 La continuidad del proyecto debe depender de la Base de Conocimiento y no exclusivamente de la memoria del modelo.
 
+La Base de Conocimiento y Git constituyen las fuentes rectoras de la Reconstruccion Certificada. La Base de Conocimiento conserva el contenido metodologico, arquitectonico, operativo e intelectual del proyecto. Git conserva la version oficial, auditable y sincronizable de ese conocimiento.
+
 Un resumen de apertura ayuda a orientar el arranque, pero no reemplaza la lectura de los documentos fuente. El resumen puede seleccionar, comprimir u omitir partes del recorrido intelectual que explican por que una decision existe.
 
 La memoria conversacional tampoco es fuente de verdad. Puede servir como contexto inmediato, pero no debe tratarse como repositorio estable, versionado ni auditable.
@@ -56,6 +58,8 @@ Por eso la continuidad debe conservar:
 * los documentos donde el aprendizaje debe quedar consolidado.
 
 La transicion entre chats debe preparar la apertura efectiva del siguiente chat. La continuidad no depende de cerrar una conversacion, sino de convertir el recorrido del chat inmediatamente anterior en conocimiento consultable, trazable y accionable cuando se abre un nuevo chat del mismo proyecto.
+
+El Documento de Transicion es una fuente auxiliar de continuidad entre sesiones. Complementa la Base de Conocimiento, el IME, los documentos rectores y el estado Git certificado, pero no los sustituye ni puede prevalecer sobre ellos.
 
 ---
 
@@ -295,6 +299,16 @@ Debe incluir decisiones, trabajo realizado, commits, validaciones, restricciones
 
 No sustituye a la Base de Conocimiento ni al Estado Operativo del Proyecto.
 
+La ausencia, desfase nominal o desactualizacion del Documento de Transicion no degrada por si sola la continuidad intelectual cuando se cumplen simultaneamente estas condiciones:
+
+* Git esta certificado y sincronizado;
+* la Base de Conocimiento fue reconstruida integramente;
+* los documentos rectores aplicables fueron leidos;
+* no existen contradicciones sustantivas entre fuentes rectoras;
+* no existen decisiones posteriores que dependan exclusivamente del Documento de Transicion ausente o desfasado.
+
+En ese caso, el desfase debe registrarse como observacion documental o pendiente de regularizacion, sin afectar por si mismo el Semaforo de Continuidad.
+
 ### Auditoria de Reconstruccion
 
 La Auditoria de Reconstruccion forma parte obligatoria del procedimiento de continuidad antes de emitir el Semaforo de Continuidad.
@@ -344,6 +358,8 @@ Criterio sugerido:
 * Verde: contexto reconstruido, repositorios alineados, working tree limpio o cambios conocidos/autorizados, validaciones iniciales correctas y sin bloqueadores.
 * Amarillo: contexto reconstruido, pero existen cambios locales, validaciones pendientes, advertencias o decisiones que requieren confirmacion antes de modificar.
 * Rojo: no se pudo reconstruir contexto, hay divergencia no resuelta, conflicto Git, validaciones fallidas criticas o riesgo de perdida de trabajo.
+
+El desfase nominal, ausencia o desactualizacion del Documento de Transicion no debe convertirse automaticamente en resultado amarillo o rojo si las fuentes rectoras fueron reconstruidas, Git esta certificado y no hay decisiones posteriores dependientes exclusivamente de ese documento. Debe registrarse como observacion documental o pendiente de regularizacion.
 
 ### Estado Operativo del Proyecto
 
