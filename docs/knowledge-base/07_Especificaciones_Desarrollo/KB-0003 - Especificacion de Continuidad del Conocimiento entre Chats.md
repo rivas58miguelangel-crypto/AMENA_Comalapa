@@ -14,6 +14,13 @@ Garantizar que la continuidad metodologica del proyecto no dependa de la memoria
 
 Cada nuevo chat debe comenzar con suficiente contexto para preservar no solo el estado tecnico del proyecto, sino tambien su identidad, sus principios rectores y su modelo de trabajo.
 
+La Continuidad Certificada se obtiene mediante una Reconstruccion Certificada del Estado Intelectual del Proyecto.
+
+Ambos conceptos deben mantenerse diferenciados:
+
+* Continuidad Certificada: objetivo de gobernanza que asegura continuidad, trazabilidad y capacidad de evolucion sin perdida de conocimiento.
+* Reconstruccion Certificada: procedimiento obligatorio que permite alcanzar esa continuidad antes de cualquier analisis, propuesta, diseno, modificacion o desarrollo.
+
 ---
 
 # Problema identificado
@@ -134,13 +141,139 @@ La conversacion saliente unicamente podra utilizarse como mecanismo de validacio
 
 La continuidad operativa debe seguir este flujo general:
 
-1. Reconstruccion.
+1. Reconstruccion Certificada del Estado Intelectual del Proyecto.
 2. Auditoria de Reconstruccion.
 3. Semaforo de Continuidad.
 4. Estado Operativo del Proyecto.
 5. Contexto Operativo Certificado segun FO-COC-0001.
 6. Plan de Trabajo.
 7. Microcirugias.
+
+La reconstruccion debe completarse antes de emitir diagnosticos, recomendaciones, planes, propuestas de arquitectura, cambios documentales o cambios tecnicos.
+
+## Reconstruccion Certificada del Estado Intelectual del Proyecto
+
+La Reconstruccion Certificada del Estado Intelectual del Proyecto es el procedimiento obligatorio mediante el cual un chat, asistente o equipo reconstruye el contexto completo del proyecto antes de continuar su evolucion.
+
+Su proposito no es producir un resumen narrativo. Su proposito es reconstruir de forma verificable:
+
+* el estado operativo;
+* el estado documental;
+* el estado arquitectonico;
+* el estado intelectual;
+* las decisiones vigentes;
+* las restricciones;
+* los pendientes;
+* los riesgos;
+* las prioridades.
+
+La reconstruccion debe utilizar exclusivamente la Base de Conocimiento del repositorio rector como fuente oficial. La memoria conversacional, el historial visible del chat o inferencias del asistente solo pueden utilizarse como contraste para detectar omisiones recientes, nunca como fuente rectora.
+
+### Fase 1 - Verificacion Operativa
+
+Antes de leer, diagnosticar, proponer o modificar, debe verificarse el repositorio rector y, cuando aplique, el repositorio operativo.
+
+Como minimo debe confirmarse:
+
+* rama activa;
+* HEAD;
+* HEAD == origin;
+* working tree limpio o cambios locales identificados y autorizados.
+
+Si estas condiciones no se cumplen, la continuidad no puede declararse verde. El asistente debe reportar el bloqueo, divergencia o cambio local antes de continuar.
+
+### Fase 2 - Reconstruccion Documental
+
+Debe reconstruirse el contexto desde la Base de Conocimiento del repositorio rector.
+
+Como minimo deben revisarse:
+
+Documentos rectores:
+
+* IME-0001;
+* GOV-0001;
+* GOV-0002.
+
+Continuidad:
+
+* KB-0003;
+* FO-COC-0001.
+
+Arquitectura:
+
+* `architecture-decisions.md`;
+* PD-0001;
+* VAPI-0001.
+
+Transicion:
+
+* el documento de transicion mas reciente disponible en `docs/knowledge-base/98_Work_In_Progress`.
+
+La reconstruccion documental debe identificar contradicciones, omisiones, documentos obsoletos, pendientes vivos y fuentes que requieran lectura adicional.
+
+### Fase 3 - Reconstruccion Arquitectonica
+
+Debe verificarse la coherencia de la arquitectura vigente antes de proponer o iniciar cualquier nuevo desarrollo.
+
+Como minimo deben revisarse:
+
+Serie SUPABASE:
+
+* SUPABASE-0001;
+* SUPABASE-0002;
+* SUPABASE-0003.
+
+Serie ACO:
+
+* ACO-0001;
+* ACO-0002;
+* ACO-0003;
+* ACO-0004.
+
+Estas series constituyen actualmente la base conceptual de:
+
+* la Arquitectura del Conocimiento Operacional;
+* el futuro modelo logico de persistencia;
+* la arquitectura de Supabase.
+
+Toda propuesta futura debera ser coherente con:
+
+* principios arquitectonicos vigentes;
+* serie ACO;
+* serie SUPABASE;
+* decisiones arquitectonicas certificadas.
+
+Esta validacion de integridad arquitectonica debe realizarse antes de iniciar cualquier nuevo desarrollo. Si existe tension entre una propuesta y la arquitectura certificada, debe reportarse explicitamente antes de modificar documentos, codigo, persistencia o integraciones.
+
+### Fase 4 - Reconstruccion del Estado Intelectual del Proyecto
+
+Debe reconstruirse explicitamente:
+
+* objetivo estrategico vigente;
+* estado operativo de cada repositorio aplicable;
+* decisiones arquitectonicas vigentes;
+* principios rectores;
+* conocimiento consolidado;
+* trabajo concluido en el chat anterior;
+* trabajo pendiente;
+* riesgos conocidos;
+* prioridades.
+
+Esta fase reconstruye el estado intelectual completo del proyecto antes de continuar su evolucion. No debe limitarse a tareas inmediatas ni a cambios recientes.
+
+### Fase 5 - Certificacion
+
+Antes de iniciar cualquier modificacion debe emitirse obligatoriamente:
+
+* Auditoria de Reconstruccion;
+* Semaforo de Continuidad;
+* Estado Operativo del Proyecto;
+* Contexto Operativo Certificado;
+* Plan de Trabajo.
+
+No se debe iniciar ninguna modificacion sin completar esta certificacion.
+
+La certificacion debe separar hechos verificados, inferencias, limitaciones, contradicciones y decisiones pendientes.
 
 ## Separacion de responsabilidades
 
