@@ -409,6 +409,40 @@ Su funcion es ordenar pasos concretos, alcance, validaciones y criterios de cier
 
 No reemplaza al Estado Operativo del Proyecto ni debe redefinir decisiones arquitectonicas vigentes.
 
+### Entrega Consolidada de Instrucciones para Codex
+
+La Entrega Consolidada de Instrucciones para Codex es la norma que gobierna el cierre de un analisis, auditoria, revision, diseno o decision arquitectonica cuando el resultado natural del trabajo conduce a una intervencion de Codex.
+
+Principio rector:
+
+```text
+Siempre que el resultado logico de un analisis, auditoria, revision, diseno o decision arquitectonica conduzca naturalmente a una intervencion de Codex, la respuesta debera concluir entregando directamente las instrucciones completas para Codex.
+```
+
+Esta regla aplica unicamente cuando la siguiente accion natural del flujo de trabajo sea ejecutar una intervencion en Codex.
+
+No aplica cuando el siguiente paso logico sea:
+
+* continuar el analisis;
+* debatir alternativas;
+* tomar una decision arquitectonica;
+* revisar resultados;
+* solicitar aclaraciones.
+
+Cuando si corresponda una intervencion de Codex, las instrucciones deberan:
+
+* constituir una unica version consolidada;
+* incorporar todas las observaciones, conclusiones y mejoras detectadas durante el analisis;
+* no dejar modificaciones pendientes para mensajes posteriores;
+* no finalizar con recomendaciones que alteren la propia instruccion;
+* estar listas para copiar y ejecutar inmediatamente;
+* entregarse dentro de un unico bloque de codigo para facilitar la copia integra mediante el boton Copiar de ChatGPT;
+* representar la version definitiva de trabajo para Codex.
+
+Si durante la elaboracion de las instrucciones surge una mejora metodologica o arquitectonica relevante, esta debera incorporarse directamente antes de entregar la version final y nunca como una observacion posterior.
+
+La entrega consolidada constituye el cierre natural del proceso de analisis y el puente formal entre ChatGPT y Codex.
+
 ---
 
 # Estructura recomendada para cada nuevo chat

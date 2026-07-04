@@ -278,6 +278,7 @@ Debe incluir como minimo:
 20. Estado exacto de cambios locales.
 21. Punto exacto de reanudacion.
 22. Decision inmediata requerida del usuario.
+23. Entrega Consolidada de Instrucciones para Codex, cuando la siguiente accion natural sea una intervencion ejecutable en Codex.
 
 ---
 
@@ -327,6 +328,32 @@ El punto exacto de reanudacion debe redactarse de manera accionable. Debe permit
 
 ---
 
+## Entrega Consolidada de Instrucciones para Codex
+
+Cuando el resultado logico del analisis, auditoria, revision, diseno o decision arquitectonica conduzca naturalmente a una intervencion de Codex, la respuesta debe cerrar con una seccion denominada:
+
+```text
+Entrega Consolidada de Instrucciones para Codex
+```
+
+Esta seccion no debe emitirse si el siguiente paso logico es continuar el analisis, debatir alternativas, tomar una decision arquitectonica, revisar resultados o solicitar aclaraciones.
+
+Cuando corresponda emitirla, debe cumplir todos estos criterios:
+
+* constituir una unica version consolidada;
+* incorporar todas las observaciones, conclusiones y mejoras detectadas durante el analisis;
+* no dejar modificaciones pendientes para mensajes posteriores;
+* no finalizar con recomendaciones que alteren la propia instruccion;
+* estar lista para copiar y ejecutar inmediatamente;
+* entregarse dentro de un unico bloque de codigo para facilitar la copia integra mediante el boton Copiar de ChatGPT;
+* representar la version definitiva de trabajo para Codex.
+
+Si durante su elaboracion surge una mejora metodologica o arquitectonica relevante, esa mejora debe incorporarse directamente antes de entregar la version final y no como observacion posterior.
+
+Esta entrega constituye el puente formal entre el cierre del analisis y la ejecucion de la siguiente microcirugia en Codex.
+
+---
+
 ## Riesgos del formato
 
 Este formato tambien tiene riesgos que deben reconocerse:
@@ -349,6 +376,7 @@ FO-COC-0001 se considera cumplido solo si el lector puede responder sin ambigued
 * Que falta validar?
 * Cual es la proxima microcirugia?
 * Que decision necesita el usuario?
+* Si corresponde una intervencion de Codex, la Entrega Consolidada de Instrucciones para Codex esta lista para copiarse y ejecutarse sin ajustes posteriores?
 
 Si el lector no puede responder esas preguntas, el Contexto Operativo Certificado esta incompleto y debe corregirse antes de iniciar el Plan de Trabajo o cualquier microcirugia.
 
