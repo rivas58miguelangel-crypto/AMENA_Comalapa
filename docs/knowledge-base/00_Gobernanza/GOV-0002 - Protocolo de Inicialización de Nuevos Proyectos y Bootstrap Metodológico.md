@@ -32,6 +32,21 @@ El documento es independiente de cualquier proyecto especifico. No depende de AM
 8. La continuidad entre chats debe preservarse mediante documentos de transicion, no mediante memoria conversacional.
 9. Ningun proyecto debe iniciar desarrollo funcional sin gobierno documental, tecnico y operativo minimo.
 10. Toda duda relevante debe conservarse como pendiente, riesgo o elemento por verificar; no debe convertirse en hecho.
+11. Ninguna linea de trabajo debe prolongarse indefinidamente sin producir entregables operativos verificables.
+
+### Principio de Concrecion Progresiva
+
+La arquitectura es un activo estrategico del proyecto.
+
+Las oportunidades de expansion arquitectonica deben registrarse, clasificarse y conservarse como conocimiento, pendientes o lineas futuras cuando correspondan, pero no deben interrumpir indefinidamente el objetivo activo.
+
+Toda fase de trabajo debe orientarse hacia un resultado visible, evaluable y utilizable.
+
+El avance metodologico, documental o arquitectonico debe producir entregables verificables que permitan continuar la operacion, validar decisiones, reducir incertidumbre o preparar la siguiente intervencion.
+
+La prioridad operativa del proyecto es avanzar continuamente hacia un Centro Demo demostrable y, posteriormente, hacia un producto operacional.
+
+Este principio no reduce la importancia de la arquitectura. La protege de convertirse en expansion indefinida sin cierre operativo.
 
 ---
 
