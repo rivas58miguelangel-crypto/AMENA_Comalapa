@@ -181,7 +181,11 @@ El avance hacia hecho operacional exige contexto, trazabilidad y una primera eva
 
 Un hecho operacional se convierte en conocimiento certificado cuando alcanza un nivel de calidad, certeza y verificabilidad suficiente para orientar decisiones o alimentar aprendizaje.
 
-La certificacion no significa que todo conocimiento sea absoluto o permanente.
+En ACO-0005, la expresion "conocimiento certificado" no significa conocimiento confirmado de forma absoluta, verdad definitiva ni certeza permanente.
+
+Significa conocimiento que ha alcanzado un grado suficiente de validacion, confianza, trazabilidad y utilidad operacional para integrarse responsablemente al proceso de aprendizaje organizacional, respetando siempre los niveles de certeza definidos por ACO-0003.
+
+La certificacion no elimina la incertidumbre ni reemplaza la escala de certeza. La hace explicita.
 
 Significa que el conocimiento declara con claridad:
 
@@ -306,6 +310,18 @@ El conocimiento institucional necesita gobernanza para no degradarse.
 
 Sin gobernanza, el conocimiento puede volverse obsoleto, contradictorio, excesivo, ambiguo o riesgoso.
 
+El paso desde conocimiento institucional hacia gobernanza del conocimiento es obligatorio porque el aprendizaje consolidado empieza a influir decisiones futuras. Cuando un criterio se vuelve reutilizable, tambien aumenta su riesgo: puede aplicarse fuera de contexto, quedar desactualizado, entrar en contradiccion con evidencia nueva o convertirse indebidamente en regla automatica.
+
+La gobernanza conserva el valor del conocimiento institucional porque protege:
+
+- vigencia: determina si el aprendizaje sigue siendo aplicable;
+- coherencia: evita contradicciones con otros criterios institucionales;
+- trazabilidad: conserva origen, evidencia, cambios y responsables;
+- confiabilidad: mantiene visibles los niveles de certeza y las condiciones de uso;
+- capacidad de evolucion: permite corregir, ampliar, archivar o reemplazar conocimiento sin perder historia.
+
+Por eso la gobernanza no es una capa administrativa externa al aprendizaje. Es la condicion que permite que el conocimiento institucional siga siendo util, verificable y evolutivo.
+
 La gobernanza del conocimiento debe definir, en una etapa posterior:
 
 - quien puede validar conocimiento institucional;
@@ -372,6 +388,10 @@ Por eso el aprendizaje organizacional es retroalimentacion continua, no una conc
 
 ## Principios del aprendizaje operacional
 
+Los siguientes principios tienen caracter permanente dentro de la Arquitectura del Conocimiento Operacional.
+
+No son observaciones circunstanciales de ACO-0005. Deben orientar cualquier decision futura sobre aprendizaje, persistencia, inteligencia operacional, automatizacion, procesos o gobernanza.
+
 ### Principio 1 - La organizacion aprende de su operacion
 
 El aprendizaje organizacional nace de la experiencia real de operar.
@@ -434,25 +454,53 @@ El aprendizaje organizacional no termina.
 
 Cada ciclo de accion y resultado puede generar nuevo conocimiento, nuevas excepciones, nuevos riesgos y nuevas mejoras.
 
+### Principio 11 - La inteligencia operacional consume aprendizaje; no lo reemplaza
+
+La inteligencia operacional puede interpretar, conectar, priorizar y recomendar a partir del conocimiento disponible.
+
+Pero no sustituye el proceso mediante el cual la organizacion valida experiencia, certifica patrones y convierte aprendizaje en conocimiento institucional.
+
+### Principio 12 - La tecnologia implementa la Arquitectura del Conocimiento Operacional; nunca la redefine
+
+Toda decision tecnica, de persistencia, automatizacion, interfaz o integracion debe obedecer la disciplina ACO.
+
+Ninguna tecnologia puede modificar, limitar o condicionar los principios conceptuales que gobiernan el aprendizaje organizacional.
+
+### Principio 13 - El conocimiento institucional requiere gobernanza permanente
+
+El aprendizaje consolidado puede degradarse si no se revisa, corrige, archiva o actualiza.
+
+La gobernanza permanente protege su vigencia, coherencia, trazabilidad, confiabilidad y capacidad de evolucion.
+
 ## Diferenciacion conceptual
+
+Esta seccion no redefine los conceptos ya establecidos por ACO-0001, ACO-0002, ACO-0003 y ACO-0004.
+
+Su funcion es indicar como se usan esos conceptos dentro de la teoria del aprendizaje organizacional.
 
 ### Dato
 
-Unidad basica de registro. Tiene valor potencial, pero sin contexto no explica suficientemente una situacion.
+Se usa en el sentido definido por ACO-0001: unidad basica de registro.
+
+Dentro de ACO-0005, el dato es materia prima del aprendizaje solo cuando puede conservar fuente, contexto y relacion con la operacion.
 
 ### Informacion
 
-Dato ubicado en contexto. Permite entender que ocurrio, a quien afecta, cuando ocurrio y de donde proviene.
+Se usa en el sentido definido por ACO-0001: dato ubicado en contexto.
+
+Dentro del aprendizaje organizacional, la informacion permite que una captura operacional empiece a convertirse en hecho interpretable.
 
 ### Conocimiento
 
-Informacion interpretada con significado operativo suficiente para orientar criterio, decision o accion.
+Se usa en el sentido definido por ACO-0001: informacion interpretada con significado operativo.
+
+Dentro de ACO-0005, el conocimiento solo alimenta aprendizaje cuando su calidad, certeza, evidencia y vigencia son suficientes para integrarse responsablemente a experiencia acumulada.
 
 ### Evidencia
 
-Registro, fuente, evento, archivo, decision, accion o salida que respalda una afirmacion operacional.
+Se usa conforme a ACO-0002, ACO-0003 y SUPABASE-0002: registro, fuente, evento, decision, accion o salida que respalda una afirmacion operacional.
 
-La evidencia permite explicar por que se sabe algo.
+Dentro del aprendizaje organizacional, la evidencia permite explicar por que una experiencia puede transformarse en patron, aprendizaje o conocimiento institucional.
 
 ### Experiencia
 
@@ -480,9 +528,9 @@ Debe conservar evidencia, vigencia y mecanismo de revision.
 
 ### Inteligencia operacional
 
-Capacidad de utilizar memoria, aprendizaje y conocimiento institucional para interpretar la operacion, priorizar, explicar, recomendar y mejorar decisiones.
+Se usa en continuidad con ACO-0001: capacidad de convertir memoria y aprendizaje en decisiones mejores, mas rapidas y mas explicables.
 
-La inteligencia operacional depende de la calidad del aprendizaje acumulado.
+Dentro de ACO-0005, la inteligencia operacional consume aprendizaje acumulado; no lo reemplaza ni lo crea por si misma.
 
 ## Relacion con la serie SUPABASE
 
