@@ -459,6 +459,10 @@ Si durante la elaboracion de las instrucciones surge una mejora metodologica o a
 
 La entrega consolidada constituye el cierre natural del proceso de analisis y el puente formal entre ChatGPT y Codex.
 
+Toda recomendacion operativa que implique Codex, Git, PowerShell u otra herramienta ejecutable debe seguir el estandar operativo de instrucciones ejecutables definido en FO-COC-0001.
+
+Ese estandar exige que las explicaciones precedan a las instrucciones y que el mensaje finalice con el recurso ejecutable correspondiente, listo para copiar y ejecutar cuando la accion ya este definida.
+
 ---
 
 # Estructura recomendada para cada nuevo chat

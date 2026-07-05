@@ -368,6 +368,54 @@ Esta entrega constituye el puente formal entre el cierre del analisis y la ejecu
 
 ---
 
+## Estandar operativo de instrucciones ejecutables
+
+Toda recomendacion operativa debe finalizar con la instruccion completa correspondiente, lista para ejecutar.
+
+Cuando una recomendacion implique Codex, Git, PowerShell u otra herramienta operativa, el recurso ejecutable debe entregarse en el mismo mensaje. No debe requerir una solicitud adicional del usuario para obtener la instruccion final, salvo que falte una decision humana necesaria para definir el alcance.
+
+Las explicaciones, contexto, advertencias o justificaciones deben preceder a las instrucciones. El mensaje debe finalizar con el recurso ejecutable correspondiente.
+
+### Instrucciones para Codex
+
+Las instrucciones dirigidas a Codex deben:
+
+* estar claramente identificadas como "Instrucción para Codex";
+* entregarse dentro de un bloque de codigo;
+* estar listas para copiarse y ejecutarse sin ajustes posteriores;
+* contener la version completa, consolidada y definitiva de la intervencion solicitada.
+
+Formato obligatorio:
+
+```text
+Instrucción para Codex
+
+[Instruccion completa lista para copiar y ejecutar]
+```
+
+### Instrucciones para PowerShell
+
+Las instrucciones para PowerShell deben:
+
+* contener unicamente los comandos necesarios;
+* entregarse dentro de un bloque de codigo independiente;
+* estar listas para copiarse y ejecutarse sin modificaciones;
+* evitar explicaciones dentro del bloque de codigo.
+
+Formato obligatorio:
+
+```powershell
+[comandos necesarios]
+```
+
+### Vigencia del estandar
+
+Este estandar forma parte de la continuidad operativa entre chats.
+
+Debe mantenerse durante todas las sesiones futuras salvo que una decision de gobernanza posterior lo sustituya expresamente.
+
+---
+
 ## Riesgos del formato
 
 Este formato tambien tiene riesgos que deben reconocerse:
