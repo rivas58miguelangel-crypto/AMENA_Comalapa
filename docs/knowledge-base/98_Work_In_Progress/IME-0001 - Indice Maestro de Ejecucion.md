@@ -22,6 +22,7 @@ Antes de trabajar, consultar este indice y luego los documentos asociados segun 
 * GOV-0002: protocolo oficial para inicializar nuevos proyectos mediante Bootstrap Metodologico;
 * KB-0004: modelo conceptual de madurez del conocimiento;
 * OPS-0001: protocolo operativo PC/Laptop/Git;
+* PERSISTENCIA-0001: documento rector integrador de la arquitectura de persistencia y conocimiento operacional;
 * ADR: decisiones arquitectonicas cuando un tema afecte arquitectura.
 
 El IME no sustituye los documentos fuente. Consultar el IME obliga a leer los documentos asociados aplicables antes de diagnosticar, proponer o modificar trabajo relacionado.
@@ -38,6 +39,7 @@ Al abrir un nuevo chat del mismo proyecto debe localizarse el chat inmediatament
 | GOV | Reglas permanentes | Que regla debe respetarse de forma continua? |
 | KB | Modelos conceptuales | Como se entiende o clasifica un concepto del proyecto? |
 | OPS | Protocolos operativos | Como se ejecuta una rutina operativa recurrente? |
+| PERSISTENCIA | Arquitectura de persistencia y conocimiento operacional | Como se integra el modelo rector de persistencia, conocimiento, evidencia, rutas operacionales y aprendizaje? |
 | IME | Ejecucion viva | Que temas estan activos, pendientes o en revision? |
 
 ---
@@ -110,6 +112,7 @@ Al abrir un nuevo chat del mismo proyecto debe localizarse el chat inmediatament
 | IME-008 | GOV-0001 | Continuidad documental | Respaldo / espejo | Idea | Pendiente | Alta | Media | Ambos | Definir si se requiere espejo en Google Drive y responsable de actualizacion | Acceso futuro o espejo en Google Drive. Git sigue siendo fuente rectora. |
 | IME-009 | GOV-0002 | Gobernanza | Sistema documental | Implementado | En validacion inicial | Alta | Alta | Ambos | Usar GOV-0002 como protocolo rector al iniciar proyectos nuevos bajo metodologia H-OperIA | Protocolo oficial de Bootstrap Metodologico previo a cualquier desarrollo funcional. El Bootstrap concluye cuando el proyecto alcanza estado POI. |
 | IME-010 | VAPI-0001 | Marta / Vapi | Compromiso tecnico | Planificado | Pendiente | Alta | Alta | Ambos | Auditar integracion Vapi/Marta inmediatamente despues de estabilizar Centro Demo y antes del 15 de julio de 2026 | VAPI-0001 - Auditoria y migracion de descarga autenticada de grabaciones de Marta. No implementar aun. No exponer API keys. Verificar endpoints autenticados, redirects 302 y repositorios/flujos externos relacionados. |
+| IME-011 | PERSISTENCIA-0001 | Persistencia / Conocimiento Operacional | Sistema documental | Conocimiento consolidado | Completado confirmado | Alta | Alta | Ambos | Usar como documento rector integrador antes de iniciar diseno detallado de entidades fisicas | Documento rector permanente de la arquitectura de persistencia y conocimiento operacional. Toda evolucion futura de ACO, SUPABASE y documentos arquitectonicos relacionados debe evaluarse tambien contra PERSISTENCIA-0001. |
 
 ---
 
@@ -122,4 +125,3 @@ Las reglas de auditoria, certeza y no eliminacion estan definidas en GOV-0001.
 Los criterios de madurez estan definidos en KB-0004.
 
 Los protocolos operativos recurrentes deben referenciar documentos OPS.
-
