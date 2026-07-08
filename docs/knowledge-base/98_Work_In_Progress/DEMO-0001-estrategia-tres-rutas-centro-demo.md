@@ -43,7 +43,7 @@ Demo rápida de respaldo.
 
 ### Descripción
 
-Crear una versión equivalente a la demo actual, pero sustituyendo manualmente el contenido asociado al proyecto original.
+Crear una copia controlada de la demo actual, preservando la mayor cantidad posible del trabajo ya realizado y sustituyendo manualmente el contenido asociado al proyecto original.
 
 ### Objetivo
 
@@ -60,6 +60,7 @@ Contar con una demo limpia, ficticia-realista, presentable y sin riesgo de uso i
 - Cambiar los precios.
 - Ajustar el contexto geográfico y narrativo.
 - Conservar la estructura visual y el flujo de la demo actual.
+- Conservar el valor de la arquitectura Supabase ya construida y de los bloques documentados.
 - No exigir parametrización todavía.
 - No depender todavía de carga real desde Supabase para la presentación inmediata.
 
@@ -71,11 +72,31 @@ Esta ruta puede usar contenido generalista o generado para demo, siempre que sea
 
 Demo comercial principal de corto plazo.
 
+### Aclaración AMENA 74 sobre la Ruta 2
+
+La Ruta 2 / Frente B no es una demo nueva construida desde cero. Es una transición práctica y comercial basada en una copia controlada de la demo actual. Su principio rector es: **“copiar, preservar, neutralizar manualmente y avanzar; no rehacer”**.
+
+Desde este momento, la diferencia entre la demo AMENA tradicional y la Ruta 2 será principalmente manual y visible:
+
+- Nombres.
+- Textos.
+- Narrativa comercial.
+- Imágenes.
+- Modelos.
+- Precios.
+- Especificaciones.
+- Referencias explícitas al proyecto original.
+- Cualquier contenido que amarre la demo a AMENA cuando no convenga comercialmente.
+
+La Ruta 1 AMENA no se elimina, no se archiva y no se invalida. Si AMENA reaparece como oportunidad comercial, podrá presentarse la demo con imágenes propias de AMENA cuando estén disponibles; su ausencia no será un bloqueo absoluto.
+
+La Ruta 2 mantiene el valor de la arquitectura Supabase ya construida y de los bloques documentados, pero no constituye la versión final productiva. Su finalidad inmediata es terminar una demo vendible y presentable sin mezclar ese objetivo con la construcción de la solución productiva definitiva.
+
 ## 5. Ruta 3 — Demo productivo/parametrizable real
 
 ### Descripción
 
-Evolución futura hacia una versión alimentada desde Supabase y desde la arquitectura del Catálogo Comercial Parametrizable.
+Evolución futura, diferida hasta después de terminar y validar el demo, hacia una versión alimentada desde Supabase y desde la arquitectura del Catálogo Comercial Parametrizable.
 
 ### Objetivo
 
@@ -105,7 +126,7 @@ La Ruta 2 no contradice la arquitectura parametrizable.
 
 La Ruta 2 es una solución comercial pragmática de corto plazo.
 
-La Ruta 3 sigue siendo la dirección estratégica productiva.
+La Ruta 3 sigue siendo la dirección estratégica productiva, pero no debe mezclarse con el objetivo inmediato de terminar una demo presentable.
 
 ## 7. Regla de protección comercial
 
@@ -168,6 +189,12 @@ AMENA 74 debe iniciar con Reconstrucción Certificada y luego decidir entre:
 
 - A. Continuar Bloque 6 — Atributos Configurables por Tipo Comercial.
 - B. Abrir un frente corto para la Ruta 2 — Demo genérico/manual no parametrizable.
+
+La secuencia estratégica general queda establecida así:
+
+1. Terminar un demo vendible y presentable.
+2. Usarlo para presentar y validar.
+3. Construir después la versión final/productiva.
 
 ## 13. Dictamen
 
