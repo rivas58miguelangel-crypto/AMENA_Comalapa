@@ -760,7 +760,254 @@ order by pi.inventory_code;
 ROLLBACK;
 ```
 
-## 6. Validaciones Posteriores Ajustadas
+## 6. Bloque Post-ROLLBACK de Solo Lectura
+
+Este bloque debe ejecutarse solamente despues de confirmar que el `ROLLBACK` anterior fue ejecutado.
+
+Debe ejecutarse fuera de la transaccion ya revertida.
+
+No contiene `BEGIN`.
+
+No contiene `COMMIT`.
+
+No contiene sentencias de escritura.
+
+No modifica datos.
+
+Su proposito es demostrar, mediante lectura posterior, que no quedo persistencia del paquete dry-run Ruta 2 y que el estado observable regreso a lo capturado antes del dry-run.
+
+La comparacion humana debe hacerse contra la evidencia capturada en los prechecks previos y contra los resultados del bloque transaccional antes del `ROLLBACK`.
+
+```sql
+-- ============================================================
+-- SUPABASE-RUTA2-0015
+-- BLOQUE POST-ROLLBACK DE SOLO LECTURA
+--
+-- Ejecutar unicamente despues de confirmar que ROLLBACK fue
+-- ejecutado en el bloque dry-run anterior.
+--
+-- Este bloque debe correr fuera de la transaccion revertida.
+-- No contiene BEGIN.
+-- No contiene COMMIT.
+-- No contiene INSERT, UPDATE, DELETE, MERGE, ALTER, DROP,
+-- CREATE, TRUNCATE ni ninguna sentencia de escritura.
+-- ============================================================
+
+with
+route2_org as (
+  select id, name, short_name, data_origin, operational_environment, legacy_status
+  from public.organizations
+  where short_name = 'RUTA2-DEMO'
+),
+route2_project as (
+  select p.id, p.organization_id, p.name, p.code, p.data_origin, p.operational_environment, p.legacy_status
+  from public.projects p
+  join route2_org o on o.id = p.organization_id
+  where p.code = 'ruta2-demo'
+),
+route2_catalog as (
+  select pc.id, pc.project_id, pc.catalog_code, pc.catalog_name, pc.data_origin, pc.operational_environment, pc.legacy_status
+  from public.project_catalog pc
+  join route2_project p on p.id = pc.project_id
+  where pc.catalog_code = 'catalogo-ruta2-demo'
+),
+route2_branding as (
+  select pb.id, pb.project_id, pb.brand_name, pb.data_origin, pb.operational_environment, pb.legacy_status
+  from public.project_branding pb
+  join route2_project p on p.id = pb.project_id
+),
+route2_hero_assets as (
+  select a.id, a.project_id, a.asset_type, a.asset_reference, a.is_primary, a.data_origin, a.operational_environment, a.legacy_status
+  from public.project_assets a
+  join route2_project p on p.id = a.project_id
+  where a.asset_type = 'hero_image'
+),
+route2_commercial_types as (
+  select pct.id, pct.project_id, pct.project_catalog_id, pct.type_code, pct.data_origin, pct.operational_environment, pct.legacy_status
+  from public.project_commercial_types pct
+  join route2_catalog c on c.id = pct.project_catalog_id
+  where pct.type_code in ('residencia-demo', 'servicio-demo', 'curso-demo')
+),
+route2_inventory as (
+  select pi.id, pi.project_id, pi.project_catalog_id, pi.inventory_code, pi.data_origin, pi.operational_environment, pi.legacy_status
+  from public.project_inventory pi
+  join route2_catalog c on c.id = pi.project_catalog_id
+  where pi.inventory_code in (
+    'INV-RUTA2-RES-001',
+    'INV-RUTA2-RES-002',
+    'INV-RUTA2-SRV-001',
+    'INV-RUTA2-CUR-001'
+  )
+)
+select
+  'post_rollback_route2_scoped_counts' as evidence_type,
+  (select count(*) from route2_org) as organizations_ruta2_demo,
+  (select count(*) from route2_project) as projects_ruta2_demo,
+  (select count(*) from route2_branding) as branding_for_project,
+  (select count(*) from route2_hero_assets where is_primary = true) as primary_hero_assets_for_project,
+  (select count(*) from route2_catalog) as catalogs_ruta2_demo,
+  (select count(*) from route2_commercial_types) as commercial_types_for_catalog,
+  (select count(*) from route2_inventory) as inventory_for_catalog,
+  'Comparar estos conteos contra los prechecks capturados antes del dry-run. Deben volver exactamente al estado previo.' as human_review_rule;
+
+with
+package_markers as (
+  select 'organizations' as table_name, count(*) as matching_rows
+  from public.organizations
+  where short_name = 'RUTA2-DEMO'
+    and data_origin = 'fase_04_demo'
+    and operational_environment = 'demo'
+    and legacy_status = 'none'
+
+  union all
+
+  select 'projects' as table_name, count(*) as matching_rows
+  from public.projects p
+  join public.organizations o on o.id = p.organization_id
+  where o.short_name = 'RUTA2-DEMO'
+    and p.code = 'ruta2-demo'
+    and p.data_origin = 'fase_04_demo'
+    and p.operational_environment = 'demo'
+    and p.legacy_status = 'none'
+
+  union all
+
+  select 'project_branding' as table_name, count(*) as matching_rows
+  from public.project_branding pb
+  join public.projects p on p.id = pb.project_id
+  join public.organizations o on o.id = p.organization_id
+  where o.short_name = 'RUTA2-DEMO'
+    and p.code = 'ruta2-demo'
+    and pb.brand_name = 'Ruta 2 Demo'
+    and pb.data_origin = 'fase_04_demo'
+    and pb.operational_environment = 'demo'
+    and pb.legacy_status = 'none'
+
+  union all
+
+  select 'project_assets' as table_name, count(*) as matching_rows
+  from public.project_assets a
+  join public.projects p on p.id = a.project_id
+  join public.organizations o on o.id = p.organization_id
+  where o.short_name = 'RUTA2-DEMO'
+    and p.code = 'ruta2-demo'
+    and a.asset_reference = 'https://example.invalid/amena/ruta2-demo/hero-placeholder.jpg'
+    and a.data_origin = 'fase_04_demo'
+    and a.operational_environment = 'demo'
+    and a.legacy_status = 'none'
+
+  union all
+
+  select 'project_catalog' as table_name, count(*) as matching_rows
+  from public.project_catalog pc
+  join public.projects p on p.id = pc.project_id
+  join public.organizations o on o.id = p.organization_id
+  where o.short_name = 'RUTA2-DEMO'
+    and p.code = 'ruta2-demo'
+    and pc.catalog_code = 'catalogo-ruta2-demo'
+    and pc.data_origin = 'fase_04_demo'
+    and pc.operational_environment = 'demo'
+    and pc.legacy_status = 'none'
+
+  union all
+
+  select 'project_commercial_types' as table_name, count(*) as matching_rows
+  from public.project_commercial_types pct
+  join public.project_catalog pc on pc.id = pct.project_catalog_id
+  join public.projects p on p.id = pc.project_id
+  join public.organizations o on o.id = p.organization_id
+  where o.short_name = 'RUTA2-DEMO'
+    and p.code = 'ruta2-demo'
+    and pc.catalog_code = 'catalogo-ruta2-demo'
+    and pct.type_code in ('residencia-demo', 'servicio-demo', 'curso-demo')
+    and pct.data_origin = 'fase_04_demo'
+    and pct.operational_environment = 'demo'
+    and pct.legacy_status = 'none'
+
+  union all
+
+  select 'project_inventory' as table_name, count(*) as matching_rows
+  from public.project_inventory pi
+  join public.project_catalog pc on pc.id = pi.project_catalog_id
+  join public.projects p on p.id = pc.project_id
+  join public.organizations o on o.id = p.organization_id
+  where o.short_name = 'RUTA2-DEMO'
+    and p.code = 'ruta2-demo'
+    and pc.catalog_code = 'catalogo-ruta2-demo'
+    and pi.inventory_code in (
+      'INV-RUTA2-RES-001',
+      'INV-RUTA2-RES-002',
+      'INV-RUTA2-SRV-001',
+      'INV-RUTA2-CUR-001'
+    )
+    and pi.data_origin = 'fase_04_demo'
+    and pi.operational_environment = 'demo'
+    and pi.legacy_status = 'none'
+)
+select
+  'post_rollback_package_markers' as evidence_type,
+  table_name,
+  matching_rows,
+  'Aprobar solo si matching_rows coincide exactamente con el estado previo capturado antes del dry-run; para filas creadas por el paquete durante la transaccion, debe ser 0 despues del ROLLBACK.' as human_review_rule
+from package_markers
+order by table_name;
+
+with expected_codes as (
+  select *
+  from (
+    values
+      ('organization_short_name', 'RUTA2-DEMO'),
+      ('project_code', 'ruta2-demo'),
+      ('catalog_code', 'catalogo-ruta2-demo'),
+      ('hero_asset_reference', 'https://example.invalid/amena/ruta2-demo/hero-placeholder.jpg'),
+      ('commercial_type_code', 'residencia-demo'),
+      ('commercial_type_code', 'servicio-demo'),
+      ('commercial_type_code', 'curso-demo'),
+      ('inventory_code', 'INV-RUTA2-RES-001'),
+      ('inventory_code', 'INV-RUTA2-RES-002'),
+      ('inventory_code', 'INV-RUTA2-SRV-001'),
+      ('inventory_code', 'INV-RUTA2-CUR-001')
+  ) as v(marker_type, marker_value)
+)
+select
+  'post_rollback_marker_inventory' as evidence_type,
+  marker_type,
+  marker_value,
+  'Debe no existir como fila nueva persistida por el dry-run. Si existia antes, debe coincidir con la evidencia previa y no aumentar conteo.' as human_review_rule
+from expected_codes
+order by marker_type, marker_value;
+
+select
+  'post_rollback_out_of_scope_tables' as evidence_type,
+  'El paquete dry-run solo contiene DML sobre organizations, projects, project_branding, project_assets, project_catalog, project_commercial_types y project_inventory.' as touched_tables,
+  'Aprobar solo si el diff documental y la ejecucion humana confirman que no se ejecuto escritura sobre tablas ajenas. Este bloque post-ROLLBACK es solo lectura y no puede alterar tablas.' as human_review_rule;
+```
+
+### Criterios Humanos Post-ROLLBACK
+
+Aprobar el dry-run humano solo si:
+
+- el bloque post-`ROLLBACK` se ejecuto despues del `ROLLBACK` confirmado;
+- los conteos Ruta 2 post-`ROLLBACK` coinciden exactamente con los prechecks capturados antes del dry-run;
+- no aparece ninguna fila nueva persistida por el paquete Ruta 2;
+- no aparecen nuevos codigos, slugs, referencias o identificadores temporales del dry-run;
+- los marcadores `RUTA2-DEMO`, `ruta2-demo`, `catalogo-ruta2-demo`, `https://example.invalid/amena/ruta2-demo/hero-placeholder.jpg`, `residencia-demo`, `servicio-demo`, `curso-demo`, `INV-RUTA2-RES-001`, `INV-RUTA2-RES-002`, `INV-RUTA2-SRV-001` e `INV-RUTA2-CUR-001` coinciden con el estado previo o no existen si fueron creados solo durante la transaccion;
+- no hubo escritura sobre tablas ajenas a `organizations`, `projects`, `project_branding`, `project_assets`, `project_catalog`, `project_commercial_types` y `project_inventory`;
+- no existe `COMMIT`;
+- no existe duda humana.
+
+Abortar y volver a analisis documental si:
+
+- cualquier conteo post-`ROLLBACK` difiere del precheck previo;
+- aparece una fila nueva persistida del paquete Ruta 2;
+- aparece un codigo, slug, referencia o identificador temporal que no existia antes;
+- hay evidencia o sospecha de escritura sobre una tabla ajena;
+- el bloque post-`ROLLBACK` fue ejecutado antes de confirmar el `ROLLBACK`;
+- aparece cualquier error SQL;
+- el resultado es ambiguo;
+- alguien intenta agregar `COMMIT` o cambiar el alcance.
+
+## 7. Validaciones Posteriores Ajustadas
 
 Las validaciones posteriores del paquete 0015 se enfocan exclusivamente en el dataset Ruta 2.
 
@@ -784,7 +1031,7 @@ El paquete evita usar como criterio principal conteos amplios basados solo en:
 
 Esos campos pueden seguir existiendo como contexto del dataset, pero no deben ser el criterio principal de exito.
 
-## 7. Evidencias Posteriores Ajustadas
+## 8. Evidencias Posteriores Ajustadas
 
 El paquete busca producir evidencia especifica de:
 
@@ -800,7 +1047,7 @@ Toda evidencia debe revisarse antes de considerar cualquier siguiente paso.
 
 Un dry-run exitoso no autoriza persistencia de datos.
 
-## 8. Senales de Aborto
+## 9. Senales de Aborto
 
 Abortar si:
 
@@ -818,7 +1065,7 @@ Abortar si:
 
 Si el script se detiene antes del `ROLLBACK` final, Miguel debe ejecutar `ROLLBACK` manualmente antes de cualquier otra accion.
 
-## 9. Decisiones Vigentes
+## 10. Decisiones Vigentes
 
 Ruta 2 sigue desconectada.
 
@@ -832,7 +1079,7 @@ Tabla poblada no equivale a consumo funcional por una app.
 
 Solo consumo real en codigo permite declarar que un bloque esta aplicado funcionalmente en Ruta 2.
 
-## 10. Acciones Explicitamente No Realizadas
+## 11. Acciones Explicitamente No Realizadas
 
 Durante la creacion de este documento:
 
@@ -849,7 +1096,7 @@ Durante la creacion de este documento:
 - No se creo archivo `.sql` ejecutable.
 - No se crearon constraints nuevos.
 
-## 11. Conclusion
+## 12. Conclusion
 
 `SUPABASE-RUTA2-0015` deja preparado un paquete dry-run ajustado, sin placeholder, con validaciones posteriores especificas del dataset Ruta 2 y con regla humana explicita de emergencia para `ROLLBACK` manual.
 

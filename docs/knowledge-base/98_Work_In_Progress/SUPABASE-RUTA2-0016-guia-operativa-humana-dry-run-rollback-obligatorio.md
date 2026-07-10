@@ -188,7 +188,25 @@ Solo pasar a esta fase si los prechecks son aceptables.
 10. No hacer `COMMIT`.
 11. Capturar evidencia visual o textual del resultado.
 
-### Fase E - Emergencia
+### Fase E - Verificacion Post-ROLLBACK
+
+Solo pasar a esta fase despues de confirmar que el `ROLLBACK` del bloque transaccional fue ejecutado.
+
+1. Copiar solo el bloque post-`ROLLBACK` de solo lectura de `SUPABASE-RUTA2-0015`.
+2. Confirmar visualmente que el bloque post-`ROLLBACK` esta separado del bloque transaccional principal.
+3. Confirmar visualmente que el bloque post-`ROLLBACK` no contiene `BEGIN`.
+4. Confirmar visualmente que el bloque post-`ROLLBACK` no contiene `COMMIT`.
+5. Confirmar visualmente que el bloque post-`ROLLBACK` no contiene `INSERT`, `UPDATE`, `DELETE`, `MERGE`, `ALTER`, `DROP`, `CREATE` ni `TRUNCATE`.
+6. Ejecutar el bloque post-`ROLLBACK` solo si el `ROLLBACK` anterior ya quedo confirmado.
+7. Comparar los conteos post-`ROLLBACK` contra los prechecks capturados antes del dry-run.
+8. Confirmar que no quedo persistida ninguna fila nueva del paquete Ruta 2.
+9. Confirmar que no quedaron codigos, slugs, referencias o identificadores temporales nuevos del dry-run.
+10. Confirmar que no hubo escritura sobre tablas ajenas a `organizations`, `projects`, `project_branding`, `project_assets`, `project_catalog`, `project_commercial_types` y `project_inventory`.
+11. Aprobar solo si todos los conteos regresaron exactamente al estado previo y no existe duda humana.
+12. Abortar si cualquier conteo difiere, aparece persistencia inesperada, el resultado es ambiguo o alguien intenta agregar `COMMIT`.
+13. Capturar evidencia visual o textual del resultado post-`ROLLBACK`.
+
+### Fase F - Emergencia
 
 Si ocurre error antes del `ROLLBACK` final:
 
@@ -219,6 +237,7 @@ Antes de cualquier prueba futura, confirmar:
 - el SQL no contiene `COMMIT`;
 - el SQL contiene `BEGIN`;
 - el SQL termina en `ROLLBACK`;
+- entiendo que despues del `ROLLBACK` debe ejecutarse un bloque separado de solo lectura para verificar ausencia de persistencia;
 - entiendo que no debe persistir datos;
 - entiendo que Ruta 2 no se modifica;
 - entiendo que Bloque 6 no avanza.
@@ -228,6 +247,11 @@ Antes de cualquier prueba futura, confirmar:
 Despues de cualquier prueba futura, confirmar:
 
 - `ROLLBACK` ejecutado;
+- bloque post-`ROLLBACK` de solo lectura ejecutado fuera de la transaccion revertida;
+- conteos post-`ROLLBACK` comparados contra prechecks previos;
+- ausencia de filas nuevas persistidas del paquete Ruta 2 confirmada;
+- ausencia de codigos, slugs, referencias o identificadores temporales nuevos confirmada;
+- ausencia de escritura sobre tablas ajenas confirmada humanamente contra el alcance del paquete;
 - no hubo `COMMIT`;
 - se capturo resultado;
 - se capturo cualquier error si existio;
