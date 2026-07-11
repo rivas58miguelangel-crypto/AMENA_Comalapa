@@ -1,7 +1,9 @@
 # SUPABASE-RUTA2-0020 - Estado certificado de Supabase Ruta 2 en pausa formal
 
-Fecha de cierre documental: 2026-07-11
+Fecha de cierre documental: 2026-07-10
 Dry-run humano certificado: 2026-07-10
+Proyecto Supabase observado en el dry-run humano: amena-demo-03
+Schema observado en el dry-run humano: public
 Repositorio base: AMENA_Comalapa
 Rama base certificada antes de este paquete: centro-mando-admin10
 HEAD base certificado antes de este paquete: 6b5b468ead7d2381b436a847eebbb3c75a6bf088
@@ -28,6 +30,18 @@ Durante esta pausa no se autoriza:
 ## 2. Que quedo demostrado por el dry-run humano
 
 El documento SUPABASE-RUTA2-0018 certifico que el paquete SUPABASE-RUTA2-0015 fue ejecutado manualmente en modo dry-run con ROLLBACK obligatorio.
+
+Contexto certificado del dry-run humano:
+
+- proyecto Supabase observado: amena-demo-03;
+- schema observado: public;
+- precheck `organizations.short_name = 'RUTA2-DEMO'`: 0;
+- precheck `projects.code = 'ruta2-demo'` dentro de la organizacion demo: 0;
+- precheck de `project_assets` con `asset_type = 'hero_image'` e `is_primary = true`: 0;
+- dataset temporal Ruta 2 observado dentro de la transaccion;
+- ROLLBACK ejecutado;
+- COMMIT no ejecutado;
+- ausencia de persistencia post-ROLLBACK certificada.
 
 El dry-run demostro:
 
@@ -60,7 +74,7 @@ El dry-run no demostro:
 | project_commercial_types | Probada temporalmente | No | project_catalog.id | Tipos comerciales y atributos no extendidos |
 | project_inventory | Probada temporalmente | No | projects.id + project_catalog.id | Inventario demo y estados comerciales |
 
-Decision: tecnicamente estan aptas como base para preparar un paquete persistente futuro, pero no quedan autorizadas por esta pausa.
+Decision: las siete tablas cuentan con evidencia suficiente para evaluar documentalmente un futuro paquete persistente, sujeto a nueva auditoria y autorizacion. No quedan autorizadas por esta pausa, no estan certificadas como productivas y no deben tratarse como listas para operacion.
 
 ## 4. Datos temporales observados en el dry-run
 
@@ -76,6 +90,30 @@ El dry-run observo marcadores Ruta 2 Demo y unidades temporales, entre ellas:
   - INV-RUTA2-SRV-001
 
 Todos esos datos fueron revertidos. No quedaron persistidos.
+
+Conteos post-ROLLBACK certificados en cero:
+
+| Evidencia post-ROLLBACK | Resultado |
+| --- | ---: |
+| organizations_ruta2_demo | 0 |
+| projects_ruta2_demo | 0 |
+| branding_for_project | 0 |
+| primary_hero_assets_for_project | 0 |
+| catalogs_ruta2_demo | 0 |
+| commercial_types_for_catalog | 0 |
+| inventory_for_catalog | 0 |
+
+Marcadores post-ROLLBACK certificados con `matching_rows = 0`:
+
+| Tabla / marcador de paquete | matching_rows |
+| --- | ---: |
+| organizations | 0 |
+| projects | 0 |
+| project_branding | 0 |
+| project_assets | 0 |
+| project_catalog | 0 |
+| project_commercial_types | 0 |
+| project_inventory | 0 |
 
 ## 5. Datos que siguen siendo placeholders, genericos o no definitivos
 
@@ -108,6 +146,8 @@ Permanecen no definitivos:
 No existe en este cierre un paquete persistente autorizado.
 No existe en este cierre un rollback compensatorio persistente autorizado.
 No debe convertirse SUPABASE-RUTA2-0015 en persistente por sustitucion mecanica de ROLLBACK por COMMIT.
+
+Regla rectora: poblacion persistente no equivale a integracion funcional; integracion funcional no equivale a operacion productiva.
 
 ## 7. Dependencias reales preservadas
 
@@ -184,4 +224,4 @@ El Centro Demo no debe presentarse como conectado a Supabase Ruta 2 hasta que un
 - Aplicaciones no modificadas.
 - Esquema no modificado.
 - Persistencia no autorizada.
-- Commit SQL no creado.
+- COMMIT SQL no ejecutado.

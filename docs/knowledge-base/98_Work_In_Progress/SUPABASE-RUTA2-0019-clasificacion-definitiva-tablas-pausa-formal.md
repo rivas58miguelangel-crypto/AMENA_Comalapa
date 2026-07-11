@@ -1,6 +1,6 @@
 # SUPABASE-RUTA2-0019 - Clasificacion definitiva de tablas para pausa formal
 
-Fecha de cierre documental: 2026-07-11
+Fecha de cierre documental: 2026-07-10
 Proyecto: AMENA / H-OperIA / Centro Demo
 Repositorio base: AMENA_Comalapa
 Rama base certificada antes de este paquete: centro-mando-admin10
@@ -21,7 +21,7 @@ Su funcion es preservar criterio tecnico para que una reanudacion futura no conf
 ## 2. Fuentes documentales revisadas
 
 - TRANSICION-Codex-AMENA-77-A-78-20260710.md
-- SUPABASE-0001 - Revision Tecnica de Uso Real de Supabase en el Codigo Actual.md
+- SUPABASE-0001 - Modelo Rector Definitivo y Clasificacion Preliminar del Esquema Actual.md
 - SUPABASE-0007 - Inventario y Clasificacion de Tablas Supabase Existentes Frente al Plan Maestro SQL.md
 - SUPABASE-RUTA2-0001 a SUPABASE-RUTA2-0018
 - BLOQUE-01-nucleo-institucional.sql
@@ -39,16 +39,16 @@ Su funcion es preservar criterio tecnico para que una reanudacion futura no conf
 
 Las tablas se clasifican en seis grupos:
 
-- A: Rectoras nuevas y validas para Ruta 2.
+- A: Rectoras nuevas, validas como modelo rector documental y probadas en dry-run; no certificadas como productivas.
 - B: Operativas existentes que deben conservarse, auditarse o integrarse mas adelante.
 - C: Tablas proyectadas o pendientes de diseno/aplicacion.
 - D: Legacy o candidatas a no uso operativo directo.
 - E: Tecnicas, auxiliares o de evidencia.
 - F: Indeterminadas hasta nueva auditoria.
 
-La clasificacion no certifica existencia actual en Supabase al 2026-07-11. La existencia real debe ser reconfirmada en una fase futura autorizada, sin inferencias.
+La clasificacion no certifica existencia actual en Supabase al 2026-07-10. La existencia real debe ser reconfirmada en una fase futura autorizada, sin inferencias.
 
-## 4. Categoria A: tablas rectoras nuevas y validas de Ruta 2
+## 4. Categoria A: tablas rectoras nuevas de Ruta 2, validas solo como modelo documental probado en dry-run
 
 Estas son las siete tablas rectoras cubiertas por el dry-run humano exitoso con ROLLBACK de los Bloques 01 a 05.
 
@@ -63,6 +63,8 @@ Estas son las siete tablas rectoras cubiertas por el dry-run humano exitoso con 
 | project_commercial_types | 05 | Tipos comerciales por catalogo | project_catalog.id | INSERT temporal observado y revertido | Conservar como tabla rectora nueva |
 
 Decision: estas siete tablas son el nucleo rector preservado de Ruta 2, pero permanecen sin datos persistidos por decision expresa de pausa formal.
+
+Precision obligatoria: estas tablas no quedan certificadas como productivas, integradas ni listas para operacion. Quedan clasificadas como modelo rector documental probado temporalmente en dry-run con ROLLBACK.
 
 ## 5. Categoria B: tablas operativas existentes que se conservan pero no son rectoras
 
@@ -123,6 +125,8 @@ Prohibicion: no conectar la App Publica, Centro de Mando, Vendedoras, Marta ni I
 
 ## 8. Categoria E: tecnicas, auxiliares o de evidencia
 
+Esta categoria refina clasificaciones preliminares de SUPABASE-0007 cuando aplica. En SUPABASE-0007 algunas tablas aparecian como operacionales vigentes probables; en este cierre se separan como tecnicas, auxiliares o de evidencia para evitar que se interpreten como dominios canonicos comerciales.
+
 | tabla | funcion | decision de pausa |
 |---|---|---|
 | technical_evidence_logs | Evidencia tecnica/auditoria | Conservar; no usar como sustituto de reserva ni inventario |
@@ -154,5 +158,5 @@ Decision: no usar ni eliminar hasta confirmar origen, productor, consumidor y va
 - Supabase no abierto.
 - Esquema no modificado.
 - Aplicaciones no modificadas.
-- Commit SQL no autorizado.
+- COMMIT SQL no ejecutado.
 - Persistencia no autorizada.

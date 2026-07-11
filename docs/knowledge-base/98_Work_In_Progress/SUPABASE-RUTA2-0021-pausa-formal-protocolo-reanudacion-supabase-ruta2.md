@@ -1,6 +1,6 @@
 # SUPABASE-RUTA2-0021 - Pausa formal y protocolo de reanudacion Supabase Ruta 2
 
-Fecha de cierre documental: 2026-07-11
+Fecha de cierre documental: 2026-07-10
 Proyecto: AMENA / H-OperIA / Centro Demo
 Estado: pausa formal
 
@@ -26,7 +26,7 @@ Hasta nueva autorizacion explicita, queda prohibido:
 10. modificar aplicaciones;
 11. modificar repositorios operativos;
 12. conectar pantallas a tablas sin mapa funcional;
-13. reutilizar property_inventory o property_models para el demo nuevo;
+13. reutilizar property_inventory, property_models o inventory_import_batches para el demo nuevo;
 14. presentar datos simulados como persistidos;
 15. asumir que una tabla existe porque esta documentada;
 16. asumir que una tabla funciona porque existe;
@@ -40,7 +40,7 @@ Hasta nueva autorizacion explicita, queda prohibido:
 Antes de retomar Ruta 2, un agente humano o Codex debe leer completamente:
 
 - TRANSICION-Codex-AMENA-77-A-78-20260710.md
-- SUPABASE-0001 - Revision Tecnica de Uso Real de Supabase en el Codigo Actual.md
+- SUPABASE-0001 - Modelo Rector Definitivo y Clasificacion Preliminar del Esquema Actual.md
 - SUPABASE-0007 - Inventario y Clasificacion de Tablas Supabase Existentes Frente al Plan Maestro SQL.md
 - SUPABASE-RUTA2-0010
 - SUPABASE-RUTA2-0011
@@ -103,8 +103,25 @@ Detener si la autorizacion es ambigua.
 4. Reconfirmar tablas tecnicas/auxiliares.
 5. Reconfirmar tablas indeterminadas.
 6. Reconfirmar si Bloque 06 sigue fuera de alcance.
+7. Inspeccionar el schema real autorizado antes de cualquier ejecucion.
+8. Revisar constraints.
+9. Revisar indices.
+10. Revisar claves foraneas.
+11. Revisar triggers.
+12. Revisar RLS.
+13. Revisar policies.
+14. Revisar funciones.
+15. Revisar vistas.
+16. Revisar RPC.
+17. Revisar consumidores actuales.
+18. Revisar cambios de codigo ocurridos durante la pausa.
+19. Revisar cambios de schema ocurridos durante la pausa.
 
 Detener si alguna tabla cambia de categoria sin justificacion documental.
+
+Detener si cualquier cambio de schema, constraints, indices, claves foraneas, triggers, RLS, policies, funciones, vistas, RPC, consumidores o codigo ocurrido durante la pausa invalida la evidencia anterior.
+
+Cualquier cambio relevante durante la pausa obliga a evaluar y, cuando corresponda, repetir el dry-run. No puede reutilizarse automaticamente la certificacion humana de 2026-07-10.
 
 ### Compuerta 5: paquete persistente futuro
 
@@ -120,6 +137,8 @@ Solo si la autorizacion futura lo permite:
 8. Definir criterio de abortar.
 
 Detener si se intenta convertir 0015 directamente en paquete persistente.
+
+Regla rectora: poblacion persistente no equivale a integracion funcional; integracion funcional no equivale a operacion productiva.
 
 ### Compuerta 6: integracion funcional futura
 
@@ -149,7 +168,7 @@ Debe detenerse el trabajo si ocurre cualquiera de estos casos:
 - paquete persistente inexistente;
 - rollback compensatorio inexistente para una carga persistente;
 - duda sobre constraints, FKs, RLS o ON CONFLICT;
-- intento de usar property_inventory o property_models como base nueva;
+- intento de usar property_inventory, property_models o inventory_import_batches como base nueva;
 - intento de incluir Bloque 06 sin dictamen;
 - intento de presentar datos locales como datos Supabase;
 - error parcial sin estrategia de contingencia.
@@ -187,7 +206,7 @@ No debe inferirse que:
 - una tabla existente tiene los constraints esperados;
 - una tabla existente tiene RLS correcto;
 - operational_records puede reemplazar cualquier tabla especializada;
-- property_inventory o property_models son aceptables para Ruta 2;
+- property_inventory, property_models o inventory_import_batches son aceptables para Ruta 2;
 - la App Publica ya guarda reservas canonicas;
 - Centro de Mando ya esta conectado a Ruta 2;
 - Bloque 06 esta aprobado;

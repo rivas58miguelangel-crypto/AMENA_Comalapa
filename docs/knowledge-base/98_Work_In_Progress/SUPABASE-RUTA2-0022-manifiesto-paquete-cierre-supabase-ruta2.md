@@ -1,8 +1,23 @@
 # SUPABASE-RUTA2-0022 - Manifiesto del paquete de cierre Supabase Ruta 2
 
-Fecha de cierre documental: 2026-07-11
+Fecha de cierre documental: 2026-07-10
 Proyecto: AMENA / H-OperIA / Centro Demo
 Estado: paquete documental de pausa formal
+
+## 0. Certificacion Git del paquete
+
+Repositorio: C:\Amena\Codex\AMENA_Comalapa
+Rama: centro-mando-admin10
+Commit de cierre anterior auditado: 3df31b47d23b1648fcabd341d5408772ec8f17c0
+Commit correctivo documental: el commit Git que contiene esta version corregida del manifiesto; su hash final debe certificarse en la entrega posterior al commit, porque un commit no puede contener literalmente su propio hash sin alterar el hash.
+HEAD local/remoto al iniciar correccion: 3df31b47d23b1648fcabd341d5408772ec8f17c0
+Ahead/behind al iniciar correccion: 0 0
+Working tree al iniciar correccion: limpio
+HEAD local/remoto final: debe certificarse despues de commit y push.
+Ahead/behind final: debe certificarse despues de commit y push.
+Working tree final: debe certificarse despues de commit y push.
+
+Esta certificacion no registra ejecucion SQL ni apertura de Supabase. Registra solo el estado Git del paquete documental.
 
 ## 1. Proposito del manifiesto
 
@@ -24,14 +39,14 @@ Su finalidad es impedir que una reanudacion futura parta desde cero o tome como 
 Para reanudar Ruta 2, leer en este orden:
 
 1. SUPABASE-RUTA2-0022, para conocer el mapa documental.
-2. SUPABASE-RUTA2-0021, para conocer prohibiciones y protocolo.
+2. SUPABASE-RUTA2-0021, para conocer prohibiciones y protocolo. Es obligatorio leerlo y cumplirlo antes de cualquier reanudacion.
 3. SUPABASE-RUTA2-0020, para conocer estado certificado.
 4. SUPABASE-RUTA2-0019, para conocer clasificacion de tablas.
 5. SUPABASE-RUTA2-0018, para conocer evidencia del dry-run humano.
 6. SUPABASE-RUTA2-0015, para conocer el paquete dry-run vigente.
 7. SUPABASE-RUTA2-0016, para conocer la guia operativa humana.
 8. SUPABASE-RUTA2-0010 y 0011, para columnas, constraints, FKs y riesgos.
-9. SUPABASE-0001 y SUPABASE-0007, para fotografia previa de uso real e inventario.
+9. SUPABASE-0001 - Modelo Rector Definitivo y Clasificacion Preliminar del Esquema Actual, y SUPABASE-0007, para modelo rector preliminar e inventario.
 10. Bloques 01 a 06 y documentos puente, para contexto de diseno.
 11. TRANSICION-Codex-AMENA-77-A-78-20260710.md, para continuidad entre agentes.
 
@@ -43,20 +58,20 @@ Para reanudar Ruta 2, leer en este orden:
 | SUPABASE-RUTA2-0002 | Avance documental temprano | Historico |
 | SUPABASE-RUTA2-0003 | Avance documental temprano | Historico |
 | SUPABASE-RUTA2-0004 | Preparacion tecnica temprana | Historico |
-| SUPABASE-RUTA2-0005 | Primer paquete semilla | Superado |
+| SUPABASE-RUTA2-0005 | Primer paquete semilla con SQL historico | Antecedente superado; no usar como instruccion operativa directa |
 | SUPABASE-RUTA2-0006 | Revision/ajuste temprano | Historico |
 | SUPABASE-RUTA2-0007 | Revision/ajuste temprano | Historico |
 | SUPABASE-RUTA2-0008 | Revision/ajuste temprano | Historico |
-| SUPABASE-RUTA2-0009 | Paquete ajustado previo | Superado por 0015 |
+| SUPABASE-RUTA2-0009 | Paquete ajustado previo con SQL historico | Superado por 0015; no usar como instruccion operativa directa |
 | SUPABASE-RUTA2-0010 | Columnas, constraints y FKs | Vigente como referencia tecnica |
 | SUPABASE-RUTA2-0011 | Dictamen de riesgos | Vigente como referencia de riesgo |
-| SUPABASE-RUTA2-0012 | Guia de dry-run obligatorio | Vigente como antecedente |
-| SUPABASE-RUTA2-0013 | Semilla endurecida | Antecedente tecnico |
+| SUPABASE-RUTA2-0012 | Guia de dry-run obligatorio | Antecedente; no usar como instruccion operativa directa sin nueva revision |
+| SUPABASE-RUTA2-0013 | Semilla endurecida con SQL historico | Antecedente superado; no usar como instruccion operativa directa |
 | SUPABASE-RUTA2-0014 | Ajuste/evaluacion intermedia | Historico |
-| SUPABASE-RUTA2-0015 | Paquete dry-run ajustado con ROLLBACK | Vigente solo como dry-run |
-| SUPABASE-RUTA2-0016 | Guia operativa humana | Vigente como guia |
+| SUPABASE-RUTA2-0015 | Unico paquete dry-run realmente ejecutado el 2026-07-10 | Vigente solo como evidencia de dry-run; no utilizar como persistente |
+| SUPABASE-RUTA2-0016 | Guia operativa humana usada en la ejecucion de 2026-07-10 | Vigente como antecedente de guia; no reutilizar sin nueva revision |
 | SUPABASE-RUTA2-0017 | Seguimiento panel admin futuro | Pendiente/no implementado |
-| SUPABASE-RUTA2-0018 | Resultado dry-run humano exitoso con ROLLBACK | Evidencia certificada |
+| SUPABASE-RUTA2-0018 | Resultado dry-run humano exitoso con ROLLBACK | Evidencia certificada del resultado humano |
 | SUPABASE-RUTA2-0019 | Clasificacion definitiva de tablas | Vigente |
 | SUPABASE-RUTA2-0020 | Estado certificado en pausa formal | Vigente |
 | SUPABASE-RUTA2-0021 | Protocolo de reanudacion | Rector operativo vigente |
@@ -66,7 +81,7 @@ Para reanudar Ruta 2, leer en este orden:
 
 | documento | valor | estado |
 |---|---|---|
-| SUPABASE-0001 | Uso real de Supabase en codigo actual | Referencia tecnica |
+| SUPABASE-0001 | Modelo Rector Definitivo y Clasificacion Preliminar del Esquema Actual | Referencia tecnica |
 | SUPABASE-0007 | Inventario y clasificacion previa de tablas | Referencia tecnica |
 | PERSISTENCIA-0001 | Arquitectura rectora de persistencia | Referencia conceptual |
 | PD-0002 | Catalogo comercial parametrizable | Referencia conceptual |
@@ -82,6 +97,8 @@ No existe SQL persistente autorizado.
 
 Existe un paquete de dry-run con ROLLBACK obligatorio documentado en SUPABASE-RUTA2-0015.
 
+Ese paquete fue el unico dry-run realmente ejecutado el 2026-07-10. No puede transformarse en persistente cambiando ROLLBACK por COMMIT.
+
 Existen antecedentes SQL o pseudo-SQL que no deben ejecutarse sin revisar su vigencia:
 
 - BLOQUE-01-nucleo-institucional.sql
@@ -92,6 +109,21 @@ Existen antecedentes SQL o pseudo-SQL que no deben ejecutarse sin revisar su vig
 - BLOQUE-06-project-commercial-type-attributes.sql.md
 
 Bloque 06 sigue fuera de alcance.
+
+Cualquier documento con SQL historico debe considerarse no ejecutable sin nueva revision y autorizacion humana explicita.
+
+## 6.1 Contexto exacto del dry-run certificado
+
+- Proyecto Supabase observado: amena-demo-03.
+- Schema observado: public.
+- Prechecks certificados: 0 / 0 / 0.
+- Dataset temporal observado dentro de transaccion.
+- Inventarios temporales observados: INV-RUTA2-CUR-001, INV-RUTA2-RES-001, INV-RUTA2-RES-002 e INV-RUTA2-SRV-001.
+- ROLLBACK ejecutado.
+- COMMIT no ejecutado.
+- Conteos post-ROLLBACK en cero.
+- Marcadores de las siete tablas en cero.
+- Ausencia de persistencia certificada.
 
 ## 7. Estado funcional al cierre
 
@@ -105,6 +137,16 @@ Bloque 06 sigue fuera de alcance.
 | Marta | No conectada a Ruta 2 |
 | H-OperIA Intelligence | No conectada a Ruta 2 |
 | Bloque 06 | Pendiente |
+
+Regla rectora: poblacion persistente no equivale a integracion funcional; integracion funcional no equivale a operacion productiva.
+
+## 7.1 Tablas legacy no utilizables para el demo nuevo
+
+No deben usarse como base nueva de Ruta 2:
+
+- property_inventory;
+- property_models;
+- inventory_import_batches.
 
 ## 8. Prohibiciones que debe heredar cualquier agente futuro
 
@@ -138,6 +180,8 @@ El punto correcto es:
 
 Al cierre de este paquete, el siguiente frente autorizado es solo la revision integral del Centro Demo visible/presentable.
 
+La obligacion inicial de cualquier reanudacion es leer y cumplir SUPABASE-RUTA2-0021. El punto de reanudacion no es ejecutar SQL.
+
 ## 10. Confirmacion de cierre
 
 - SQL no ejecutado.
@@ -145,5 +189,6 @@ Al cierre de este paquete, el siguiente frente autorizado es solo la revision in
 - Schema no modificado.
 - Aplicaciones no modificadas.
 - Paquete persistente no preparado.
-- Commit SQL no creado.
+- COMMIT SQL no ejecutado.
+- Commit y push documental de cierre realizados.
 - Push de codigo de aplicacion no requerido.
