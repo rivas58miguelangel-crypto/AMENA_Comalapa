@@ -101,7 +101,7 @@ export default function DemoCommandEvidencePanel({
   counts,
   onInjectSimulatedData,
 }: DemoCommandEvidencePanelProps) {
-  const [auditStatus, setAuditStatus] = useState("Pendiente de auditoria");
+  const [auditStatus, setAuditStatus] = useState("Pendiente de auditoría");
   const [flowStatus, setFlowStatus] = useState<ScenicFlowStatus>("idle");
   const [rejectedRegenerated, setRejectedRegenerated] = useState(false);
   const layerTwoRef = useRef<HTMLDivElement | null>(null);
@@ -126,12 +126,12 @@ export default function DemoCommandEvidencePanel({
   ) => {
     const nextValue = Math.max(0, Number(value) || 0);
     setQuantities((current) => ({ ...current, [key]: nextValue }));
-    setAuditStatus("Pendiente de auditoria");
+    setAuditStatus("Pendiente de auditoría");
     setFlowStatus("idle");
     setRejectedRegenerated(false);
   };
   const resetGeneration = () => {
-    setAuditStatus("Pendiente de auditoria");
+    setAuditStatus("Pendiente de auditoría");
     setFlowStatus("idle");
     setRejectedRegenerated(false);
     setQuantities({
@@ -193,15 +193,15 @@ export default function DemoCommandEvidencePanel({
     const valid = wasAudited ? Math.max(generated - defective, 0) : 0;
     const status =
       flowStatus === "idle"
-        ? "Pendiente de generacion"
+        ? "Pendiente de generación"
         : flowStatus === "generated"
-          ? "Pendiente de auditoria"
+          ? "Pendiente de auditoría"
           : flowStatus === "regenerated"
             ? "Rechazados regenerados"
             : defective > 0
-              ? "Requiere regeneracion"
+              ? "Requiere regeneración"
               : flowStatus === "injected"
-                ? "Inyeccion realizada"
+                ? "Carga demo realizada"
                 : hasApprovedData
                   ? "Aprobado"
                   : "Auditado";
@@ -216,18 +216,18 @@ export default function DemoCommandEvidencePanel({
     !hasRejectedRows;
   const flowLabel =
     flowStatus === "idle"
-      ? "Pendiente de generacion"
+      ? "Pendiente de generación"
       : flowStatus === "generated"
         ? "Datos generados"
         : flowStatus === "audited"
           ? hasRejectedRows
-            ? "Auditoria con rechazos"
-            : "Auditoria aprobable"
+            ? "Auditoría con rechazos"
+            : "Auditoría aprobable"
           : flowStatus === "regenerated"
-            ? "Rechazados regenerados; pendiente de auditoria"
+            ? "Rechazados regenerados; pendiente de auditoría"
             : flowStatus === "approved"
               ? "Datos aprobados"
-              : "Empresa Demo inyectada";
+              : "Empresa Demo simulada cargada";
   const actionButtonClass =
     "rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600";
   const secondaryButtonClass =
@@ -241,29 +241,30 @@ export default function DemoCommandEvidencePanel({
             FASE 04 Centro de Mando y Evidencia de la Operación
           </h3>
           <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
-            Estación para configurar, auditar, regenerar e inyectar datos
+            Estación para configurar, auditar, regenerar y cargar datos
             simulados de una Empresa Demo antes de la lectura de Intelligence.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusBadge tone={simulatedDataInjected ? "green" : "amber"}>
-            {simulatedDataInjected ? "Datos enviados" : "Preparacion"}
+            {simulatedDataInjected ? "Datos demo cargados" : "Preparación"}
           </StatusBadge>
-          <StatusBadge tone="amber">Supabase no verificado</StatusBadge>
+          <StatusBadge tone="violet">Datos simulados</StatusBadge>
+          <StatusBadge tone="amber">No persistido</StatusBadge>
         </div>
       </div>
 
       <div className="mt-5 rounded-3xl border border-amber-100 bg-amber-50 p-5">
         <div>
           <div className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">
-            Capa 01 · Preparación e inyección de datos simulados
+            Capa 01 · Preparación y carga de datos simulados
           </div>
           <h4 className="mt-2 text-xl font-black text-slate-950">
             Qué está ocurriendo
           </h4>
           <p className="mt-1 text-sm font-semibold text-slate-700">
             Configure la Empresa Demo, defina cantidades por aplicación, audite
-            calidad y ejecute la inyección simulada.
+            calidad y cargue el escenario demo local.
           </p>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -306,7 +307,7 @@ export default function DemoCommandEvidencePanel({
             Cantidad deseada de datos a generar
           </h4>
           <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">
-            Define cuántos datos simulados deseas generar en cada aplicación al ejecutar la inyección.
+            Define cuántos datos simulados deseas generar en cada aplicación al cargar el escenario demo local.
           </p>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-4">
@@ -332,7 +333,7 @@ export default function DemoCommandEvidencePanel({
         </div>
         <div className="mt-5 rounded-2xl border border-amber-100 bg-white p-4 text-sm font-black leading-6 text-slate-800">
           Generar datos → Auditar calidad → Regenerar categoría si falla →
-          Volver a auditar → Aprobar → Inyectar Empresa Demo
+          Volver a auditar → Aprobar → Cargar Empresa Demo simulada
         </div>
         <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-amber-100 bg-white p-5 xl:flex-row xl:items-center xl:justify-between">
           <p className="text-sm font-semibold leading-6 text-slate-700">
@@ -356,8 +357,8 @@ export default function DemoCommandEvidencePanel({
                 Proceso de generación
               </h4>
               <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">
-                Estos pasos preparan la demostración. La inyección real solo se
-                ejecuta al presionar Inyectar Empresa Demo.
+                Estos pasos preparan la demostración. La carga demo solo afecta
+                el escenario local al presionar Cargar Empresa Demo simulada.
               </p>
             </div>
             <StatusBadge tone={hasApprovedData ? "green" : hasGeneratedData ? "amber" : "slate"}>
@@ -379,7 +380,7 @@ export default function DemoCommandEvidencePanel({
               disabled={!hasGeneratedData}
               onClick={() => {
                 setFlowStatus("audited");
-                setAuditStatus("Auditoria ejecutada");
+                setAuditStatus("Auditoría ejecutada");
               }}
               className={secondaryButtonClass}
             >
@@ -436,7 +437,7 @@ export default function DemoCommandEvidencePanel({
                 <div className="p-4">{row.valid}</div>
                 <div className="p-4">{row.defective}</div>
                 <div className="p-4">
-                  <StatusBadge tone={row.status === "Aprobado" ? "green" : row.status === "Requiere regeneracion" ? "amber" : "slate"}>
+                  <StatusBadge tone={row.status === "Aprobado" ? "green" : row.status === "Requiere regeneración" ? "amber" : "slate"}>
                     {row.status}
                   </StatusBadge>
                 </div>
@@ -459,12 +460,12 @@ export default function DemoCommandEvidencePanel({
         </div>
         <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">
           Los registros válidos se conservan. Solo los rechazados se regeneran
-          y se auditan nuevamente antes de la inyección.
+          y se auditan nuevamente antes de cargar el escenario demo.
         </p>
         <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-amber-100 bg-white p-5 xl:flex-row xl:items-center xl:justify-between">
           <p className="text-sm font-semibold leading-6 text-slate-700">
             H-OperIA Intelligence no genera datos simulados en esta fase; su
-            interpretación comienza en la FASE 05.
+            interpretación comienza en la FASE 05. La carga queda en memoria local de la demo.
           </p>
           <button
             disabled={!canInjectDemo}
@@ -476,12 +477,12 @@ export default function DemoCommandEvidencePanel({
                 scenarioName: scenarioName.trim() || "Lanzamiento comercial de proyecto habitacional",
               });
               setFlowStatus("injected");
-              setAuditStatus("Empresa Demo inyectada");
+              setAuditStatus("Empresa Demo simulada cargada");
             }}
             className="rounded-2xl bg-slate-950 px-6 py-4 text-base font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
           >
             <UploadCloud size={18} className="mr-2 inline" />
-            Inyectar Empresa Demo
+            Cargar Empresa Demo simulada
           </button>
         </div>
       </div>
@@ -491,17 +492,17 @@ export default function DemoCommandEvidencePanel({
           Estado consolidado de la corrida
         </div>
         <h4 className="mt-2 text-xl font-black text-slate-950">
-          Resumen de Datos Enviados
+          Resumen de Datos Demo Cargados
         </h4>
         <p className="mt-1 text-sm font-semibold text-slate-700">
-          Resumen posterior al envío ejecutado desde la preparación simulada.
+          Resumen posterior a la carga ejecutada desde la preparación simulada.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <SummaryItem label="Empresa demo" value={demoContext?.prospectCompanyName || "Pendiente"} />
           <SummaryItem label="Proyecto" value={demoContext?.projectName || "Proyecto Comalapa"} />
-          <SummaryItem label="Fecha / ultima actualizacion" value={demoContext?.injectedAt || "Pendiente"} />
-          <SummaryItem label="Estado de envio" value={simulatedDataInjected ? "Enviado" : "Pendiente"} />
-          <SummaryItem label="Supabase" value="No verificado" />
+          <SummaryItem label="Fecha / última actualización" value={demoContext?.injectedAt || "Pendiente"} />
+          <SummaryItem label="Estado demo" value={simulatedDataInjected ? "Cargado localmente" : "Pendiente"} />
+          <SummaryItem label="Persistencia" value="No persistido" />
         </div>
         <div className="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-white">
           <div className="overflow-x-auto">
@@ -510,7 +511,7 @@ export default function DemoCommandEvidencePanel({
               <div className="p-4">Marta Voz / Vapi</div>
               <div className="p-4">Registro Comercial</div>
               <div className="p-4">Mensajes Equipo</div>
-              <div className="p-4">Total enviado</div>
+              <div className="p-4">Total demo</div>
             </div>
             <div className="grid min-w-[720px] grid-cols-5 border-t border-slate-100 text-sm font-black text-slate-950">
               <div className="p-4">{counts.reservations}</div>

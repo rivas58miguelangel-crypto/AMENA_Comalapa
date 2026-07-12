@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 
 const REPORT_DATE = "Corte: 15 mayo 2026";
+const PUBLIC_RESERVATION_APP_URL = "http://localhost:3001/";
 
 const menu = [
   { id: "executive", label: "Centro Ejecutivo", icon: MonitorCog },
@@ -383,14 +384,14 @@ function PageHeader({ title, subtitle, icon: Icon, sync = 80, badges = [], syncN
         </div>
         <div className="min-w-0 rounded-3xl bg-slate-50 p-5 border border-slate-100 xl:min-w-[310px]">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-black text-slate-950">Nivel de Integración Operacional</span>
+            <span className="text-sm font-black text-slate-950">Nivel de Integración Operacional · Demo</span>
             <span className="text-3xl font-black text-emerald-500">{sync}%</span>
           </div>
           <div className="mt-3 h-3 rounded-full bg-slate-200">
             <div className="h-3 rounded-full bg-emerald-300" style={{ width: `${sync}%` }} />
           </div>
           <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">
-            {syncNote || "Indica qué tanto este módulo conecta información real, señales operativas y criterio humano. Marta acompaña conversaciones; H-OperIA Intelligence analiza señales; el equipo humano revisa, decide y ejecuta."}
+            {syncNote || "Indicador demostrativo de conexión escénica entre señales operativas, criterio humano y lectura asistida. No representa medición productiva ni persistencia real."}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {badges.map((b) => <Badge key={b} tone="dark">{b}</Badge>)}
@@ -1820,6 +1821,15 @@ function DemoPage({
   const [selectedBreakdowns, setSelectedBreakdowns] = useState(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
   const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
   const phaseSectionRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const publicReservationUrl = new URL(PUBLIC_RESERVATION_APP_URL);
+  const currentAdminUrl = typeof window !== "undefined" ? new URL(window.location.href) : null;
+  const localHosts = ["localhost", "127.0.0.1"];
+  const publicReservationBridgeDisabled =
+    currentAdminUrl !== null &&
+    (currentAdminUrl.origin === publicReservationUrl.origin ||
+      (localHosts.includes(currentAdminUrl.hostname) &&
+        localHosts.includes(publicReservationUrl.hostname) &&
+        currentAdminUrl.port === publicReservationUrl.port));
   const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", Alta: "red", Media: "amber", Baja: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
   const adminTargetsByPage = {
     "Centro Ejecutivo": "executive",
@@ -1839,7 +1849,7 @@ function DemoPage({
     service: "Servicio Cliente",
     sellers: "Ventas / Vendedoras",
     campaigns: "Marketing / Canales",
-    campaignDelivery: "CampaÃ±as",
+    campaignDelivery: "Campañas",
     funnels: "Embudos",
     dashboards: "Inteligencia Operativa",
   };
@@ -1859,7 +1869,7 @@ function DemoPage({
     low: "Baja",
     medium: "Media",
     high: "Alta",
-    critical: "CrÃ­tica",
+    critical: "Crítica",
   };
   const demoFindingSeverityTone = {
     low: "green",
@@ -1868,7 +1878,7 @@ function DemoPage({
     critical: "red",
   };
   const demoVisibleStatusLabels = {
-    pending: "Pendiente de verificaciÃ³n",
+    pending: "Pendiente de verificación",
     visible: "Visible",
     acknowledged: "Revisado",
     hidden: "Oculto",
@@ -2101,7 +2111,7 @@ function DemoPage({
     { phase: "Fase 03", source: "Vendedoras", page: "Registro de Seguimiento Comercial", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
     { phase: "Fase 03", source: "Mensajes entre el Equipo", page: "Mensajes entre el Equipo", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
     { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias agregadas a la corrida`, observation: "Reservas, reportes, mensajes, llamadas y seguimientos consolidados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
-    { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Inteligencia Operativa", section: "Hallazgos prioritarios inyectados", change: `${phaseFiveFindings.length} hallazgos priorizados dentro del Admin`, observation: "La actividad operacional se interpreta como hallazgos verificables en páginas internas.", status: phaseFiveDemoActive ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
+    { phase: "Fase 05", source: "H-OperIA Intelligence", page: "Inteligencia Operativa", section: "Hallazgos prioritarios cargados", change: `${phaseFiveFindings.length} hallazgos priorizados dentro del Admin`, observation: "La actividad operacional se interpreta como hallazgos verificables en páginas internas.", status: phaseFiveDemoActive ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
     { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Consultas y conclusión", change: `${phaseFiveFindings.length} señales disponibles para lectura ejecutiva`, observation: "Las señales se convierten en criterios y una conclusión para junta.", status: phaseFiveDemoActive ? "Generado" : "Pendiente", targetId: "demo-executive-close" },
     { phase: "Auxiliar", source: "Información pública", page: "Inventario Demo", section: "Sección auxiliar técnica", change: "8 categorías de inventario previstas", observation: "Soporte reutilizable fuera de la ruta escénica principal.", status: "Visible", targetId: "demo-technical-inventory" },
   ];
@@ -2141,8 +2151,43 @@ function DemoPage({
           <InfoCard title="Empresa Activa" value={effectiveDemoContext?.prospectCompanyName || "AMENA"} />
           <InfoCard title="Proyecto Activo" value={effectiveDemoContext?.projectName || "AMENA Comalapa"} />
           <InfoCard title="Escenario Activo" value={effectiveDemoContext?.scenarioName || "Centro Demo"} />
-          <InfoCard title="Estado" value={effectiveDemoContext?.status || "Preparado"} />
-          <InfoCard title="Última actualización" value={effectiveDemoContext?.injectedAt || "Pendiente de inyección"} />
+          <InfoCard title="Estado" value={effectiveDemoContext?.status === "injected" ? "Demo local cargada" : effectiveDemoContext?.status || "Preparado"} />
+          <InfoCard title="Última actualización" value={effectiveDemoContext?.injectedAt || "Pendiente de carga demo"} />
+        </div>
+      </Card>
+      <Card className="border-blue-100 bg-blue-50">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="blue">Demo</Badge>
+              <Badge tone="slate">Aplicación separada</Badge>
+            </div>
+            <h3 className="mt-3 text-2xl font-black text-slate-950">Experiencia pública de reserva</h3>
+            <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
+              Abre la App Pública, una aplicación separada, en una pestaña nueva para mostrar el inicio del recorrido del cliente. Debe estar activa en {PUBLIC_RESERVATION_APP_URL}.
+            </p>
+            {publicReservationBridgeDisabled && (
+              <p className="mt-2 max-w-4xl text-sm font-black leading-6 text-amber-900">
+                Admin está usando el mismo puerto preparado para la App Pública. Inicia Admin en http://localhost:3000/ y la App Pública en {PUBLIC_RESERVATION_APP_URL} para habilitar este puente.
+              </p>
+            )}
+          </div>
+          {publicReservationBridgeDisabled ? (
+            <button disabled className="inline-flex items-center justify-center rounded-2xl bg-amber-100 px-5 py-4 text-sm font-black text-amber-900 opacity-90">
+              <ExternalLink size={16} className="mr-2" />
+              App Pública requiere otro puerto
+            </button>
+          ) : (
+            <a
+              href={PUBLIC_RESERVATION_APP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"
+            >
+              <ExternalLink size={16} className="mr-2" />
+              Abrir experiencia pública de reserva
+            </a>
+          )}
         </div>
       </Card>
       <DemoScenarioRoute phases={phases} progress={progress} phaseStatus={phaseStatus} onPresentPhase={presentPhase} onCompletePhase={completePhase} />
@@ -2155,15 +2200,15 @@ function DemoPage({
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <button onClick={addVolunteer} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><Users size={16} className="mr-2 inline" />Registrar voluntario</button>
-            <button onClick={() => sendDemoLink("whatsapp")} disabled={visibleSendStatus.whatsappStatus === "Enviando"} className="rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><MessageCircle size={16} className="mr-2 inline" />Enviar link WhatsApp</button>
-            <button onClick={() => sendDemoLink("email")} disabled={visibleSendStatus.emailStatus === "Enviando"} className="rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-70"><Mail size={16} className="mr-2 inline" />Enviar link email</button>
+            <button disabled className="rounded-2xl bg-emerald-100 px-4 py-4 text-sm font-black text-emerald-800 opacity-80"><MessageCircle size={16} className="mr-2 inline" />WhatsApp demo no activo</button>
+            <button disabled className="rounded-2xl bg-blue-100 px-4 py-4 text-sm font-black text-blue-800 opacity-80"><Mail size={16} className="mr-2 inline" />Email demo no activo</button>
             <button onClick={finishVolunteer} className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-950">Guardar y limpiar formulario</button>
           </div>
           <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <div className="flex flex-col gap-2 xl:flex-row xl:items-start xl:justify-between">
               <div>
                 <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-700">Evidencia operacional de envío</div>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Solicitud enviada al backend local. Esto confirma envío solicitado, no recepción final del destinatario.</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Controles reservados para el backend demo. En esta presentación no realizan envíos reales ni prueban recepción del destinatario.</p>
               </div>
               <Badge tone="violet">Marta acompaña · H-OperIA Intelligence analiza · humano decide</Badge>
             </div>
@@ -2190,8 +2235,9 @@ function DemoPage({
         </Card>
         <div id="demo-reservation-live" className="scroll-mt-64">
         <Card>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.</p></div><div className="flex flex-wrap gap-2"><Badge tone="slate">Reserva base preparada</Badge><Badge tone="blue">Preparado para Evidencia de la Operación</Badge></div></div>
-          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><Database size={16} className="mr-2 inline" />Buscar reserva en Supabase</button><button className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><ExternalLink size={16} className="mr-2 inline" />Abrir registro en Supabase</button></div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo se representa como dato demo para iniciar el ciclo escénico de seguimiento.</p></div><div className="flex flex-wrap gap-2"><Badge tone="slate">Reserva base preparada</Badge><Badge tone="blue">Datos simulados</Badge><Badge tone="amber">No persistido</Badge></div></div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><Search size={16} className="mr-2 inline" />Validar reserva demo</button></div>
+          <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">El acceso técnico al registro externo queda fuera del recorrido comercial; esta validación solo actualiza el escenario local.</p>
           <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-600">Última actualización: hace 12 segundos</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <InfoCard title="Nombre del cliente" value={selectedVolunteer.name || "Sin registro"} />
@@ -2218,20 +2264,20 @@ function DemoPage({
 
       <div id="demo-marta-vapi" ref={(element) => { phaseSectionRefs.current[1] = element; }} className="scroll-mt-64">
         <Card>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 02 Marta · Acompañamiento Multicanal</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La interacción real con Marta se registra como dato estructurado para evidencia, expediente, seguimiento e inteligencia.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 02 Marta · Acompañamiento Multicanal</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La interacción con Marta se muestra como evidencia demo estructurada para seguimiento e inteligencia. No activa llamadas ni mensajería real.</p></div><Badge tone={statusTone[martaStatus] || "violet"}>{martaStatus}</Badge></div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Badge tone="green">Activo · Voz / Vapi</Badge>
-          <Badge tone="green">Activo · WhatsApp</Badge>
+          <Badge tone="violet">Demo · Voz / Vapi</Badge>
+          <Badge tone="violet">Demo · WhatsApp</Badge>
           <Badge tone="slate">Próximo · Email</Badge>
           <Badge tone="slate">Próximo · Widget Web</Badge>
           <Badge tone="slate">Próximo · Link posterior</Badge>
         </div>
         <div className="mt-5 grid gap-4 xl:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Transcripción:</span> “Quiero confirmar prima, fecha de entrega y documentos para avanzar.”</div><div className="rounded-2xl bg-violet-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Structured output:</span> intención alta, duda financiera, documento pendiente, próxima acción: llamada humana.</div><div className="rounded-2xl bg-emerald-50 p-4 text-base font-semibold leading-7 text-slate-800"><span className="font-black text-slate-950">Evidencia:</span> resumen de llamada y tarea de seguimiento.</div></div>
         <div className="mt-5 flex flex-wrap gap-2">
-          <button onClick={simulateMartaConversation} className="rounded-2xl bg-violet-600 px-5 py-4 text-sm font-black text-white"><Bot size={16} className="mr-2 inline" />Mostrar conversación con Marta</button>
-          <button onClick={openVapi} className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><PhoneCall size={16} className="mr-2 inline" />Abrir logs Vapi</button>
+          <button onClick={simulateMartaConversation} className="rounded-2xl bg-violet-600 px-5 py-4 text-sm font-black text-white"><Bot size={16} className="mr-2 inline" />Mostrar conversación demo con Marta</button>
+          <button onClick={openVapi} className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"><PhoneCall size={16} className="mr-2 inline" />Ver logs Vapi simulados</button>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2"><Badge tone="green">Logs verificados</Badge></div>
+        <div className="mt-3 flex flex-wrap gap-2"><Badge tone="violet">Logs demo</Badge><Badge tone="amber">No persistido</Badge></div>
         {simulatedDataInjected && (
           <div className="mt-5 space-y-4">
             <div id="demo-marta-vapi-voice" className="scroll-mt-64">
@@ -2353,7 +2399,7 @@ function DemoPage({
               <h3 className="text-3xl font-black text-slate-950">FASE 05 H-OperIA Intelligence</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Índice escénico de hallazgos prioritarios que H-OperIA Intelligence interpreta después de la Empresa Demo y ubica dentro de páginas internas del Admin.</p>
             </div>
-            <Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveDemoActive ? "Demo activa" : "Sin demo activa"}</Badge>
+            <div className="flex flex-wrap gap-2"><Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveDemoActive ? "Demo activa" : "Sin demo activa"}</Badge><Badge tone="violet">Datos simulados</Badge></div>
           </div>
           {!phaseFiveDemoActive && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Esperando corrida simulada</div>}
           <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -2365,7 +2411,7 @@ function DemoPage({
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h3 className="text-3xl font-black text-slate-950">Hallazgos prioritarios inyectados en Admin</h3>
+              <h3 className="text-3xl font-black text-slate-950">Hallazgos prioritarios cargados en Admin</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada hallazgo muestra dónde debe revisarse dentro del Admin, de qué fuente nace y qué verificación externa corresponde antes de tratarlo como hecho.</p>
             </div>
             <Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveFindings.length} hallazgos</Badge>
@@ -2436,15 +2482,15 @@ function DemoPage({
                       <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3">
                         {signal.externalVerification && (
                           <>
-                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Verificación externa</div>
+                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Verificación externa prevista</div>
                             <button type="button" onClick={(event) => event.preventDefault()} className="mt-2 inline-flex items-center rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
-                              <ExternalLink size={15} className="mr-2" />{signal.externalVerification}
+                              <ExternalLink size={15} className="mr-2" />{signal.externalVerification === "Supabase" ? "Validación externa futura" : signal.externalVerification}
                             </button>
                           </>
                         )}
                         {signal.supabaseTable && (
                           <div className="mt-3">
-                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Tabla Supabase prevista</div>
+                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Referencia técnica prevista</div>
                             <div className="mt-2 inline-flex items-center rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
                               <Database size={15} className="mr-2" />{signal.supabaseTable}
                             </div>
@@ -2463,7 +2509,7 @@ function DemoPage({
       <div id="demo-executive-close" ref={(element) => { phaseSectionRefs.current[5] = element; }} className="scroll-mt-64">
         <Card>
         <h3 className="text-3xl font-black text-slate-950">FASE 06 Cierre ejecutivo y próximos pasos</h3>
-        <p className="mt-3 text-base font-semibold leading-7 text-slate-700">A continuación escriba su pregunta o sus preguntas, una por una. Al terminar cada pregunta presione Enter para agregarla al listado.</p>
+        <p className="mt-3 text-base font-semibold leading-7 text-slate-700">A continuación escriba su pregunta o sus preguntas, una por una. Al terminar cada pregunta presione Enter para agregarlas al listado demo.</p>
         <p className="mt-3 rounded-2xl bg-slate-50 p-4 text-base font-black leading-7 text-slate-900">Las reservas generan oportunidades. Las personas generan contexto. H-OperIA transforma ambas en decisiones ejecutables.</p>
         <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]">
           <input value={executiveQuery} onChange={(e) => setExecutiveQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addExecutiveQuestion(); }} className="min-w-0 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold outline-none" placeholder="Escribir pregunta ejecutiva individual" />
@@ -2497,21 +2543,21 @@ function DemoPage({
           </div>
           <div className="mt-5 rounded-2xl border border-blue-100 bg-white p-5">
             <h4 className="text-xl font-black text-slate-950">Desgloses seleccionados para respuesta</h4>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Este es el conjunto final que se enviará para generar la respuesta ejecutiva.</p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Este es el conjunto final que se usará para preparar una respuesta ejecutiva simulada.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {selectedBreakdowns.map((item) => <span key={item} className="rounded-full bg-blue-100 px-4 py-2 text-sm font-black text-blue-900">{item}</span>)}
             </div>
-            <button onClick={() => setExecutiveResponseReady(true)} className="mt-4 rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black text-white">Enviar desgloses</button>
+            <button onClick={() => setExecutiveResponseReady(true)} className="mt-4 rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black text-white">Preparar respuesta demo</button>
           </div>
           <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50 p-5">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
               <h4 className="text-xl font-black text-slate-950">Respuestas generadas por H-OperIA Intelligence</h4>
-              <Badge tone={executiveResponseReady ? "green" : "amber"}>{executiveResponseReady ? "Posterior al envío" : "Esperando desgloses"}</Badge>
+              <Badge tone={executiveResponseReady ? "green" : "amber"}>{executiveResponseReady ? "Respuesta demo generada" : "Esperando desgloses"}</Badge>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              {["Texto ejecutivo", "Cuadros comparativos", "Dashboard", "PDF descargable", "Imagen ejecutiva"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
+              {["Texto ejecutivo demo", "Cuadros comparativos previstos", "Dashboard previsto", "PDF futuro", "Imagen ejecutiva futura"].map((format) => <Badge key={format} tone="violet">{format}</Badge>)}
             </div>
-            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">{executiveResponseReady ? "Resultado mock posterior al envío de desgloses: referidos concentra el mejor balance entre ingresos netos, conversión y menor atraso operativo. Instagram mantiene volumen, pero necesita filtro financiero temprano y seguimiento humano documentado. Para junta, la conclusión es reforzar referidos, ajustar pauta digital y pedir evidencia semanal por vendedora." : "Al enviar los desgloses seleccionados, H-OperIA Intelligence generará una conclusión ejecutiva en los formatos disponibles."}</p>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-800">{executiveResponseReady ? "Resultado demo posterior a preparar desgloses: referidos concentra el mejor balance entre ingresos netos, conversión y menor atraso operativo. Instagram mantiene volumen, pero necesita filtro financiero temprano y seguimiento humano documentado. Para junta, la conclusión es reforzar referidos, ajustar pauta digital y pedir evidencia semanal por vendedora." : "Al preparar los desgloses seleccionados, H-OperIA Intelligence mostrará una conclusión ejecutiva simulada en los formatos previstos."}</p>
             <button className="mt-4 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"><ClipboardCheck size={16} className="mr-2 inline" />Copiar conclusión para junta</button>
           </div>
         </div>
