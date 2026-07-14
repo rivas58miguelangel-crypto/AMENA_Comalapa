@@ -1,4 +1,4 @@
-H-OperIA  
+H - OperIA
 Repositorio de Arquitectura
 
 # ADR-001
@@ -9,10 +9,10 @@ Repositorio de Arquitectura
 **Versión:** 1.0  
 **Estado:** Aprobado  
 **Fecha de aprobación:** [pendiente de completar]  
-**Autoría:** Arquitectura H-OperIA  
+**Autoría:** Arquitectura H - OperIA
 **Clasificación:** Documento Rector  
 
-Este documento forma parte de la colección permanente de ADR del Repositorio de Arquitectura de H-OperIA.
+Este documento forma parte de la colección permanente de ADR del Repositorio de Arquitectura de H - OperIA.
 
 ---
 
@@ -24,9 +24,9 @@ Este documento forma parte de la colección permanente de ADR del Repositorio de
 | Título | Marco Rector del Ecosistema de Demostración |
 | Estado | Aprobado |
 | Versión | 1.0 |
-| Responsable | Arquitectura H-OperIA |
-| Ámbito | Ecosistema H-OperIA / Ecosistema de Demostración |
-| Repositorio | Arquitectura H-OperIA |
+| Responsable | Arquitectura H - OperIA |
+| Ámbito | Ecosistema H - OperIA / Ecosistema de Demostración |
+| Repositorio | Arquitectura H - OperIA |
 | Sustituye | Ninguno |
 | Sustituido por | — |
 | Fecha de creación | [pendiente de completar] |
@@ -36,7 +36,7 @@ Este documento forma parte de la colección permanente de ADR del Repositorio de
 
 ---
 
-# H-OperIA
+# H - OperIA
 
 # ADR-001 — Marco Rector del Ecosistema de Demostración
 
@@ -46,11 +46,11 @@ Este documento forma parte de la colección permanente de ADR del Repositorio de
 
 **Estado:** Aprobado
 
-**Ámbito:** Gobierno arquitectónico del Ecosistema H-OperIA y del Ecosistema de Demostración
+**Ámbito:** Gobierno arquitectónico del Ecosistema H - OperIA y del Ecosistema de Demostración
 
-**Aplicabilidad:** Obligatoria para todo el Ecosistema H-OperIA, todo Centro Demo presente y futuro, y cualquier sistema futuro que adopte este marco arquitectónico.
+**Aplicabilidad:** Obligatoria para todo el Ecosistema H - OperIA, todo Centro Demo presente y futuro, y cualquier sistema futuro que adopte este marco arquitectónico.
 
-**Carácter:** Primer documento rector del repositorio de arquitectura de H-OperIA.
+**Carácter:** Primer documento rector del repositorio de arquitectura de H - OperIA.
 
 ---
 
@@ -58,13 +58,19 @@ Este documento forma parte de la colección permanente de ADR del Repositorio de
 
 El propósito del Ecosistema de Demostración no es mostrar software.
 
-Su propósito es demostrar cómo H-OperIA transforma una operación real en decisiones ejecutivas mediante evidencia verificable, criterio humano e inteligencia artificial.
+Su propósito es demostrar cómo la Suite H - OperIA transforma una operación real en conocimiento accionable, decisiones verificables y acciones concretas mediante evidencia demostrable, criterio humano e inteligencia artificial.
+
+Eslogan vigente:
+
+```text
+Humanización de las operaciones con inteligencia artificial.
+```
 
 ---
 
 ## Nota de gobierno arquitectónico
 
-Este documento establece el primer marco rector del repositorio de arquitectura de H-OperIA.
+Este documento establece el primer marco rector del repositorio de arquitectura de H - OperIA.
 
 Toda decisión futura relacionada con Centro Demo, Motor Multi-Demo, narrativa ejecutiva, nomenclatura, regeneración, aplicaciones demostradas o nuevas demos deberá ser compatible con este documento o justificar explícitamente su modificación.
 
@@ -72,7 +78,7 @@ Toda decisión futura relacionada con Centro Demo, Motor Multi-Demo, narrativa e
 
 ## Principio de Primacía del Repositorio y Trazabilidad Obligatoria
 
-El repositorio constituye la única fuente oficial de la arquitectura vigente del Ecosistema H-OperIA.
+El repositorio constituye la única fuente oficial de la arquitectura vigente del Ecosistema H - OperIA.
 
 Ninguna conversación, nota temporal, instrucción verbal, sesión de inteligencia artificial o intercambio de mensajes sustituye un documento rector versionado dentro del repositorio.
 
@@ -96,13 +102,13 @@ El orden obligatorio de trabajo será:
 
 Toda desviación de este proceso constituye una desviación del Gobierno Arquitectónico y deberá corregirse antes de continuar con el desarrollo.
 
-Este principio tiene carácter permanente y será obligatorio para todos los futuros ADR, decisiones arquitectónicas, nuevos Centros Demo, el Motor Multi-Demo y cualquier aplicación perteneciente al ecosistema H-OperIA.
+Este principio tiene carácter permanente y será obligatorio para todos los futuros ADR, decisiones arquitectónicas, nuevos Centros Demo, el Motor Multi-Demo y cualquier aplicación perteneciente al ecosistema H - OperIA.
 
 ---
 
 ## Puerta de Validación Arquitectónica
 
-Antes de iniciar cualquier implementación que modifique la arquitectura, el modelo de dominio, los repositorios, la documentación rectora o cualquier componente estratégico del Ecosistema H-OperIA, deberá realizarse obligatoriamente una revisión previa de gobierno arquitectónico.
+Antes de iniciar cualquier implementación que modifique la arquitectura, el modelo de dominio, los repositorios, la documentación rectora o cualquier componente estratégico del Ecosistema H - OperIA, deberá realizarse obligatoriamente una revisión previa de gobierno arquitectónico.
 
 Esta revisión deberá responder, como mínimo, las siguientes preguntas:
 
@@ -114,15 +120,15 @@ Esta revisión deberá responder, como mínimo, las siguientes preguntas:
 
 Si cualquiera de las respuestas anteriores es negativa, la implementación deberá detenerse temporalmente hasta corregir la deficiencia documental o arquitectónica correspondiente.
 
-Esta puerta de validación tiene como propósito preservar la coherencia arquitectónica, evitar decisiones aisladas, impedir deuda documental, fortalecer la trazabilidad institucional y garantizar la evolución controlada del Ecosistema H-OperIA.
+Esta puerta de validación tiene como propósito preservar la coherencia arquitectónica, evitar decisiones aisladas, impedir deuda documental, fortalecer la trazabilidad institucional y garantizar la evolución controlada del Ecosistema H - OperIA.
 
 ---
 
 ## Ámbito de Aplicación Enterprise
 
-El presente ADR gobierna todo el Ecosistema H-OperIA y cualquier sistema futuro que adopte este marco arquitectónico, independientemente del dominio de negocio, industria, empresa, proyecto o caso de uso.
+El presente ADR gobierna todo el Ecosistema H - OperIA y cualquier sistema futuro que adopte este marco arquitectónico, independientemente del dominio de negocio, industria, empresa, proyecto o caso de uso.
 
-Su aplicabilidad no se limita al Centro Demo ni al Ecosistema de Demostración. Estos constituyen el primer ámbito formal de aplicación, pero los principios de gobierno arquitectónico, trazabilidad, documentación rectora, coherencia institucional y evolución controlada definidos en este documento podrán regir futuros sistemas construidos bajo la arquitectura H-OperIA.
+Su aplicabilidad no se limita al Centro Demo ni al Ecosistema de Demostración. Estos constituyen el primer ámbito formal de aplicación, pero los principios de gobierno arquitectónico, trazabilidad, documentación rectora, coherencia institucional y evolución controlada definidos en este documento podrán regir futuros sistemas construidos bajo la arquitectura H - OperIA.
 
 Toda iniciativa que adopte este marco deberá respetar la separación entre principios, políticas, estándares e implementaciones, así como la primacía del repositorio como fuente oficial de arquitectura vigente.
 
@@ -130,17 +136,17 @@ Toda iniciativa que adopte este marco deberá respetar la separación entre prin
 
 ## Modelo Replicable para Sistemas Futuros
 
-H-OperIA constituye el modelo de referencia para desarrollar nuevos sistemas reutilizando los principios arquitectónicos, el gobierno documental, la trazabilidad y las prácticas institucionales definidas por este ADR.
+H - OperIA constituye el modelo de referencia para desarrollar nuevos sistemas reutilizando los principios arquitectónicos, el gobierno documental, la trazabilidad y las prácticas institucionales definidas por este ADR.
 
 Cada nuevo sistema podrá adaptar su dominio funcional, sus aplicaciones operativas, sus flujos de presentación, sus modelos de datos y sus interfaces, pero deberá conservar la disciplina arquitectónica establecida por este marco: decisiones rectoras documentadas, trazabilidad explícita, validación previa, coherencia entre capas, separación de responsabilidades y evolución controlada.
 
-Este modelo replicable permite que H-OperIA crezca hacia nuevos contextos sin perder consistencia institucional ni depender de decisiones aisladas o no versionadas.
+Este modelo replicable permite que H - OperIA crezca hacia nuevos contextos sin perder consistencia institucional ni depender de decisiones aisladas o no versionadas.
 
 ---
 
 ## Jerarquía Normativa del Ecosistema
 
-El Ecosistema H-OperIA se regirá por una jerarquía normativa compuesta por principios arquitectónicos, políticas, estándares e implementaciones.
+El Ecosistema H - OperIA se regirá por una jerarquía normativa compuesta por principios arquitectónicos, políticas, estándares e implementaciones.
 
 Principios Arquitectónicos.  
 Son fundamentos permanentes del marco rector. Definen la dirección conceptual del ecosistema, la separación de responsabilidades, la primacía documental, la trazabilidad y la coherencia institucional. Cambian rara vez y solo mediante actualización formal del ADR correspondiente.
@@ -172,7 +178,7 @@ Ningún nivel inferior podrá contradecir o invalidar un nivel superior sin la c
 
 ## Jerarquía Documental del Ecosistema
 
-La documentación del Ecosistema H-OperIA mantiene una estructura jerárquica para garantizar coherencia, trazabilidad y evolución controlada.
+La documentación del Ecosistema H - OperIA mantiene una estructura jerárquica para garantizar coherencia, trazabilidad y evolución controlada.
 
 Jerarquía conceptual:
 
@@ -193,9 +199,9 @@ El código constituye la materialización de la arquitectura, pero nunca reempla
 
 ## 1. Propósito del Marco Rector
 
-El presente Marco Rector establece los principios, límites y criterios que gobiernan el Ecosistema H-OperIA, iniciando por el Ecosistema de Demostración.
+El presente Marco Rector establece los principios, límites y criterios que gobiernan el Ecosistema H - OperIA, iniciando por el Ecosistema de Demostración.
 
-Su propósito es asegurar que toda demostración ejecutiva de H-OperIA sea clara, coherente, regenerable, presentable y alineada con una visión institucional de largo plazo.
+Su propósito es asegurar que toda demostración ejecutiva de H - OperIA sea clara, coherente, regenerable, presentable y alineada con una visión institucional de largo plazo.
 
 Este documento evita que se confundan operación real, demostración, datos simulados, aplicaciones operativas, capacidades inteligentes, backend, Supabase y motor regenerativo.
 
@@ -232,7 +238,7 @@ Aplicaciones demostradas:
 - Registro de Seguimiento Comercial.
 - Mensajes entre el Equipo.
 - Centro de Mando y Evidencia de la Operación.
-- H-OperIA Intelligence.
+- H - OperIA Intelligence.
 
 ---
 
@@ -248,7 +254,7 @@ El Motor Multi-Demo no debe limitarse a generar datos. Debe generar contexto, na
 
 ## 5. Rol del Centro Demo Como Aplicación Independiente
 
-El Centro Demo debe permitir presentar H-OperIA ante diferentes empresas, proyectos e industrias mediante una experiencia ejecutiva clara, específica y regenerable.
+El Centro Demo debe permitir presentar H - OperIA ante diferentes empresas, proyectos e industrias mediante una experiencia ejecutiva clara, específica y regenerable.
 
 Debe contener:
 
@@ -304,7 +310,7 @@ Toda demostración debe poder adaptarse a:
 - indicadores relevantes;
 - preguntas ejecutivas esperadas.
 
-La regeneración debe conservar el estándar H-OperIA, adaptando la superficie narrativa al contexto del prospecto.
+La regeneración debe conservar el estándar H - OperIA, adaptando la superficie narrativa al contexto del prospecto.
 
 ---
 
@@ -314,7 +320,7 @@ Toda demo debe contar una historia, no mostrar pantallas sueltas.
 
 Secuencia rectora:
 
-Reserva → Marta → Registro de Seguimiento Comercial → Mensajes entre el Equipo → Centro de Mando y Evidencia de la Operación → H-OperIA Intelligence → Cierre ejecutivo.
+Reserva → Marta → Registro de Seguimiento Comercial → Mensajes entre el Equipo → Centro de Mando y Evidencia de la Operación → H - OperIA Intelligence → Cierre ejecutivo.
 
 Cada bloque debe responder:
 
@@ -349,15 +355,38 @@ Los controles técnicos de preparación pueden existir, pero no deben dominar la
 
 Nombres oficiales:
 
+- Suite H - OperIA.
+- H - OperIA Inmobiliaria.
+- H - OperIA Intelligence.
 - Centro Demo.
 - Marta.
 - Registro de Seguimiento Comercial.
 - Mensajes entre el Equipo.
 - Centro de Mando y Evidencia de la Operación.
-- H-OperIA Intelligence.
 - Reserva en vivo.
 - Validación operacional.
 - Cierre ejecutivo.
+
+Regla ortográfica obligatoria:
+
+- "H" en mayúscula.
+- Espacio, guion simple, espacio.
+- "OperIA" con "Oper" y "IA" en mayúsculas y minúsculas exactamente como se muestra.
+- No usar `H - OPERIA`.
+- No usar `H-OperIA` sin espacios.
+- No usar `H - Operia`.
+
+La nomenclatura sectorial seguirá el formato:
+
+```text
+H - OperIA [Especialidad]
+```
+
+No deben inventarse nombres sectoriales adicionales sin aprobación humana expresa.
+
+Definición fundacional:
+
+> La Suite H - OperIA es una plataforma compuesta por aplicaciones especializadas que comparten una misma arquitectura operacional, una base común de conocimiento y principios homogéneos para transformar la operación en conocimiento accionable.
 
 No deben modificarse nombres técnicos internos si forman parte de rutas, tipos, archivos, variables, tablas, servicios o arquitectura existente.
 
@@ -372,7 +401,7 @@ Marta acompaña.
 El equipo registra seguimiento.  
 El equipo conversa internamente.  
 El Centro de Mando consolida evidencia.  
-H-OperIA Intelligence interpreta.  
+H - OperIA Intelligence interpreta.
 La dirección decide.
 
 Ninguna app debe aparecer sin explicar qué dato, evidencia, señal o decisión viaja hacia ella.
@@ -393,9 +422,99 @@ La demostración debe sentirse ejecutiva, no administrativa.
 
 Todas las aplicaciones deben compartir una misma promesa institucional:
 
-H-OperIA convierte operación humana, evidencia y señales dispersas en decisiones ejecutivas claras.
+La Suite H - OperIA convierte operación humana, evidencia y señales dispersas en conocimiento accionable, decisiones verificables, acciones concretas y evidencias demostrables.
 
 Cada aplicación conserva su identidad, pero debe hablar el mismo lenguaje de evidencia, seguimiento, trazabilidad, criterio humano, inteligencia operacional y decisión ejecutiva.
+
+---
+
+## 13A. Principio Rector de Conocimiento Accionable
+
+El propósito del Centro Demo no es demostrar pantallas, sino demostrar cómo H - OperIA transforma la información operacional en conocimiento accionable, facilita la toma de decisiones verificables y permite ejecutar acciones concretas cuyas consecuencias pueden demostrarse.
+
+Secuencia conceptual obligatoria:
+
+```text
+Información operacional
+↓
+Conocimiento accionable
+↓
+Decisiones verificables
+↓
+Acciones concretas
+↓
+Evidencias demostrables
+```
+
+El orden no debe alterarse:
+
+- primero se obtiene conocimiento;
+- después se toman decisiones verificables;
+- esas decisiones conducen a acciones concretas;
+- las consecuencias de esas acciones deben poder demostrarse.
+
+---
+
+## 13B. Principio de Credibilidad Integral
+
+La credibilidad debe impregnar toda la experiencia de demostración y no limitarse a una lista cerrada.
+
+Cada dato, hallazgo, navegación, acción, decisión, evidencia y consecuencia debe sentirse específico, coherente, trazable, demostrable y comercialmente confiable, aunque utilice datos simulados.
+
+Ejemplos no exhaustivos:
+
+- personas concretas;
+- empresas concretas;
+- casos específicos;
+- Expedientes Vivos;
+- notas;
+- abonos ficticios;
+- seguimientos;
+- actividades;
+- navegación coherente;
+- consecuencias visibles;
+- fixtures suficientemente realistas;
+- evidencias creadas expresamente para demostrar el comportamiento futuro.
+
+Los datos simulados deben utilizarse de forma transparente dentro de la arquitectura interna, pero la experiencia visible debe sostener una operación convincente, trazable y verificable.
+
+---
+
+## 13C. Principio de Reutilización
+
+Toda mejora deberá evaluarse primero como capacidad reutilizable de la plataforma H - OperIA y solamente después como personalización para una aplicación específica.
+
+Este principio protege la evolución de la Suite H - OperIA, evita personalizaciones prematuras y permite que cada avance del Centro Demo pueda transformarse posteriormente en capacidad general de producto.
+
+---
+
+## 13D. Estrategia de Ejecución Controlada
+
+La evolución del Centro Demo y de las aplicaciones demostradas deberá respetar estas reglas:
+
+- no abrir múltiples frentes simultáneamente;
+- concluir primero el frente prioritario vigente;
+- registrar traslados futuros sin implementarlos todavía;
+- ejecutar cambios mediante microcirugías controladas;
+- cerrar primero Ruta 2 genérica/manual;
+- trasladar posteriormente las mejoras funcionales pertinentes a la App Pública específica de AMENA.
+
+---
+
+## 13E. Entorno Final de Demostración Comercial
+
+Para la demostración comercial, deberán desplegarse en el VPS de Hostinger:
+
+- Centro Demo;
+- App Pública de Reservas;
+- Registro de Seguimiento Comercial;
+- Mensajes entre el Equipo;
+- Backend Demo API;
+- las demás aplicaciones necesarias para sostener la experiencia.
+
+Las pruebas locales en PC o laptop son pruebas de desarrollo.
+
+La validación comercial final deberá realizarse en el ecosistema desplegado en el VPS de Hostinger.
 
 ---
 
@@ -403,7 +522,7 @@ Cada aplicación conserva su identidad, pero debe hablar el mismo lenguaje de ev
 
 Toda futura demo debe iniciar con una pregunta ejecutiva:
 
-¿Qué necesita entender, decidir o imaginar esta empresa al ver H-OperIA?
+¿Qué necesita entender, decidir o imaginar esta empresa al ver H - OperIA?
 
 Desde esa pregunta se define:
 
@@ -428,7 +547,7 @@ Toda nueva aplicación deberá declarar:
 - qué usuario la utiliza;
 - qué dato entrega al ecosistema;
 - cómo aparece dentro del Centro Demo;
-- qué puede leer H-OperIA Intelligence;
+- qué puede leer H - OperIA Intelligence;
 - qué decisión ejecutiva habilita.
 
 Ninguna nueva aplicación debe incorporarse al ecosistema de demostración sin una función narrativa clara.
@@ -442,7 +561,7 @@ No mezclar datos simulados con datos productivos.
 No mezclar Centro Demo con backend.  
 No mezclar Centro Demo con Supabase.  
 No mezclar Motor Multi-Demo con UI operativa.  
-No mezclar H-OperIA Intelligence con Marta.  
+No mezclar H - OperIA Intelligence con Marta.
 No mezclar presentación ejecutiva con administración interna.
 
 Cada capa debe conservar responsabilidad propia.
@@ -459,7 +578,7 @@ El incumplimiento de este marco puede provocar:
 - que las aplicaciones operativas pierdan identidad;
 - que datos simulados se confundan con operación real;
 - que el Motor Multi-Demo se reduzca a generador de registros;
-- que H-OperIA Intelligence se confunda con Marta;
+- que H - OperIA Intelligence se confunda con Marta;
 - que futuras demos crezcan sin estructura rectora.
 
 ---
@@ -511,17 +630,17 @@ Sin implementación inmediata, se recomiendan las siguientes microcirugías futu
 
 ## 21. Gobierno del Ecosistema
 
-El Marco Rector gobierna los principios, límites, lenguaje, responsabilidades y criterios de calidad del Ecosistema de Demostración de H-OperIA.
+El Marco Rector gobierna los principios, límites, lenguaje, responsabilidades y criterios de calidad del Ecosistema de Demostración de H - OperIA.
 
 El Motor Multi-Demo construye experiencias ejecutivas regenerables. Su responsabilidad es preparar contexto, escenario, narrativa, datos simulados, evidencias, mapa de impacto, preguntas, conclusiones y cierre.
 
 El Centro Demo ejecuta la presentación. Su responsabilidad es conducir la experiencia frente a una audiencia ejecutiva, mostrar las aplicaciones demostradas, ordenar la transición entre ellas y sostener la narrativa completa.
 
-Las aplicaciones operativas muestran capacidades funcionales específicas. Su responsabilidad es demostrar cómo H-OperIA opera en puntos concretos del ciclo: reserva, acompañamiento, seguimiento, coordinación, evidencia, inteligencia y decisión.
+Las aplicaciones operativas muestran capacidades funcionales específicas. Su responsabilidad es demostrar cómo H - OperIA opera en puntos concretos del ciclo: reserva, acompañamiento, seguimiento, coordinación, evidencia, inteligencia y decisión.
 
-Marta acompaña al cliente o usuario en interacciones conversacionales. Su responsabilidad es asistir, captar intención, facilitar seguimiento y generar señales útiles sin sustituir el criterio humano ni a H-OperIA Intelligence.
+Marta acompaña al cliente o usuario en interacciones conversacionales. Su responsabilidad es asistir, captar intención, facilitar seguimiento y generar señales útiles sin sustituir el criterio humano ni a H - OperIA Intelligence.
 
-H-OperIA Intelligence interpreta señales del ecosistema. Su responsabilidad es analizar, priorizar, recomendar y convertir evidencia operacional en lectura ejecutiva.
+H - OperIA Intelligence interpreta señales del ecosistema. Su responsabilidad es analizar, priorizar, recomendar y convertir evidencia operacional en lectura ejecutiva.
 
 Ningún elemento debe invadir la responsabilidad de otro.
 
@@ -538,8 +657,8 @@ Reglas permanentes:
 - Ningún cambio de nomenclatura podrá romper el lenguaje oficial.
 - El Centro Demo nunca deberá convertirse en una aplicación operativa.
 - El Motor Multi-Demo nunca deberá convertirse en una interfaz de administración.
-- Marta no deberá confundirse con H-OperIA Intelligence.
-- H-OperIA Intelligence no deberá presentarse como chatbot de atención al cliente.
+- Marta no deberá confundirse con H - OperIA Intelligence.
+- H - OperIA Intelligence no deberá presentarse como chatbot de atención al cliente.
 - Toda nueva demo deberá conservar separación entre operación real, demostración y simulación.
 - Toda evolución deberá aumentar claridad, no complejidad.
 - Toda decisión futura deberá poder explicarse desde este documento.
@@ -562,7 +681,7 @@ Credibilidad: los datos, escenarios y conclusiones son plausibles para la empres
 
 Comprensión inmediata: un Director General puede entender el valor sin explicación técnica excesiva.
 
-Regeneración: la demo puede adaptarse por empresa, proyecto, inventario, industria y escenario sin romper el estándar H-OperIA.
+Regeneración: la demo puede adaptarse por empresa, proyecto, inventario, industria y escenario sin romper el estándar H - OperIA.
 
 Coherencia del ecosistema: nomenclatura, promesa, tono, secuencia y capacidades se mantienen consistentes entre aplicaciones.
 
@@ -570,7 +689,7 @@ Carga cognitiva: cada sección responde una pregunta clara y no introduce más c
 
 Cierre ejecutivo: la demostración termina con conclusiones, decisiones posibles y valor estratégico explícito.
 
-Estos criterios constituyen la lista oficial de validación previa a cualquier demostración ejecutiva de H-OperIA.
+Estos criterios constituyen la lista oficial de validación previa a cualquier demostración ejecutiva de H - OperIA.
 
 ---
 
@@ -649,7 +768,7 @@ El Motor Multi-Demo debe preparar escenarios sin absorber responsabilidades de U
 
 Este principio será especialmente importante para la futura extracción del Centro Demo a un repositorio independiente.
 
-La independencia entre capas protege la evolución del ecosistema, reduce acoplamiento, facilita nuevas demos y permite que H-OperIA crezca por módulos sin perder coherencia institucional.
+La independencia entre capas protege la evolución del ecosistema, reduce acoplamiento, facilita nuevas demos y permite que H - OperIA crezca por módulos sin perder coherencia institucional.
 
 ---
 
@@ -657,7 +776,8 @@ La independencia entre capas protege la evolución del ecosistema, reduce acopla
 
 | Versión | Estado | Descripción |
 |---|---|---|
-| 1.0 | Aprobado | Primera aprobación del Marco Rector del Ecosistema de Demostración de H-OperIA como documento rector del repositorio de arquitectura. |
+| 1.0 | Aprobado | Primera aprobación del Marco Rector del Ecosistema de Demostración de H - OperIA como documento rector del repositorio de arquitectura. |
+| 1.1 | Aprobado documental | Incorpora nomenclatura oficial de la Suite H - OperIA, definición fundacional, eslogan, principio Información -> Conocimiento -> Decisiones -> Acciones -> Evidencias, credibilidad integral, reutilización, estrategia de ejecución controlada y VPS de Hostinger como entorno final de validación comercial. |
 | 1.x | Pendiente | Reservado para futuras revisiones menores de gobierno documental, claridad o consistencia editorial. |
 | 2.0 | Pendiente | Reservado para una futura revisión mayor, únicamente si la arquitectura conceptual del ecosistema requiere actualización formal. |
 
@@ -676,6 +796,24 @@ Esta regla aplica a decisiones relacionadas con Centro Demo, Motor Multi-Demo, n
 
 ---
 
+## Referencia Operativa Vigente
+
+El backlog operativo vigente del Centro Demo se conserva en:
+
+```text
+docs/knowledge-base/98_Work_In_Progress/DEMO-0001-estrategia-tres-rutas-centro-demo.md
+```
+
+Ese documento debe remitir a este ADR para principios permanentes y debe distinguir decisiones operativas vigentes, tareas futuras y elementos fuera de alcance inmediato.
+
+Fuente documental de la actualización operativa:
+
+```text
+Observaciones al centro demo 260714.docx
+```
+
+---
+
 ## Cierre Institucional
 
-El presente ADR-001 constituye el primer documento rector del repositorio de arquitectura de H-OperIA. Su propósito es preservar la coherencia conceptual del Ecosistema de Demostración y servir como referencia obligatoria para la evolución del Centro Demo, del Motor Multi-Demo y de toda futura demostración ejecutiva desarrollada sobre H-OperIA.
+El presente ADR-001 constituye el primer documento rector del repositorio de arquitectura de H - OperIA. Su propósito es preservar la coherencia conceptual del Ecosistema de Demostración y servir como referencia obligatoria para la evolución del Centro Demo, del Motor Multi-Demo y de toda futura demostración ejecutiva desarrollada sobre H - OperIA.

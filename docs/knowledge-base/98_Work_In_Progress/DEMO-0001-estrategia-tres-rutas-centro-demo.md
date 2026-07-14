@@ -7,7 +7,7 @@ Durante AMENA 73 se consolidaron avances estructurales del Catálogo Comercial P
 - `public.project_catalog`
 - `public.project_commercial_types`
 
-También se decidió que la Fase 6 directiva / H-OperIA Intelligence causal no debe formar parte del Centro Demo inicial como capacidad interactiva completa, porque requiere evidencia operacional suficiente, SQL/analítica estructurada y RAG.
+También se decidió que la Fase 6 directiva / H - OperIA Intelligence causal no debe formar parte del Centro Demo inicial como capacidad interactiva completa, porque requiere evidencia operacional suficiente, SQL/analítica estructurada y RAG.
 
 ## 2. Decisión estratégica
 
@@ -33,7 +33,7 @@ Tener una versión funcional inmediata para cualquier eventualidad comercial.
 - Conservar imágenes y textos actuales mientras no se cree la versión genérica.
 - Terminar pendientes conocidos.
 - No prometer parametrización completa.
-- No prometer H-OperIA Intelligence causal.
+- No prometer H - OperIA Intelligence causal.
 
 ### Uso recomendado
 
@@ -203,3 +203,144 @@ La estrategia de tres rutas queda adoptada como marco rector del Centro Demo:
 - Ruta 1: respaldo inmediato.
 - Ruta 2: demo comercial principal de corto plazo.
 - Ruta 3: demo productivo/parametrizable real.
+
+## 14. Actualización AMENA 79 — Backlog corregido del Centro Demo
+
+Fecha de consolidación documental: 2026-07-14.
+
+Fuente:
+
+```text
+Observaciones al centro demo 260714.docx
+```
+
+Documento fundacional de referencia:
+
+```text
+docs/ADR-001-marco-rector-ecosistema-demostracion.md
+```
+
+Este backlog aplica los principios permanentes registrados en `ADR-001`, especialmente:
+
+- nomenclatura oficial de la Suite H - OperIA;
+- formato sectorial H - OperIA Inmobiliaria;
+- H - OperIA Intelligence como componente nombrado;
+- eslogan vigente: Humanización de las operaciones con inteligencia artificial;
+- credibilidad integral del demo;
+- secuencia Información operacional -> Conocimiento accionable -> Decisiones verificables -> Acciones concretas -> Evidencias demostrables;
+- reutilización de mejoras primero como capacidades de plataforma;
+- no abrir múltiples frentes simultáneamente;
+- VPS de Hostinger como entorno final de validación comercial.
+
+Este documento conserva decisiones operativas vigentes, tareas futuras y elementos fuera de alcance inmediato. Los principios permanentes no se duplican íntegramente aquí; deben consultarse en `ADR-001`.
+
+## 15. Criterios rectores operativos
+
+- Cerrar primero la Ruta 2 genérica/manual como frente prioritario vigente.
+- No iniciar todavía el traslado funcional a la App Pública específica de AMENA.
+- Registrar mejoras funcionales que después deban trasladarse a AMENA específica, sin implementarlas ahora.
+- Usar provisionalmente `Empresa Demo` como empresa activa y `Proyecto de Empresa Demo` como proyecto activo mientras no exista parametrización multiempresa.
+- Usar `AMENA` o `AMENA Comalapa` solo cuando represente el proyecto inmobiliario específico.
+- Usar lenguaje de datos simulados local: configurar, auditar, regenerar, cargar datos simulados, carga demo local y carga no persistida.
+- No usar "inyectar" cuando se trate solo de estado local o simulación; reservarlo para una operación técnica real verificada.
+- Distinguir explícitamente funcionalidades operativas actuales, simulaciones controladas y capacidades futuras.
+- Validar en desarrollo local solo como prueba de desarrollo; la validación comercial final corresponde al ecosistema desplegado en VPS de Hostinger.
+
+## 16. Backlog priorizado
+
+### 16.1 Microajustes inmediatos del Centro Demo
+
+| ID | Observación | Objetivo comercial | Repositorio probable | Aplicación | Tipo de cambio | Prioridad | Complejidad | Dependencias | Riesgo | Orden recomendado | Estado propuesto |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| CD-01 | Sustituir empresa/proyecto activos por `Empresa Demo` y `Proyecto de Empresa Demo`. | Evitar que el demo parezca atado a AMENA mientras no hay multiempresa. | `AMENA_Comalapa` | Centro Demo | Copy/configuración visible | P0 | Baja | Ninguna técnica | Bajo | 1 | Listo para implementar después |
+| CD-02 | Corregir menciones residuales de AMENA en zonas genéricas, especialmente Fase 04. | Mantener neutralidad comercial sin borrar AMENA cuando represente el proyecto inmobiliario específico. | `AMENA_Comalapa` | Centro Demo | Copy/nomenclatura | P0 | Baja | Revisión visual | Medio | 2 | Listo para revisión |
+| CD-03 | Preparar nomenclatura oficial: `Suite H - OperIA` y `H - OperIA Inmobiliaria`. | Posicionar la plataforma como suite y el demo inmobiliario como primer componente sectorial. | `AMENA_Comalapa` | Centro Demo / narrativa transversal | Naming/productización | P1 | Media | Confirmar dónde debe aparecer primero | Medio | 3 | Requiere alcance humano |
+| CD-04 | Ajustar Fase 04 para describir configurar, auditar, regenerar y cargar datos simulados. | Explicar el valor del Centro Demo como estación de preparación, control y evidencia. | `AMENA_Comalapa` | Centro Demo | Copy funcional | P0 | Baja | Texto rector definido | Bajo | 4 | Listo para implementar después |
+| CD-05 | Revisar Fase 05 por posible incoherencia narrativa similar. | Evitar saltos durante la presentación ejecutiva. | `AMENA_Comalapa` | Centro Demo | Copy/narrativa | P1 | Baja | Revisión visual posterior | Bajo | 5 | Listo para análisis puntual |
+| CD-06 | Marcar Fase 06 como futura/no operativa. | Evitar prometer funcionalidad que todavía no existe. | `AMENA_Comalapa` | Centro Demo | Estado/copy visual | P0 | Baja | Ninguna | Bajo | 6 | Listo para implementar después |
+| CD-07 | Aplicar credibilidad integral a hallazgos: reemplazar expresiones genéricas por casos específicos, trazables y demostrables. | Que el demo se perciba confiable, concreto y accionable. | `AMENA_Comalapa` | Centro Demo / Expediente Vivo | Datos demo + navegación | P0 | Media | Definir casos y expedientes disponibles o ficticios | Medio | 7 | Requiere mapeo de casos |
+| CD-08 | Crear evidencias simuladas convincentes cuando haga falta: expedientes, notas, abonos, actividades, seguimientos u otras consecuencias visibles. | Mostrar que la información conduce a acciones verificables dentro del demo. | `AMENA_Comalapa` | Centro Demo / Evidencia Viva | Fixtures/carga demo local no persistida | P1 | Media | Definir escenarios demostrables | Medio | 8 | Requiere confirmación de casos |
+
+### 16.2 Pruebas funcionales entre aplicaciones
+
+| ID | Observación | Objetivo comercial | Repositorio probable | Aplicación | Tipo de cambio | Prioridad | Complejidad | Dependencias | Riesgo | Orden recomendado | Estado propuesto |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| QA-01 | Probar acceso a Registro de Seguimiento Comercial en desarrollo local y luego en VPS. | Permitir demostración de operación comercial posterior a reserva. | `AMENA_Comalapa` / entorno desplegado | Registro de Seguimiento Comercial | Prueba funcional local + VPS | P0 | Media | Rutas/URLs y despliegue disponibles | Medio | 9 | Pendiente |
+| QA-02 | Probar acceso a Mensajes entre el Equipo en desarrollo local y luego en VPS. | Mostrar coordinación interna como parte de la operación. | `AMENA_Comalapa` / entorno desplegado | Mensajes entre el Equipo | Prueba funcional local + VPS | P0 | Media | Rutas/URLs y despliegue disponibles | Medio | 10 | Pendiente |
+| QA-03 | Verificar que datos ingresados en Registro y Mensajes aparezcan reflejados en Fase 03, primero local y luego integrado en VPS. | Comprobar trazabilidad entre aplicaciones y Centro Demo. | `AMENA_Comalapa` / VPS Hostinger | Centro Demo Fase 03 | Prueba integrada | P0 | Alta | QA-01, QA-02, comunicación entre apps, Backend Demo API si aplica | Alto | 11 | Pendiente, no asumir integración |
+| QA-04 | Probar los cuatro botones de Voluntarios en desarrollo y después en VPS de Hostinger. | Garantizar que la sesión demo pueda activar accesos y comunicaciones reales. | `AMENA_Comalapa` / VPS Hostinger | Centro Demo / Voluntarios | Prueba funcional + prueba desplegada | P1 | Media | WhatsApp y correo activos, configurados y accesibles desde VPS | Alto | 12 | Pendiente |
+
+### 16.3 Mejoras de Ruta 2 que después deben trasladarse a AMENA específica
+
+| ID | Observación | Objetivo comercial | Repositorio probable | Aplicación | Tipo de cambio | Prioridad | Complejidad | Dependencias | Riesgo | Orden recomendado | Estado propuesto |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| R2-01 | Concluir primero verificación visual de Ruta 2 genérica/manual. | Cerrar el demo vendible inmediato sin dispersión. | Repositorio Ruta 2 / ubicación real | App Pública Reservas Ruta 2 | QA visual / estabilización | P0 | Media | No abrir AMENA específica todavía | Alto si se abren dos frentes | 13 | Prioridad funcional vigente |
+| R2-02 | Registrar mejoras funcionales recientes de Ruta 2 para traslado posterior a AMENA específica. | No perder avances si se reactiva interés de AMENA. | Ruta 2 + AMENA específica futura | App Pública AMENA específica | Backlog de paridad funcional | P1 | Media | Cerrar Ruta 2 primero | Medio | 14 | Corto plazo, no implementar ahora |
+| R2-03 | Separar mejoras funcionales de cambios cosméticos como imágenes/nombres. | Trasladar valor funcional, no personalizaciones accidentales. | Ruta 2 / AMENA específica | Reservas | Clasificación funcional | P1 | Baja | Inventario de cambios recientes | Bajo | 15 | Pendiente de inventario |
+
+### 16.4 Evolución arquitectónica futura
+
+| ID | Observación | Objetivo comercial | Repositorio probable | Aplicación | Tipo de cambio | Prioridad | Complejidad | Dependencias | Riesgo | Orden recomendado | Estado propuesto |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| ARQ-01 | Crear mecanismo para parametrizar nuevas empresas/proyectos. | Escalar Centro Demo sin editar código por cliente. | Futuro Motor Multi-Demo / Centro Demo | Centro Demo / Motor Demo | Arquitectura | P2 | Alta | Cerrar demo actual; definir modelo de datos | Alto | 16 | Futuro |
+| ARQ-02 | Formalizar la nomenclatura `Suite H - OperIA`. | Construir una arquitectura de producto modular y coherente. | Documentación rectora / arquitectura | Ecosistema H - OperIA | Naming/arquitectura | P2 | Media | Confirmación de alcance documental y visual | Medio | 17 | Futuro |
+| ARQ-03 | Definir `H - OperIA Inmobiliaria` como primer componente sectorial. | Convertir el demo inmobiliario en línea de producto dentro de la suite. | Documentación + apps visibles | Centro Demo / apps inmobiliarias | Naming/productización | P2 | Media | ARQ-02 | Medio | 18 | Futuro preparado |
+| ARQ-04 | Mantener Fase 06 como futura/no operativa. | Preservar confianza y evitar sobrepromesa. | `AMENA_Comalapa` ahora; arquitectura futura después | Centro Demo | Roadmap/narrativa | P1 | Baja | Ninguna | Bajo | 19 | Señalizar ahora, desarrollar después |
+| ARQ-05 | Planificar despliegue final en VPS de Hostinger para todas las apps necesarias de la demo. | Validar la demostración en el entorno comercial real. | Repositorios de apps + VPS | Centro Demo, Reservas, Registro, Mensajes, Backend Demo API | DevOps/despliegue | P1 | Alta | URLs/subdominios, variables, backend, WhatsApp, correo | Alto | 20 | Futuro, no implementar ahora |
+
+## 17. Primer paquete de trabajo cerrado
+
+Primer paquete autorizado para ejecución futura, sin abrir Ruta 2 ni AMENA específica:
+
+- Empresa activa: `Empresa Demo`.
+- Proyecto activo: `Proyecto de Empresa Demo`.
+- Revisión contextual de menciones genéricas de AMENA.
+- Coherencia narrativa de Fase 04.
+- Fase 06 claramente futura/no operativa.
+- Introducción mínima y contextual de `Suite H - OperIA` y `H - OperIA Inmobiliaria`.
+
+Criterio de cierre del paquete:
+
+> El Centro Demo queda preparado para una demostración comercial consistente, manteniendo explícitamente la separación entre funcionalidades operativas actuales, simulaciones controladas y capacidades futuras.
+
+Fuera de alcance inmediato:
+
+- implementar código;
+- conectar Ruta 2;
+- modificar AMENA específica;
+- ejecutar SQL;
+- abrir Supabase;
+- iniciar Bloque 6;
+- preparar persistencia;
+- iniciar despliegue en VPS;
+- activar WhatsApp o correo.
+
+## 18. Decisiones humanas pendientes
+
+- Confirmar en qué pantallas debe aparecer `Suite H - OperIA`.
+- Confirmar en qué pantallas debe aparecer `H - OperIA Inmobiliaria`.
+- Confirmar si AMENA debe conservarse únicamente como proyecto específico o también en algún rótulo histórico.
+- Definir personas, empresas, casos, expedientes y evidencias ficticias para credibilidad integral.
+- Confirmar qué Expedientes Vivos existen y cuáles deben simularse.
+- Confirmar URLs/subdominios esperados en VPS de Hostinger.
+- Confirmar variables de entorno necesarias para cada app desplegada.
+- Confirmar disponibilidad y rol del Backend Demo API.
+- Confirmar motores/servicios de WhatsApp y correo para el entorno desplegado.
+- Confirmar cuándo se hará ensayo integral en VPS.
+- Confirmar repositorio/ruta de la App Pública específica de AMENA antes de planificar traslado funcional.
+
+## 19. Referencias cruzadas
+
+Principios permanentes:
+
+```text
+docs/ADR-001-marco-rector-ecosistema-demostracion.md
+```
+
+El presente documento aplica esos principios como backlog operativo vigente del Centro Demo.
+
+La actualización queda vinculada al documento fuente:
+
+```text
+Observaciones al centro demo 260714.docx
+```
