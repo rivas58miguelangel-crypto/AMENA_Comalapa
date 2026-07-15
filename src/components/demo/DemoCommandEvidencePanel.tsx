@@ -112,10 +112,10 @@ export default function DemoCommandEvidencePanel({
     messages: 20,
   });
   const [prospectCompanyName, setProspectCompanyName] = useState(
-    demoContext?.prospectCompanyName || "Empresa demo local",
+    demoContext?.prospectCompanyName || "Empresa Demo",
   );
   const [projectName, setProjectName] = useState(
-    demoContext?.projectName || "AMENA Comalapa",
+    demoContext?.projectName || "Proyecto de Empresa Demo",
   );
   const [scenarioName, setScenarioName] = useState(
     demoContext?.scenarioName || "Lanzamiento comercial de proyecto habitacional",
@@ -270,12 +270,12 @@ export default function DemoCommandEvidencePanel({
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-100 bg-white p-4">
             <label className="text-xs font-black uppercase tracking-[0.16em] text-slate-600">
-              Empresa constructora (Empresa demo)
+              Empresa activa
             </label>
             <input
               value={prospectCompanyName}
               onChange={(event) => setProspectCompanyName(event.target.value)}
-              placeholder="Empresa demo local"
+              placeholder="Empresa Demo"
               className="mt-2 w-full rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base font-black text-slate-950 outline-none"
             />
           </div>
@@ -286,7 +286,7 @@ export default function DemoCommandEvidencePanel({
             <input
               value={projectName}
               onChange={(event) => setProjectName(event.target.value)}
-              placeholder="AMENA Comalapa"
+              placeholder="Proyecto de Empresa Demo"
               className="mt-2 w-full rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base font-black text-slate-950 outline-none"
             />
           </div>
@@ -464,7 +464,7 @@ export default function DemoCommandEvidencePanel({
         </p>
         <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-amber-100 bg-white p-5 xl:flex-row xl:items-center xl:justify-between">
           <p className="text-sm font-semibold leading-6 text-slate-700">
-            H-OperIA Intelligence no genera datos simulados en esta fase; su
+            H - OperIA Intelligence no genera datos simulados en esta fase; su
             interpretación comienza en la FASE 05. La carga queda en memoria local de la demo.
           </p>
           <button
@@ -472,8 +472,8 @@ export default function DemoCommandEvidencePanel({
             onClick={() => {
               onInjectSimulatedData({
                 ...quantities,
-                prospectCompanyName: prospectCompanyName.trim() || "Empresa demo local",
-                projectName: projectName.trim() || "AMENA Comalapa",
+                prospectCompanyName: prospectCompanyName.trim() || "Empresa Demo",
+                projectName: projectName.trim() || "Proyecto de Empresa Demo",
                 scenarioName: scenarioName.trim() || "Lanzamiento comercial de proyecto habitacional",
               });
               setFlowStatus("injected");
@@ -499,7 +499,7 @@ export default function DemoCommandEvidencePanel({
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <SummaryItem label="Empresa demo" value={demoContext?.prospectCompanyName || "Pendiente"} />
-          <SummaryItem label="Proyecto" value={demoContext?.projectName || "Proyecto Comalapa"} />
+          <SummaryItem label="Proyecto" value={demoContext?.projectName || "Proyecto de Empresa Demo"} />
           <SummaryItem label="Fecha / última actualización" value={demoContext?.injectedAt || "Pendiente"} />
           <SummaryItem label="Estado demo" value={simulatedDataInjected ? "Cargado localmente" : "Pendiente"} />
           <SummaryItem label="Persistencia" value="No persistido" />
