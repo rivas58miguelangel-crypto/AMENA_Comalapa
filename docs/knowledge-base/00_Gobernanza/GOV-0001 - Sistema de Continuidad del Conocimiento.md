@@ -14,15 +14,23 @@ Este documento define reglas generales del sistema de continuidad del conocimien
 
 ---
 
-# Regla fuente
+# Regla del medio oficial versionado
 
-Git y GitHub son la fuente oficial versionada del conocimiento del proyecto.
+Git y GitHub son el medio oficial versionado y trazable del conocimiento del proyecto.
 
 Todo documento rector, especificacion, indice, plan vivo o registro de continuidad debe estar versionado en el repositorio.
 
-Google Drive puede existir como respaldo, espejo o copia consultable, pero no es fuente rectora.
+Google Drive puede existir como respaldo, espejo o copia consultable, pero no es medio oficial versionado y trazable.
 
 En caso de diferencia entre Git/GitHub y una copia externa, prevalece Git/GitHub.
+
+## Autoridades Rectoras por dominio
+
+Git/GitHub conserva la verdad oficial versionada y trazable del conocimiento, las decisiones y los registros. No debe confundirse con una Autoridad Rectora.
+
+Una Autoridad Rectora es la entidad aprobada que posee autoridad arquitectonica para dirigir decisiones dentro de un dominio determinado. Las Autoridades Rectoras se establecen mediante decisiones arquitectonicas aprobadas y sus designaciones vigentes se consultan en `REG-0001 - Registro de Autoridades Rectoras de la Suite H - OperIA.md`.
+
+Toda intervencion en un dominio gobernado debe reconstruir y certificar la entrada aplicable del Registro antes de auditar, proponer o modificar.
 
 ---
 
@@ -70,6 +78,7 @@ Al abrir un nuevo chat, el asistente debe:
 * consultar el IME;
 * leer los documentos indicados por el IME que apliquen al trabajo solicitado;
 * leer el documento de transicion recien generado en `98_Work_In_Progress`;
+* consultar y certificar la entrada aplicable de REG-0001 cuando el trabajo pertenezca a un dominio gobernado;
 * confirmar explicitamente que documentos fueron leidos antes de diagnosticar, proponer o modificar.
 
 ---
@@ -185,6 +194,8 @@ El sistema separa responsabilidades documentales:
 * IME registra ejecucion viva;
 * ADR registra decisiones arquitectonicas.
 
+ADR-002 establece el mecanismo de Autoridades Rectoras por dominio y REG-0001 conserva sus designaciones vigentes.
+
 El IME no reemplaza los documentos fuente; los organiza y los referencia.
 
 ---
@@ -196,7 +207,8 @@ El asistente debe:
 * revisar el IME al iniciar trabajo nuevo;
 * leer los documentos asociados aplicables antes de ejecutar trabajo relacionado;
 * confirmar explicitamente los documentos leidos al abrir un nuevo chat;
-* respetar Git/GitHub como fuente rectora;
+* respetar Git/GitHub como medio oficial versionado y trazable;
+* reconstruir y certificar la Autoridad Rectora aplicable antes de intervenir un dominio gobernado;
 * no convertir dudas en hechos;
 * no eliminar compromisos ambiguos;
 * realizar la transicion de conocimiento al abrir un nuevo chat del mismo proyecto;

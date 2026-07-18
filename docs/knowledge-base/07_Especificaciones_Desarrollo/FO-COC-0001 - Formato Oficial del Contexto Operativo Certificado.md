@@ -46,7 +46,7 @@ La reconstruccion puede estar correctamente ejecutada, pero si el artefacto fina
 
 La salida del procedimiento no debe limitarse a un resumen narrativo. Debe funcionar como una interfaz operativa certificada entre la Base de Conocimiento y la siguiente intervencion tecnica, documental o funcional.
 
-La Base de Conocimiento y Git son las fuentes rectoras de la reconstruccion certificada. El Documento de Transicion es una fuente auxiliar de continuidad entre sesiones: complementa el contexto operativo, pero no sustituye la Base de Conocimiento, los documentos rectores, el IME ni el estado Git certificado.
+La Base de Conocimiento y Git son las fuentes oficiales de la reconstruccion certificada. El Documento de Transicion es una fuente auxiliar de continuidad entre sesiones: complementa el contexto operativo, pero no sustituye la Base de Conocimiento, los documentos rectores, el IME ni el estado Git certificado.
 
 ---
 
@@ -163,6 +163,29 @@ Antes de proponer nuevo desarrollo debe validarse coherencia con:
 * serie SUPABASE;
 * decisiones arquitectonicas certificadas.
 
+### Paso 3A - Certificacion de Autoridades Rectoras Aplicables
+
+Este paso es obligatorio antes de iniciar cualquier auditoria, propuesta o modificacion dentro de un dominio gobernado por una Autoridad Rectora.
+
+Debe consultarse `ADR-002-gobernanza-de-autoridades-rectoras-suite-h-operia.md` y `REG-0001 - Registro de Autoridades Rectoras de la Suite H - OperIA.md`.
+
+La certificacion debe declarar explicitamente:
+
+* dominio intervenido;
+* identificador de entrada vigente del Registro;
+* Autoridad Rectora;
+* evidencia concreta inspeccionada;
+* implementaciones hermanas;
+* aplicacion objetivo;
+* excepciones autorizadas;
+* declaracion expresa de que las decisiones derivaran de la Autoridad Rectora aplicable.
+
+La ausencia, ambiguedad, contradiccion o falta de certificacion de una Autoridad Rectora aplicable bloquea toda auditoria, propuesta o modificacion dentro del dominio afectado.
+
+La Auditoria de Reconstruccion debe indicar las Autoridades Rectoras aplicables y las entradas del Registro consultadas. El Semaforo de Continuidad debe declarar su estado de certificacion y tratar una deficiencia como bloqueo del dominio afectado. El Contexto Operativo Certificado debe incluir la certificacion, las excepciones, las restricciones y la referencia al identificador de entrada en Decisiones Cerradas y Punto de Reanudacion cuando aplique.
+
+FO-COC-0001 certifica y aplica Autoridades Rectoras ya aprobadas. No las inventa, no las crea ni las redefine. Para evitar duplicidad, debe referenciar el identificador y la evidencia de la entrada vigente del Registro, sin replicar su contenido normativo completo.
+
 ### Paso 4 - Reconstruccion del Estado Intelectual del Proyecto
 
 Reconstruir explicitamente:
@@ -201,6 +224,7 @@ La Auditoria de Reconstruccion debe indicar:
 * repositorios verificados;
 * documento de transicion revisado;
 * series arquitectonicas revisadas;
+* Autoridades Rectoras aplicables y entradas del Registro consultadas, cuando corresponda;
 * contradicciones detectadas;
 * omisiones o limitaciones;
 * discrepancias entre documentacion y conversacion saliente, si aplica.
@@ -221,6 +245,7 @@ El Semaforo de Continuidad debe declarar:
 * repositorios operativos verificados, cuando aplique;
 * documentos revisados;
 * validaciones ejecutadas;
+* estado de certificacion de Autoridades Rectoras aplicables, cuando corresponda;
 * bloqueadores;
 * resultado general: verde, amarillo o rojo.
 
@@ -228,9 +253,9 @@ Resultado:
 
 * Verde: reconstruccion completa, repositorios alineados, sin bloqueadores y condiciones suficientes para planificar o modificar.
 * Amarillo: reconstruccion suficiente, pero existen cambios locales, validaciones pendientes, advertencias o decisiones que requieren confirmacion antes de modificar.
-* Rojo: no se pudo reconstruir contexto, existe divergencia no resuelta, conflicto Git, contradiccion critica o riesgo de perdida de trabajo.
+* Rojo: no se pudo reconstruir contexto, existe divergencia no resuelta, conflicto Git, contradiccion critica, riesgo de perdida de trabajo o falta de certificacion de una Autoridad Rectora aplicable para el dominio intervenido.
 
-La ausencia, desfase nominal o desactualizacion del Documento de Transicion no degrada por si sola el resultado del Semaforo cuando las fuentes rectoras fueron reconstruidas, Git esta certificado y no existen decisiones posteriores dependientes exclusivamente de ese documento. En ese caso debe declararse como observacion documental o pendiente de regularizacion.
+La ausencia, desfase nominal o desactualizacion del Documento de Transicion no degrada por si sola el resultado del Semaforo cuando las fuentes oficiales fueron reconstruidas, Git esta certificado y no existen decisiones posteriores dependientes exclusivamente de ese documento. En ese caso debe declararse como observacion documental o pendiente de regularizacion.
 
 ---
 
@@ -276,23 +301,32 @@ Debe incluir como minimo:
    * limitaciones.
 5. Documentos revisados.
 6. Fuentes oficiales utilizadas.
-7. Objetivo estrategico vigente.
-8. Intervencion activa.
-9. Ultimo punto validado.
-10. Trabajo ya en curso.
-11. Proxima microcirugia recomendada.
-12. Decisiones cerradas que no deben reabrirse salvo evidencia nueva.
-13. Elementos no aprobados o pendientes de validacion.
-14. Restricciones operativas.
-15. Riesgos.
-16. Pendientes activos.
-17. Pendientes en espera.
-18. Pendientes en revision.
-19. Archivos probablemente involucrados.
-20. Estado exacto de cambios locales.
-21. Punto exacto de reanudacion.
-22. Decision inmediata requerida del usuario.
-23. Entrega Consolidada de Instrucciones para Codex, cuando la siguiente accion natural sea una intervencion ejecutable en Codex.
+7. Autoridades Rectoras Aplicables, cuando corresponda:
+   * dominio;
+   * identificador de entrada;
+   * Autoridad Rectora;
+   * evidencia inspeccionada;
+   * implementaciones hermanas;
+   * aplicacion objetivo;
+   * excepciones autorizadas;
+   * estado de certificacion y declaracion de derivacion.
+8. Objetivo estrategico vigente.
+9. Intervencion activa.
+10. Ultimo punto validado.
+11. Trabajo ya en curso.
+12. Proxima microcirugia recomendada.
+13. Decisiones cerradas que no deben reabrirse salvo evidencia nueva.
+14. Elementos no aprobados o pendientes de validacion.
+15. Restricciones operativas.
+16. Riesgos.
+17. Pendientes activos.
+18. Pendientes en espera.
+19. Pendientes en revision.
+20. Archivos probablemente involucrados.
+21. Estado exacto de cambios locales.
+22. Punto exacto de reanudacion.
+23. Decision inmediata requerida del usuario.
+24. Entrega Consolidada de Instrucciones para Codex, cuando la siguiente accion natural sea una intervencion ejecutable en Codex.
 
 ---
 
@@ -337,6 +371,7 @@ Debe declarar explicitamente:
 * estado actual;
 * siguiente accion;
 * elementos que no deben reabrirse.
+* Autoridad Rectora aplicable y estado de certificacion, cuando corresponda.
 
 El punto exacto de reanudacion debe redactarse de manera accionable. Debe permitir iniciar la siguiente intervencion sin repetir reconstrucciones parciales, sin reabrir decisiones ya cerradas y sin perder trabajo en curso.
 
