@@ -186,6 +186,47 @@ La Auditoria de Reconstruccion debe indicar las Autoridades Rectoras aplicables 
 
 FO-COC-0001 certifica y aplica Autoridades Rectoras ya aprobadas. No las inventa, no las crea ni las redefine. Para evitar duplicidad, debe referenciar el identificador y la evidencia de la entrada vigente del Registro, sin replicar su contenido normativo completo.
 
+### Regla de Validez del Entregable para Dominios Gobernados
+
+Todo entregable que pertenezca a un dominio gobernado por una Autoridad Rectora debe iniciar con un bloque visible denominado `CERTIFICACION DE AUTORIDAD RECTORA`.
+
+Esta regla verifica que el entregable aplico la entrada vigente de REG-0001 antes de auditar, diagnosticar, proponer, planificar, validar, cerrar, transicionar o modificar el dominio gobernado.
+
+Si el bloque falta, el entregable es NO VALIDO conforme a FO-COC-0001.
+
+Si el bloque esta incompleto, es ambiguo o contradice REG-0001, el entregable es NO VALIDO conforme a FO-COC-0001.
+
+Un entregable NO VALIDO no puede autorizar auditoria, autorizar propuesta, autorizar modificacion, justificar commit, justificar push ni servir como base de continuidad.
+
+Un entregable NO VALIDO no podra utilizarse como fundamento para instrucciones operativas, decisiones tecnicas, documentacion de continuidad, aprobaciones humanas ni ejecucion de cambios posteriores hasta recuperar su validez conforme a FO-COC-0001.
+
+La validez no puede presumirse por contexto conversacional, memoria del asistente, conocimiento previo ni proximidad documental. La certificacion debe aparecer de forma visible al inicio del entregable.
+
+Esta regla es obligatoria para auditorias, diagnosticos, propuestas, planes, microcirugias, validaciones, cierres y transiciones cuando involucren un dominio gobernado.
+
+FO-COC-0001 verifica y aplica Autoridades Rectoras existentes. No crea, redefine ni sustituye autoridades. La autoridad vigente se consulta en REG-0001 y debe mantener trazabilidad hacia la decision arquitectonica aprobada correspondiente.
+
+#### Plantilla obligatoria
+
+```text
+## CERTIFICACION DE AUTORIDAD RECTORA
+
+* **Dominio:** [dominio gobernado]
+* **Entrada vigente de REG-0001:** [identificador]
+* **Autoridad Rectora:** [entidad aprobada]
+* **Tipo de autoridad:** [tipo declarado en REG-0001]
+* **Repositorio, documento o artefacto inspeccionado:** [ruta/evidencia]
+* **Rama, commit o version certificada:** [rama + commit/version, cuando corresponda]
+* **Implementaciones hermanas o derivadas:** [lista o "No aplica"]
+* **Aplicacion o artefacto objetivo:** [objetivo del entregable]
+* **Excepciones autorizadas:** [excepciones vigentes o "Ninguna"]
+* **Declaracion expresa de derivacion:** Este entregable deriva sus criterios del registro vigente indicado y no redefine la Autoridad Rectora.
+* **Resultado de la regla de bloqueo:** [VALIDO / NO VALIDO]
+* **Nombre y fecha del entregable:** [nombre] - [AAAA-MM-DD]
+```
+
+La plantilla no debe replicar el contenido normativo completo de REG-0001. Debe citar el identificador vigente, la evidencia inspeccionada y la declaracion de derivacion suficiente para hacer verificable el entregable.
+
 ### Paso 4 - Reconstruccion del Estado Intelectual del Proyecto
 
 Reconstruir explicitamente:
