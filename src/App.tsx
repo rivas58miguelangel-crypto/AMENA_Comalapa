@@ -42,7 +42,26 @@ import {
 } from "lucide-react";
 
 const REPORT_DATE = "Corte: 15 mayo 2026";
-const PUBLIC_RESERVATION_APP_URL = "http://localhost:3001/";
+const LOCAL_PUBLIC_RESERVATION_APP_URL = "http://localhost:3001/";
+const LOCAL_DEMO_BACKEND_URL = "http://localhost:4000";
+const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env || {};
+const PUBLIC_RESERVATION_APP_URL =
+  viteEnv.VITE_PUBLIC_RESERVATION_APP_URL?.trim() || LOCAL_PUBLIC_RESERVATION_APP_URL;
+const DEMO_BACKEND_URL =
+  viteEnv.VITE_DEMO_BACKEND_URL?.trim() || LOCAL_DEMO_BACKEND_URL;
+const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1"]);
+const isConfiguredFromEnv = (key) => Boolean(viteEnv[key]?.trim());
+const parseUrlSafely = (value) => {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
+  }
+};
+const isPublicHttpsUrl = (value) => {
+  const url = parseUrlSafely(value);
+  return Boolean(url && url.protocol === "https:" && !LOCAL_HOSTNAMES.has(url.hostname));
+};
 
 const menu = [
   { id: "executive", label: "Centro Ejecutivo", icon: MonitorCog },
@@ -1567,7 +1586,6 @@ function DemoPage({
   onDemoFindingsInjected,
   setActive,
 }) {
-  const DEMO_BACKEND_URL = "http://localhost:4000";
   const phases = [
     { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.", nextStep: "validar cliente, unidad, fuente, estado y evidencia visible." },
     { title: "FASE 02", name: "Marta · Acompañamiento Multicanal", text: "Marta acompaña por voz o texto y registra cada interacción como dato estructurado para evidencia, seguimiento e inteligencia.", nextStep: "revisar por separado Marta Voz / Vapi y Marta WhatsApp / Texto." },
@@ -1826,16 +1844,21 @@ function DemoPage({
   const [selectedBreakdowns, setSelectedBreakdowns] = useState(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
   const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
   const phaseSectionRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const publicReservationUrl = new URL(PUBLIC_RESERVATION_APP_URL);
+  const publicReservationUrl = parseUrlSafely(PUBLIC_RESERVATION_APP_URL);
   const currentAdminUrl = typeof window !== "undefined" ? new URL(window.location.href) : null;
   const localHosts = ["localhost", "127.0.0.1"];
+  const publicReservationConfigured = isConfiguredFromEnv("VITE_PUBLIC_RESERVATION_APP_URL");
+  const demoBackendConfigured = isConfiguredFromEnv("VITE_DEMO_BACKEND_URL");
+  const publicReservationUrlIsPublic = isPublicHttpsUrl(PUBLIC_RESERVATION_APP_URL);
+  const demoBackendUrlIsPublic = isPublicHttpsUrl(DEMO_BACKEND_URL);
   const publicReservationBridgeDisabled =
     currentAdminUrl !== null &&
+    publicReservationUrl !== null &&
     (currentAdminUrl.origin === publicReservationUrl.origin ||
       (localHosts.includes(currentAdminUrl.hostname) &&
         localHosts.includes(publicReservationUrl.hostname) &&
         currentAdminUrl.port === publicReservationUrl.port));
-  const statusTone = { Pendiente: "amber", Activa: "blue", Completada: "green", Enviando: "blue", Enviado: "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", Alta: "red", Media: "amber", Baja: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
+  const statusTone = { Pendiente: "amber", Preparado: "amber", Activa: "blue", Completada: "green", Enviando: "blue", "Solicitud enviada": "blue", "Proveedor acepto": "green", Error: "red", Confirmado: "green", Abierto: "green", Validada: "green", Generada: "green", Generado: "green", Verificado: "green", Visible: "green", No: "slate", Finalizado: "green", Alta: "red", Media: "amber", Baja: "green", "En revisión": "amber", "Logs verificados": "green", "Conversación pendiente": "amber", "Conversación en curso": "blue", "Conversación analizada": "green" };
   const adminTargetsByPage = {
     "Centro Ejecutivo": "executive",
     "Expediente Vivo": "client",
@@ -1961,16 +1984,23 @@ function DemoPage({
     setVisibleSendStatus((current) => ({ ...current, [field]: value }));
     if (identity) updateVolunteerStatus(field, value, identity);
   };
-  const demoLink = () => {
-    if (typeof window === "undefined") return "#demo";
-    return `${window.location.origin}${window.location.pathname}#demo`;
-  };
+  const demoLink = () => PUBLIC_RESERVATION_APP_URL;
   const addDeliveryEvidence = (entry) => {
     const time = new Date().toLocaleTimeString("es-SV", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     setDeliveryEvidence((current) => [{ ...entry, time }, ...current].slice(0, 6));
   };
   const sendDemoLink = async (channel) => {
     const isWhatsApp = channel === "whatsapp";
+    if (!isWhatsApp) {
+      addDeliveryEvidence({
+        channel: "Email",
+        endpoint: "No activo",
+        recipient: volunteerForm.email.trim() || "Sin destinatario",
+        link: demoLink(),
+        result: "Correo fuera del Paquete 1 de DEMO-0002 Caso 1",
+      });
+      return;
+    }
     const endpointPath = isWhatsApp ? "/send-whatsapp" : "/send-email";
     const endpoint = `${DEMO_BACKEND_URL}${endpointPath}`;
     const statusField = isWhatsApp ? "whatsappStatus" : "emailStatus";
@@ -1980,6 +2010,14 @@ function DemoPage({
       email: volunteerForm.email.trim(),
     };
     const recipient = isWhatsApp ? formVolunteer.whatsapp : formVolunteer.email;
+    const registeredVolunteer = volunteers.some(
+      (item) => item.whatsapp === formVolunteer.whatsapp && item.name.trim() === formVolunteer.name,
+    );
+    const publicConfigurationReady =
+      publicReservationConfigured &&
+      demoBackendConfigured &&
+      publicReservationUrlIsPublic &&
+      demoBackendUrlIsPublic;
 
     if (!recipient) {
       updateVisibleSendStatus(statusField, "Error", formVolunteer.whatsapp || formVolunteer.email);
@@ -1987,7 +2025,22 @@ function DemoPage({
         channel: isWhatsApp ? "WhatsApp" : "Email",
         endpoint,
         recipient: "Sin destinatario",
+        link: demoLink(),
         result: "Error: falta destinatario",
+      });
+      return;
+    }
+
+    if (!registeredVolunteer || !publicConfigurationReady) {
+      updateVisibleSendStatus(statusField, "Error", formVolunteer.whatsapp || formVolunteer.email);
+      addDeliveryEvidence({
+        channel: "WhatsApp",
+        endpoint,
+        recipient,
+        link: demoLink(),
+        result: !registeredVolunteer
+          ? "Error: voluntario no registrado"
+          : "Preparado, bloqueado por configuracion publica pendiente",
       });
       return;
     }
@@ -2007,13 +2060,20 @@ function DemoPage({
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} ${response.statusText || "Error"}`);
       }
+      const result = await response.json();
 
-      updateVisibleSendStatus(statusField, "Enviado", formVolunteer.whatsapp || formVolunteer.email);
+      const nextStatus = result.status === "provider_accepted" ? "Proveedor acepto" : "Solicitud enviada";
+      updateVisibleSendStatus(statusField, nextStatus, formVolunteer.whatsapp || formVolunteer.email);
       addDeliveryEvidence({
         channel: isWhatsApp ? "WhatsApp" : "Email",
         endpoint,
         recipient,
-        result: `Enviado al backend · HTTP ${response.status}`,
+        link: demoLink(),
+        providerMessageId: result.provider_message_id,
+        result:
+          result.status === "provider_accepted"
+            ? `Proveedor acepto · HTTP ${response.status}`
+            : `Solicitud enviada al backend · HTTP ${response.status}`,
       });
     } catch (error) {
       updateVisibleSendStatus(statusField, "Error", formVolunteer.whatsapp || formVolunteer.email);
@@ -2021,6 +2081,7 @@ function DemoPage({
         channel: isWhatsApp ? "WhatsApp" : "Email",
         endpoint,
         recipient,
+        link: demoLink(),
         result: `Error: ${error instanceof Error ? error.message : "No se pudo contactar el backend"}`,
       });
     }
@@ -2030,7 +2091,18 @@ function DemoPage({
     setVolunteerForm(emptyVolunteer);
     resetDemoEvidence();
   };
-  const validateReservation = () => setReservationStatus({ reservation: "Validada", whatsapp: selectedVolunteer.whatsappStatus === "Enviado" ? "Confirmado" : "Pendiente", email: selectedVolunteer.emailStatus === "Enviado" ? "Confirmado" : "Pendiente", evidence: "Generada" });
+  const normalizedVolunteerPhone = normalizeSalvadoranPhone(volunteerForm.whatsapp);
+  const whatsappVolunteerRegistered = volunteers.some(
+    (item) => item.whatsapp === normalizedVolunteerPhone && item.name.trim() === volunteerForm.name.trim(),
+  );
+  const caseOneWhatsappReady =
+    whatsappVolunteerRegistered &&
+    Boolean(normalizedVolunteerPhone) &&
+    publicReservationConfigured &&
+    demoBackendConfigured &&
+    publicReservationUrlIsPublic &&
+    demoBackendUrlIsPublic;
+  const validateReservation = () => setReservationStatus({ reservation: "Validada", whatsapp: selectedVolunteer.whatsappStatus === "Proveedor acepto" ? "Confirmado" : "Pendiente", email: selectedVolunteer.emailStatus === "Enviado" ? "Confirmado" : "Pendiente", evidence: "Generada" });
   const simulateMartaConversation = () => {
     setMartaStatus("Conversación en curso");
     setVapiStatus("Pendiente");
@@ -2205,7 +2277,19 @@ function DemoPage({
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <button onClick={addVolunteer} className="rounded-2xl bg-slate-950 px-4 py-4 text-sm font-black text-white"><Users size={16} className="mr-2 inline" />Registrar voluntario</button>
-            <button disabled className="rounded-2xl bg-emerald-100 px-4 py-4 text-sm font-black text-emerald-800 opacity-80"><MessageCircle size={16} className="mr-2 inline" />WhatsApp demo no activo</button>
+            <button
+              onClick={() => sendDemoLink("whatsapp")}
+              disabled={!caseOneWhatsappReady}
+              className={cls(
+                "rounded-2xl px-4 py-4 text-sm font-black",
+                caseOneWhatsappReady
+                  ? "bg-emerald-600 text-white"
+                  : "bg-emerald-100 text-emerald-800 opacity-80",
+              )}
+            >
+              <MessageCircle size={16} className="mr-2 inline" />
+              {caseOneWhatsappReady ? "Enviar enlace por WhatsApp" : "WhatsApp preparado · requiere VPS"}
+            </button>
             <button disabled className="rounded-2xl bg-blue-100 px-4 py-4 text-sm font-black text-blue-800 opacity-80"><Mail size={16} className="mr-2 inline" />Email demo no activo</button>
             <button onClick={finishVolunteer} className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-black text-slate-950">Guardar y limpiar formulario</button>
           </div>
@@ -2213,7 +2297,7 @@ function DemoPage({
             <div className="flex flex-col gap-2 xl:flex-row xl:items-start xl:justify-between">
               <div>
                 <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-700">Evidencia operacional de envío</div>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Controles reservados para el backend demo. En esta presentación no realizan envíos reales ni prueban recepción del destinatario.</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">El Caso 1 queda preparado para solicitar envío al backend solo con configuración pública VPS certificada. La evidencia distingue solicitud, aceptación técnica del proveedor o error; no certifica entrega, recepción ni lectura.</p>
               </div>
               <Badge tone="violet">Marta acompaña · H - OperIA Intelligence analiza · humano decide</Badge>
             </div>
@@ -2230,12 +2314,16 @@ function DemoPage({
                     <div><span className="font-black text-slate-950">Destinatario:</span> {item.recipient}</div>
                     <div><span className="font-black text-slate-950">Resultado:</span> {item.result}</div>
                   </div>
+                  <div className="mt-2 grid gap-1 md:grid-cols-2">
+                    <div><span className="font-black text-slate-950">Enlace preparado:</span> {item.link || "Pendiente"}</div>
+                    <div><span className="font-black text-slate-950">ID proveedor:</span> {item.providerMessageId || "No disponible"}</div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
           <div className="mt-5 grid gap-3">
-            {volunteers.map((item) => <button key={`${item.whatsapp}-${item.email}`} onClick={() => setSelectedPhone(item.whatsapp)} className={cls("rounded-2xl border p-4 text-left", selectedPhone === item.whatsapp ? "border-slate-950 bg-slate-100" : "border-slate-100 bg-slate-50")}><div className="font-black text-slate-950">{item.name || "Voluntario sin nombre"}</div><div className="mt-1 text-sm font-semibold text-slate-700">{item.role} · {item.company} · {item.whatsapp}</div><div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[item.whatsappStatus] || "slate"}>WhatsApp enviado: {item.whatsappStatus}</Badge><Badge tone={statusTone[item.emailStatus] || "slate"}>Email enviado: {item.emailStatus}</Badge><Badge tone={statusTone[item.reservationStarted] || "slate"}>Reserva iniciada: {item.reservationStarted}</Badge><Badge tone={statusTone[item.reservationCompleted] || "slate"}>Reserva completada: {item.reservationCompleted}</Badge></div></button>)}
+            {volunteers.map((item) => <button key={`${item.whatsapp}-${item.email}`} onClick={() => setSelectedPhone(item.whatsapp)} className={cls("rounded-2xl border p-4 text-left", selectedPhone === item.whatsapp ? "border-slate-950 bg-slate-100" : "border-slate-100 bg-slate-50")}><div className="font-black text-slate-950">{item.name || "Voluntario sin nombre"}</div><div className="mt-1 text-sm font-semibold text-slate-700">{item.role} · {item.company} · {item.whatsapp}</div><div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[item.whatsappStatus] || "slate"}>WhatsApp estado: {item.whatsappStatus}</Badge><Badge tone={statusTone[item.emailStatus] || "slate"}>Email estado: {item.emailStatus}</Badge><Badge tone={statusTone[item.reservationStarted] || "slate"}>Reserva iniciada: {item.reservationStarted}</Badge><Badge tone={statusTone[item.reservationCompleted] || "slate"}>Reserva completada: {item.reservationCompleted}</Badge></div></button>)}
           </div>
         </Card>
         <div id="demo-reservation-live" className="scroll-mt-64">
