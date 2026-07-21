@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -8,9 +8,200 @@
   --color-primary: #254f66; /* Navy profundo del logo */
   --color-accent: #d8862e;  /* Naranja Amena */
   --color-surface: #faf9f6; /* Marfil cálido de fondo */
-  --color-header: #9a9490;  /* Gray/Taupe Header */
+  --color-header: #020617;  /* H - OperIA institutional header */
   
   --shadow-pwa: 0 10px 40px rgba(0, 0, 0, 0.05);
+}
+
+.hoperia-admin-topnav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 32px;
+  background: #020617;
+  color: white;
+  padding: 23px 21px 19px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.14);
+  font-family: Inter, Arial, Helvetica, sans-serif;
+}
+
+.hoperia-admin-topnav-row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.hoperia-admin-brand {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.hoperia-admin-brand-dots {
+  display: grid;
+  width: 27px;
+  flex: 0 0 27px;
+  grid-template-columns: repeat(2, 7px);
+  gap: 7px;
+}
+
+.hoperia-admin-brand-dots span {
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid #fcd34d;
+  border-radius: 50%;
+}
+
+.hoperia-admin-brand-copy {
+  min-width: 0;
+}
+
+.hoperia-admin-brand-name {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: .02em;
+}
+
+.hoperia-admin-brand-slogan {
+  max-width: 460px;
+  margin: 4px 0 0;
+  color: #cbd5e1;
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.hoperia-admin-brand-tagline {
+  margin: 5px 0 0;
+  color: #fcd34d;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.hoperia-admin-module-title {
+  margin: 8px 0 0;
+  color: white;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: .01em;
+}
+
+.hoperia-admin-actions {
+  display: flex;
+  width: auto;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.hoperia-admin-demo-button {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: #fcd34d;
+  padding: 12px 18px;
+  color: #020617;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.1;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.hoperia-admin-demo-button:hover {
+  background: #fde68a;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+}
+
+.hoperia-admin-demo-button:active {
+  transform: scale(.98);
+}
+
+.hoperia-admin-nav-list {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 1px;
+}
+
+.hoperia-admin-nav-button {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .16);
+  color: white;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  box-shadow: none;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+  white-space: normal;
+}
+
+.hoperia-admin-nav-button:hover {
+  background: rgba(255, 255, 255, .14);
+}
+
+.hoperia-admin-nav-button--active {
+  background: white;
+  border-color: white;
+  color: #020617;
+}
+
+@media (max-width: 1024px) {
+  .hoperia-admin-topnav-row,
+  .hoperia-admin-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hoperia-admin-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .hoperia-admin-topnav {
+    border-radius: 24px;
+    padding: 22px 20px 18px;
+  }
+
+  .hoperia-admin-module-title {
+    font-size: 21px;
+  }
+
+  .hoperia-admin-demo-button,
+  .hoperia-admin-nav-button {
+    width: 100%;
+  }
 }
 
 @layer base {

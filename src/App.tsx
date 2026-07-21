@@ -335,29 +335,32 @@ function Card({ children, className = "" }) {
 
 function TopNav({ active, setActive }) {
   return (
-    <div className="sticky top-0 z-50 w-full max-w-full overflow-hidden rounded-[2rem] bg-slate-950 p-4 text-white shadow-2xl sm:p-5">
-      <div className="mb-4 flex w-full min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-black tracking-[0.35em] text-amber-300">Suite H - OperIA</p>
-          <p className="mt-1 text-xs font-semibold text-slate-400">Humanización de las operaciones con inteligencia artificial.</p>
-          <p className="mt-1 text-base font-black text-slate-100">H - OperIA Inmobiliaria</p>
-          <h2 className="mt-1 text-3xl font-black">Centro de Mando</h2>
+    <div className="hoperia-admin-topnav">
+      <div className="hoperia-admin-topnav-row">
+        <div className="hoperia-admin-brand">
+          <div className="hoperia-admin-brand-dots" aria-hidden="true"><span /><span /><span /><span /></div>
+          <div className="hoperia-admin-brand-copy">
+            <p className="hoperia-admin-brand-name">Suite H - OperIA</p>
+            <p className="hoperia-admin-brand-slogan">Humanización de las operaciones con inteligencia artificial.</p>
+            <p className="hoperia-admin-brand-tagline">H - OperIA Inmobiliaria</p>
+            <h2 className="hoperia-admin-module-title">Centro de Mando</h2>
+          </div>
         </div>
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-3 lg:w-auto lg:justify-end">
+        <div className="hoperia-admin-actions">
           <Badge tone="dark">Integración demostrativa: {martaSync[active]}%</Badge>
-          <button onClick={() => setActive("demo")} className="max-w-full whitespace-normal rounded-2xl bg-amber-300 px-5 py-3 text-left text-sm font-black text-slate-950 transition hover:bg-amber-200">
+          <button onClick={() => setActive("demo")} className="hoperia-admin-demo-button">
             <Smartphone size={16} className="mr-2 inline" />Iniciar demostración
           </button>
         </div>
       </div>
-      <div className="flex w-full min-w-0 flex-wrap gap-3 pb-1">
+      <div className="hoperia-admin-nav-list">
         {menu.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActive(id)}
             className={cls(
-              "flex max-w-full items-center gap-2 whitespace-normal rounded-2xl px-5 py-3 text-left text-sm font-black transition",
-              active === id ? "bg-white text-slate-950" : "bg-white/10 text-white hover:bg-white/15"
+              "hoperia-admin-nav-button",
+              active === id && "hoperia-admin-nav-button--active"
             )}
           >
             <Icon size={18} /> {label}
