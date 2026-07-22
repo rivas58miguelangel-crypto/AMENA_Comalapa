@@ -97,6 +97,36 @@ Esta especificacion no exige modificar Traefik todavia; solo fija que la publica
 
 ---
 
+## 6.1 Criterio de granularidad y nomenclatura de proyectos Dokploy
+
+Cada proyecto Dokploy debera representar una aplicacion completa de la Suite H - OperIA, no una pagina, ruta, pantalla o modulo interno.
+
+La nomenclatura conceptual vigente para las aplicaciones actualmente identificadas es:
+
+| Proyecto Dokploy conceptual | Aplicacion representada |
+| --- | --- |
+| `h-operia-admin` | Aplicacion Administrativa |
+| `h-operia-centro-demo` | Centro Demo |
+| `h-operia-reservas` | App Publica de Reservas |
+| `h-operia-registro-operacional` | Registro Operacional |
+| `h-operia-mensajeria` | Mensajeria Operacional |
+| `h-operia-vendedoras` | Aplicacion de Vendedoras |
+| `h-operia-demo-api` | Demo API |
+
+Esta lista no es cerrada ni definitiva. La Suite H - OperIA podra incorporar nuevas aplicaciones conforme evolucione la operacion, por ejemplo aplicaciones para recepcion de documentos, cobros y pagos, atencion al cliente u otros roles operativos futuros.
+
+Cada nueva aplicacion debera seguir el mismo patron de nomenclatura y despliegue:
+
+`h-operia-[nombre-funcional-de-la-aplicacion]`
+
+No deben crearse proyectos Dokploy por cada pagina, pantalla, ruta o modulo interno.
+
+La separacion Centro Demo / Aplicacion Administrativa continua siendo una decision arquitectonica vigente. El despliegue conjunto en AMENA 84 se considera unicamente transitorio, debido a la convivencia tecnica actual dentro de `AMENA_Comalapa`.
+
+Esta decision no autoriza todavia la separacion fisica del codigo, ni autoriza crear proyectos en Dokploy.
+
+---
+
 ## 7. Separacion Local/VPS
 
 El entorno local queda reservado para desarrollo y verificacion tecnica preliminar.
