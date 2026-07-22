@@ -100,6 +100,8 @@ El procedimiento operativo reutilizable para desplegar frontends Vite estaticos 
 
 DEMO-0003 conserva la topologia oficial minima del demo. OPS-0002 conserva el procedimiento operativo de despliegue frontend y no debe duplicarse aqui.
 
+La certificacion tecnica del primer despliegue HTTPS de la App Publica Ruta 2 se encuentra en `CERT-DESPLIEGUE-RUTA2-0001-app-publica-reservas-https-dokploy.md`.
+
 ---
 
 ## 6.1 Criterio de granularidad y nomenclatura de proyectos Dokploy
