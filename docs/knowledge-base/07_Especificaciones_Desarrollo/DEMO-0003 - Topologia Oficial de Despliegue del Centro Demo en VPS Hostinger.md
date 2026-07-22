@@ -10,6 +10,7 @@
 * **Repositorio rector:** `C:\Amena\Codex\AMENA_Comalapa`
 * **Rama rectora:** `centro-mando-admin10`
 * **Relacion principal:** DEMO-0002 / IME-014
+* **Procedimiento operativo asociado:** OPS-0002
 
 Este documento no implementa aplicaciones, no modifica codigo, no despliega servicios, no abre Supabase, no ejecuta SQL y no autoriza una arquitectura empresarial de produccion.
 
@@ -94,6 +95,10 @@ Dokploy debe usarse como capa operativa existente para alojar las aplicaciones d
 Traefik debe actuar como entrada HTTPS, asignando dominios o rutas publicas a cada componente.
 
 Esta especificacion no exige modificar Traefik todavia; solo fija que la publicacion posterior debe respetar la separacion entre frontend publico, frontend operativo y backend API.
+
+El procedimiento operativo reutilizable para desplegar frontends Vite estaticos mediante Dokploy/Nixpacks/NGINX queda definido en `OPS-0002 - Protocolo Operativo de Despliegue Frontend Vite en Dokploy.md`.
+
+DEMO-0003 conserva la topologia oficial minima del demo. OPS-0002 conserva el procedimiento operativo de despliegue frontend y no debe duplicarse aqui.
 
 ---
 
