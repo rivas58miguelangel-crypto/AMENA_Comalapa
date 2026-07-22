@@ -133,6 +133,15 @@ DEMO-0002 e IME-014 quedan:
 
 DEMO-0002 no puede cerrarse por publicacion documental, interfaz visible, endpoint declarado, backend disponible, solicitud aceptada por proveedor o evidencia simulada.
 
+Correccion obligatoria sobre WhatsApp Caso 2:
+
+* no debe asumirse que el mensaje de WhatsApp se genera o envia inmediatamente despues de concretarse la reserva;
+* el usuario completa la reserva y continua todo el acompanamiento posterior;
+* el WhatsApp consolidado ocurre en el tramo final del recorrido, antes de salir de la experiencia;
+* el usuario debe confirmar dentro de la aplicacion que ya recibio el mensaje;
+* solo despues de esa confirmacion se completa el cierre definitivo;
+* la auditoria debe identificar el paso exacto, sea 14, 15, 16 o equivalente, donde ocurre la solicitud de envio, el envio real o simulado, la confirmacion de recepcion y el cierre definitivo.
+
 ---
 
 ## 7. Objetivo operativo inicial de AMENA 85

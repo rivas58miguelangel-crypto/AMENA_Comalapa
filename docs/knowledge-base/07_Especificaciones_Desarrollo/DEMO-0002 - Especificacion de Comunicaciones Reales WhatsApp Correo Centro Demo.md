@@ -62,7 +62,26 @@ El caso ocurre despues de completar la reserva y todo el recorrido de acompanami
 
 No ocurre inmediatamente despues de seleccionar o reservar una unidad.
 
-Debe enviarse realmente por WhatsApp un resumen consolidado del proceso.
+Debe generarse o enviarse por WhatsApp un resumen consolidado del proceso en el tramo final del recorrido, antes de que el usuario salga de la experiencia.
+
+La secuencia funcional correcta es:
+
+1. El usuario completa la reserva.
+2. El usuario continua todo el acompanamiento posterior.
+3. El usuario llega al tramo final del recorrido.
+4. Antes de salir de la experiencia, la aplicacion solicita el envio del WhatsApp consolidado.
+5. El mensaje se envia realmente o se simula, segun el estado tecnico certificado del motor disponible.
+6. El usuario confirma dentro de la aplicacion que ya recibio el mensaje.
+7. Solo despues de esa confirmacion se completa el cierre definitivo.
+
+La auditoria funcional debe identificar con precision el paso exacto del flujo, sea 14, 15, 16 o equivalente, donde ocurre cada evento:
+
+* solicitud de envio;
+* envio real o simulado;
+* confirmacion de recepcion por parte del usuario;
+* cierre definitivo.
+
+No debe describirse WhatsApp como una accion inmediata post-reserva.
 
 El resumen debera incluir, segun la informacion realmente disponible:
 
@@ -207,7 +226,14 @@ Envio real del enlace de acceso al voluntario desde el Centro Demo.
 
 **Caso 2**
 
-Envio real por WhatsApp del resumen consolidado despues de completar la reserva y todo el recorrido de acompanamiento.
+Envio real por WhatsApp del resumen consolidado en el tramo final del recorrido, despues de completar la reserva y todo el acompanamiento posterior, antes de salir de la experiencia y antes del cierre definitivo.
+
+La implementacion y la auditoria deberan distinguir explicitamente:
+
+* paso de solicitud de envio;
+* paso de envio real o simulado;
+* paso de confirmacion de recepcion por parte del usuario dentro de la aplicacion;
+* paso de cierre definitivo posterior a esa confirmacion.
 
 **Correo electronico**
 
