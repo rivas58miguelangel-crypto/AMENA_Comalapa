@@ -168,6 +168,7 @@ Estos puntos no amplian el alcance de AMENA 84. Quedan preservados para producci
 Esta especificacion deriva de la auditoria y delimitacion aprobadas para AMENA 84 y debe consultarse junto con:
 
 * `src/App.tsx`: evidencia de `PUBLIC_RESERVATION_APP_URL`, `DEMO_BACKEND_URL`, `sendDemoLink`, normalizacion de telefono, endpoint `/send-whatsapp`, endpoint `/send-email`, estados visibles y evidencia local de solicitud.
+* `docs/knowledge-base/07_Especificaciones_Desarrollo/DEMO-0004 - Especificacion Funcional del Cierre Inteligente y Expediente Vivo del Centro Demo.md`: especificacion funcional del cierre inteligente, disparo automatico del WhatsApp final del Caso 2 y visualizacion inmediata del Expediente Vivo en Centro Demo.
 * `docs/knowledge-base/98_Work_In_Progress/TRANSICION-Codex-AMENA-59-A-60-20260702-1251.md`: decision historica de que el WhatsApp consolidado no se envia inmediatamente despues de reservar, sino al finalizar todo el recorrido de acompanamiento.
 * `docs/knowledge-base/07_Especificaciones_Desarrollo/FO-COC-0001 - Formato Oficial del Contexto Operativo Certificado.md`: regla de continuidad que reconoce que el WhatsApp consolidado ocurre al final del recorrido.
 * `docs/knowledge-base/07_Especificaciones_Desarrollo/SUPABASE-0001 - Modelo Rector Definitivo y Clasificacion Preliminar del Esquema Actual.md`: evidencia documental del dato observado en codigo para WhatsApp, correo y estado de envio.
