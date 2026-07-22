@@ -186,3 +186,28 @@ Codex AMENA 84 queda cerrado con:
 * IME-014 activo y pendiente para continuidad en AMENA 85.
 
 La siguiente sesion debe reconstruir este documento junto con DEMO-0002, DEMO-0003 e IME-014 antes de cualquier despliegue, configuracion publica o prueba real.
+
+---
+
+## 10. Incidente de continuidad Git detectado en AMENA 85
+
+Durante la apertura operativa de Codex AMENA 85, al cambiar de PC a Laptop, se detecto una falsa percepcion inicial de sincronia Git.
+
+La Laptop parecia alineada porque se comparo `HEAD` contra la referencia `origin` local, pero esa referencia estaba desactualizada. Al ejecutar posteriormente `git fetch origin --prune`, se detecto el atraso real:
+
+* `AMENA_Comalapa`: behind 17 commits.
+* `AMENA_Demo_API`: behind 1 commit.
+* `AMENA_Reservas_Publica_Ruta2`: behind 1 commit.
+
+La actualizacion por fast-forward corrigio el estado de la Laptop y el cierre operativo posterior certifico `ahead/behind 0 0` y `working tree` limpio en los tres repositorios.
+
+Evidencia historica incorporada:
+
+* hubo falsa percepcion inicial de sincronia por uso de referencias `origin` locales no actualizadas;
+* el `fetch` posterior detecto atrasos reales;
+* la actualizacion por fast-forward corrigio la Laptop;
+* el estado final quedo certificado `0 0` en los tres repositorios.
+
+Regla operativa derivada:
+
+Toda certificacion Git posterior a cambio de equipo, apertura de nuevo chat, reanudacion despues de varias horas o sospecha de trabajo remoto previo debe ejecutar primero `git fetch origin --prune` en cada repositorio involucrado. No se puede declarar `HEAD == origin`, `ahead/behind 0 0` ni `working tree` operativo certificado usando referencias `origin` locales no actualizadas.

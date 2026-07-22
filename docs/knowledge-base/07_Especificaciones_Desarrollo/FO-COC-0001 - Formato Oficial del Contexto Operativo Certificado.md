@@ -75,6 +75,10 @@ Este checklist debe ejecutarse en el orden indicado.
 
 Verificar el repositorio rector y, cuando aplique, cada repositorio operativo relacionado.
 
+Toda certificacion Git posterior a cambio de equipo, apertura de nuevo chat, reanudacion despues de varias horas o sospecha de trabajo remoto previo debe iniciar con `git fetch origin --prune` en cada repositorio involucrado.
+
+No se puede declarar `HEAD == origin`, `ahead/behind 0 0` ni `working tree` operativo certificado usando referencias `origin` locales no actualizadas.
+
 Debe confirmarse explicitamente:
 
 * rama activa;
@@ -85,6 +89,7 @@ Debe confirmarse explicitamente:
 Comandos minimos sugeridos:
 
 ```text
+git fetch origin --prune
 git status
 git branch --show-current
 git log --oneline --decorate -3

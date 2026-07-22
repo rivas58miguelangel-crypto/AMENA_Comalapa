@@ -27,7 +27,7 @@ La PC y la Laptop no deben tratarse como fuentes independientes. Cada equipo deb
 Antes de modificar archivos, ejecutar:
 
 ```powershell
-git fetch origin
+git fetch origin --prune
 git status
 ```
 
@@ -37,6 +37,10 @@ Confirmar:
 * si la rama local esta sincronizada con origin;
 * si el working tree esta limpio;
 * ultimo commit local y remoto cuando sea necesario.
+
+Toda certificacion Git posterior a cambio de equipo, apertura de nuevo chat, reanudacion despues de varias horas o sospecha de trabajo remoto previo debe ejecutar primero `git fetch origin --prune` en cada repositorio involucrado.
+
+No se puede declarar `HEAD == origin`, `ahead/behind 0 0` ni `working tree` operativo certificado usando referencias `origin` locales no actualizadas.
 
 Si el equipo esta atrasado y el working tree esta limpio, actualizar con:
 
@@ -51,7 +55,7 @@ No hacer pull si hay cambios locales sin revisar.
 # Rutina de inicio
 
 1. Abrir el repositorio local correcto.
-2. Ejecutar `git fetch origin`.
+2. Ejecutar `git fetch origin --prune`.
 3. Ejecutar `git status`.
 4. Confirmar que se esta en la rama correcta.
 5. Si la rama local esta atrasada y no hay cambios locales, ejecutar `git pull --ff-only`.

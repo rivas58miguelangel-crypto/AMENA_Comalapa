@@ -177,6 +177,10 @@ La reconstruccion debe utilizar exclusivamente la Base de Conocimiento del repos
 
 Antes de leer, diagnosticar, proponer o modificar, debe verificarse el repositorio rector y, cuando aplique, el repositorio operativo.
 
+En toda certificacion Git posterior a cambio de equipo, apertura de nuevo chat, reanudacion despues de varias horas o sospecha de trabajo remoto previo, la verificacion operativa debe iniciar ejecutando `git fetch origin --prune` en cada repositorio involucrado.
+
+No se puede declarar `HEAD == origin`, `ahead/behind 0 0` ni `working tree` operativo certificado usando referencias `origin` locales no actualizadas.
+
 Como minimo debe confirmarse:
 
 * rama activa;
