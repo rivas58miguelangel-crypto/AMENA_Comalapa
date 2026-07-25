@@ -605,6 +605,198 @@ function AdminOperationalEvidenceAnchors({ demoFindings = [], targetPage }) {
   );
 }
 
+const demo_movement_count = 7;
+
+const demoMovementPipeline = [
+  "informacion recibida",
+  "verificacion",
+  "ordenamiento",
+  "analisis",
+  "recomendacion",
+  "accion sugerida",
+];
+
+const normalizeDemoIdSegment = (value) =>
+  String(value || "demo")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "DEMO";
+
+const buildDemoLiveFile = (client) => {
+  const reservationId = client?.reservation_id || "HOP-RES-DEMO";
+  const reservationSegment = normalizeDemoIdSegment(reservationId);
+  const demoRunId = `DEMO-RUN-${reservationSegment}`;
+  const expedienteId = `EXP-DEMO-${reservationSegment}`;
+  const clientName = client?.name || "Cliente demo";
+  const unit = client?.unit || "Unidad demo";
+  const seller = client?.seller || "Equipo comercial demo";
+
+  const movements = [
+    {
+      movement_type: "comentario adicional",
+      source: "App Publica demo",
+      verification_status: "verificado como dato demo",
+      ordering_bucket: "prioridad alta",
+      analysis_summary: `${clientName} requiere claridad posterior a la reserva de ${unit}.`,
+      recommendation: "Preparar respuesta breve con contexto de unidad, etapa y siguiente paso.",
+      suggested_action: "La asesora revisa el mensaje sugerido y confirma seguimiento humano.",
+      human_owner: seller,
+      human_decision_status: "pendiente de validacion humana",
+    },
+    {
+      movement_type: "actualizacion de preferencia",
+      source: "Registro comercial demo",
+      verification_status: "pendiente de contraste",
+      ordering_bucket: "preferencia de unidad",
+      analysis_summary: "El cliente compara unidad reservada con una alternativa cercana.",
+      recommendation: "Revisar disponibilidad y narrativa antes de ofrecer cambio.",
+      suggested_action: "Validar inventario demo y preparar comparativo para llamada.",
+      human_owner: "Coordinacion comercial",
+      human_decision_status: "por revisar",
+    },
+    {
+      movement_type: "solicitud de visita",
+      source: "Marta demo",
+      verification_status: "dato recibido",
+      ordering_bucket: "agenda",
+      analysis_summary: "La visita puede acelerar formalizacion si participa decisor familiar.",
+      recommendation: "Proponer horario y confirmar asistentes antes de bloquear agenda.",
+      suggested_action: "Contactar al cliente para validar disponibilidad de visita.",
+      human_owner: seller,
+      human_decision_status: "pendiente",
+    },
+    {
+      movement_type: "validacion documental pendiente",
+      source: "Documentos demo",
+      verification_status: "requiere revision humana",
+      ordering_bucket: "bloqueo documental",
+      analysis_summary: "Falta evidencia documental para continuar la etapa financiera.",
+      recommendation: "Solicitar documento exacto y explicar por que desbloquea el expediente.",
+      suggested_action: "Enviar checklist documental revisado por la asesora.",
+      human_owner: "Equipo documental",
+      human_decision_status: "pendiente de accion",
+    },
+    {
+      movement_type: "mensaje interno de asesora",
+      source: "Mensajes entre equipo demo",
+      verification_status: "trazable en demo",
+      ordering_bucket: "coordinacion",
+      analysis_summary: "El seguimiento requiere coordinacion entre ventas y financiera.",
+      recommendation: "Asignar responsable y hora limite para evitar perdida de contexto.",
+      suggested_action: "Registrar compromiso interno y siguiente responsable.",
+      human_owner: "Direccion comercial",
+      human_decision_status: "en espera",
+    },
+    {
+      movement_type: "alerta de prioridad",
+      source: "H - OperIA Intelligence demo",
+      verification_status: "senal interpretada",
+      ordering_bucket: "riesgo comercial",
+      analysis_summary: "La combinacion de duda financiera y documentos pendientes eleva prioridad.",
+      recommendation: "Atender hoy antes de que el caso pierda impulso comercial.",
+      suggested_action: "Programar llamada humana con guion revisado por la asesora.",
+      human_owner: seller,
+      human_decision_status: "sugerida para validacion",
+    },
+    {
+      movement_type: "observacion de coordinacion",
+      source: "Centro Demo",
+      verification_status: "dato simulado consolidado",
+      ordering_bucket: "cierre operativo",
+      analysis_summary: "El expediente necesita evidencia de decision humana final.",
+      recommendation: "Cerrar el movimiento solo cuando el equipo valide accion tomada.",
+      suggested_action: "Marcar decision humana despues de revisar contexto completo.",
+      human_owner: "Equipo humano",
+      human_decision_status: "sin ejecutar automaticamente",
+    },
+  ].slice(0, demo_movement_count);
+
+  return {
+    demo_run_id: demoRunId,
+    reservation_id: reservationId,
+    expediente_id: expedienteId,
+    movements: movements.map((movement, index) => ({
+      ...movement,
+      movement_id: `${expedienteId}-MOV-${String(index + 1).padStart(2, "0")}`,
+      received_at: index < 4 ? `Hoy ${10 + index}:0${index} AM` : `Hoy ${2 + index}:15 PM`,
+      is_demo: true,
+    })),
+  };
+};
+
+function DemoLiveFileMovementsPanel({ client }) {
+  const liveFile = buildDemoLiveFile(client);
+
+  return (
+    <Card className="border-amber-200 bg-amber-50">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <div className="flex flex-wrap gap-2">
+            <Badge tone="amber">Datos simulados de demo</Badge>
+            <Badge tone="blue">Expediente Vivo demo</Badge>
+            <Badge tone="violet">Movimientos simulados post-reserva</Badge>
+            <Badge tone="green">Acciones sugeridas para validacion humana</Badge>
+          </div>
+          <h2 className="mt-3 text-3xl font-black text-slate-950">Expediente Vivo demo</h2>
+          <p className="mt-2 max-w-5xl text-base font-semibold leading-7 text-slate-800">
+            Esta vista fixture/local muestra como una reserva demo se convierte en expediente y recibe movimientos posteriores. H - OperIA Intelligence sugiere acciones trazables para revision humana; no decide ni ejecuta automaticamente.
+          </p>
+        </div>
+        <Badge tone="dark">demo_movement_count = {demo_movement_count} ejemplo configurable</Badge>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <InfoCard title="demo_run_id" value={liveFile.demo_run_id} detail="Corrida demo local; no persistida." />
+        <InfoCard title="reservation_id" value={liveFile.reservation_id} detail="Llave de reserva demo; no usa telefono ni correo." />
+        <InfoCard title="expediente_id" value={liveFile.expediente_id} detail="Identificador fixture/local pendiente de formalizacion productiva." />
+      </div>
+
+      <div className="mt-5 rounded-3xl border border-amber-100 bg-white p-4">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Cadena operativa dentro del expediente</div>
+        <div className="mt-4 grid gap-2 md:grid-cols-6">
+          {demoMovementPipeline.map((step, index) => (
+            <div key={step} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+              <div className="text-xs font-black text-slate-500">{String(index + 1).padStart(2, "0")}</div>
+              <div className="mt-1 text-sm font-black text-slate-950">{step}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5 overflow-hidden rounded-3xl border border-amber-100 bg-white">
+        <div className="overflow-x-auto">
+          <div className="grid min-w-[1320px] grid-cols-[1fr_0.9fr_0.95fr_0.95fr_1.35fr_1.2fr_1.3fr_1fr_1fr] bg-amber-100/70 text-left text-xs font-black uppercase tracking-[0.12em] text-slate-950">
+            {["Movimiento", "Fuente", "Verificacion", "Ordenamiento", "Analisis", "Recomendacion", "Accion sugerida", "Responsable humano", "Decision humana"].map((column) => (
+              <div key={column} className="p-4">{column}</div>
+            ))}
+          </div>
+          {liveFile.movements.map((movement) => (
+            <div key={movement.movement_id} className="grid min-w-[1320px] grid-cols-[1fr_0.9fr_0.95fr_0.95fr_1.35fr_1.2fr_1.3fr_1fr_1fr] border-t border-amber-100 text-sm font-semibold leading-6 text-slate-800">
+              <div className="p-4">
+                <div className="font-black text-slate-950">{movement.movement_type}</div>
+                <div className="mt-1 text-xs font-bold text-slate-500">{movement.movement_id}</div>
+              </div>
+              <div className="p-4">{movement.source}</div>
+              <div className="p-4">{movement.verification_status}</div>
+              <div className="p-4">{movement.ordering_bucket}</div>
+              <div className="p-4">{movement.analysis_summary}</div>
+              <div className="p-4">{movement.recommendation}</div>
+              <div className="p-4 font-black text-slate-950">{movement.suggested_action}</div>
+              <div className="p-4">{movement.human_owner}</div>
+              <div className="p-4">{movement.human_decision_status}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p className="mt-4 text-sm font-semibold leading-6 text-slate-700">
+        Los movimientos y acciones sugeridas pertenecen al expediente {liveFile.expediente_id}. Son datos simulados de demo, no produccion real, no persistencia y no integracion externa.
+      </p>
+    </Card>
+  );
+}
+
 function ExecutivePage({ demoFindings = [], setActive }) {
   return (
     <div className="space-y-5">
@@ -813,6 +1005,8 @@ function ClientPage({ demoFindings = [], setActive }) {
           </div>
         )}
       </Card>
+
+      {selectedAdminClient && <DemoLiveFileMovementsPanel client={selectedAdminClient} />}
 
       <Card>
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
