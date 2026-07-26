@@ -608,12 +608,12 @@ function AdminOperationalEvidenceAnchors({ demoFindings = [], targetPage }) {
 const demo_movement_count = 7;
 
 const demoMovementPipeline = [
-  "informacion recibida",
-  "verificacion",
+  "información recibida",
+  "verificación",
   "ordenamiento",
-  "analisis",
-  "recomendacion",
-  "accion sugerida",
+  "análisis",
+  "recomendación",
+  "acción sugerida",
 ];
 
 const normalizeDemoIdSegment = (value) =>
@@ -746,10 +746,9 @@ function DemoLiveFileMovementsPanel({ client }) {
         <Badge tone="dark">demo_movement_count = {demo_movement_count} ejemplo configurable</Badge>
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
-        <InfoCard title="demo_run_id" value={liveFile.demo_run_id} detail="Corrida demo local; no persistida." />
-        <InfoCard title="reservation_id" value={liveFile.reservation_id} detail="Llave de reserva demo; no usa telefono ni correo." />
-        <InfoCard title="expediente_id" value={liveFile.expediente_id} detail="Identificador fixture/local pendiente de formalizacion productiva." />
+      <div className="mt-5 rounded-2xl border border-amber-100 bg-white/70 px-4 py-3 text-sm font-semibold leading-6 text-slate-700">
+        <span className="font-black text-slate-950">Reserva demo:</span> {liveFile.reservation_id} · Fixture/local · Sin persistencia
+        <span className="ml-2 text-xs font-bold text-slate-500">Referencia interna: {liveFile.expediente_id}</span>
       </div>
 
       <div className="mt-5 rounded-3xl border border-amber-100 bg-white p-4">
@@ -765,26 +764,33 @@ function DemoLiveFileMovementsPanel({ client }) {
       </div>
 
       <div className="mt-5 overflow-hidden rounded-3xl border border-amber-100 bg-white">
-        <div className="overflow-x-auto">
-          <div className="grid min-w-[1320px] grid-cols-[1fr_0.9fr_0.95fr_0.95fr_1.35fr_1.2fr_1.3fr_1fr_1fr] bg-amber-100/70 text-left text-xs font-black uppercase tracking-[0.12em] text-slate-950">
-            {["Movimiento", "Fuente", "Verificacion", "Ordenamiento", "Analisis", "Recomendacion", "Accion sugerida", "Responsable humano", "Decision humana"].map((column) => (
-              <div key={column} className="p-4">{column}</div>
-            ))}
-          </div>
+        <div className="border-b border-amber-100 bg-amber-100/70 p-4">
+          <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-950">Movimientos simulados post-reserva</div>
+          <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">
+            Un movimiento por bloque, con acción sugerida trazable para validación humana.
+          </p>
+        </div>
+        <div className="grid gap-4 p-4 xl:grid-cols-2">
           {liveFile.movements.map((movement) => (
-            <div key={movement.movement_id} className="grid min-w-[1320px] grid-cols-[1fr_0.9fr_0.95fr_0.95fr_1.35fr_1.2fr_1.3fr_1fr_1fr] border-t border-amber-100 text-sm font-semibold leading-6 text-slate-800">
-              <div className="p-4">
-                <div className="font-black text-slate-950">{movement.movement_type}</div>
-                <div className="mt-1 text-xs font-bold text-slate-500">{movement.movement_id}</div>
+            <div key={movement.movement_id} className="rounded-3xl border border-amber-100 bg-white p-5 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">{movement.movement_type}</div>
+                  <div className="mt-1 text-xs font-bold text-slate-500">{movement.movement_id}</div>
+                </div>
+                <Badge tone="amber">{movement.human_decision_status}</Badge>
               </div>
-              <div className="p-4">{movement.source}</div>
-              <div className="p-4">{movement.verification_status}</div>
-              <div className="p-4">{movement.ordering_bucket}</div>
-              <div className="p-4">{movement.analysis_summary}</div>
-              <div className="p-4">{movement.recommendation}</div>
-              <div className="p-4 font-black text-slate-950">{movement.suggested_action}</div>
-              <div className="p-4">{movement.human_owner}</div>
-              <div className="p-4">{movement.human_decision_status}</div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <InfoCard title="Fuente" value={movement.source} />
+                <InfoCard title="Verificación" value={movement.verification_status} />
+                <InfoCard title="Ordenamiento" value={movement.ordering_bucket} />
+                <InfoCard title="Responsable humano" value={movement.human_owner} />
+              </div>
+              <div className="mt-4 space-y-3 text-sm font-semibold leading-6 text-slate-800">
+                <p><span className="font-black text-slate-950">Análisis:</span> {movement.analysis_summary}</p>
+                <p><span className="font-black text-slate-950">Recomendación:</span> {movement.recommendation}</p>
+                <p><span className="font-black text-slate-950">Acción sugerida:</span> {movement.suggested_action}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -886,8 +892,7 @@ function ClientPage({ demoFindings = [], setActive }) {
   const profile = clientOperationalProfile;
   const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="client" />;
   const [clientSearch, setClientSearch] = useState("");
-  const [submittedClientSearch, setSubmittedClientSearch] = useState("");
-  const [selectedClientReservationId, setSelectedClientReservationId] = useState("HOP-RES-000784");
+  const [selectedClientReservationId, setSelectedClientReservationId] = useState(null);
   const adminClients = [
     {
       name: profile.cliente.name,
@@ -911,16 +916,20 @@ function ClientPage({ demoFindings = [], setActive }) {
       seller: "Ana Guardado · VND-017",
     },
   ];
-  const executeClientSearch = () => setSubmittedClientSearch(clientSearch.trim());
-  const normalizedClientSearch = submittedClientSearch.toLowerCase();
+  const normalizedClientSearch = clientSearch.trim().toLowerCase();
   const filteredAdminClients = normalizedClientSearch
     ? adminClients.filter((client) =>
         `${client.name} ${client.reservation_id}`.toLowerCase().includes(normalizedClientSearch),
       )
-    : adminClients;
-  const selectedAdminClient =
-    adminClients.find((client) => client.reservation_id === selectedClientReservationId) ||
-    adminClients[0];
+    : [];
+  const selectedAdminClient = adminClients.find((client) => client.reservation_id === selectedClientReservationId) || null;
+  const selectedClientInitials = selectedAdminClient?.name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "EV";
+  const hasDetailedDemoFile = selectedAdminClient?.reservation_id === "HOP-RES-000784";
 
   return (
     <div className="space-y-5">
@@ -937,83 +946,114 @@ function ClientPage({ demoFindings = [], setActive }) {
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <h2 className="text-2xl font-black text-slate-950">Clientes</h2>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Consulta rápida por nombre o ID de reserva.</p>
+            <h2 className="text-2xl font-black text-slate-950">Buscar expediente</h2>
+            <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-700">
+              Escribe un nombre o reservation_id para abrir un expediente demo. La vista inferior permanece en blanco hasta seleccionar un cliente.
+            </p>
           </div>
-          <div className="flex w-full flex-col gap-2 sm:flex-row xl:max-w-2xl">
+          <div className="w-full xl:max-w-2xl">
             <input
               value={clientSearch}
               onChange={(event) => setClientSearch(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") executeClientSearch();
-              }}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none"
-              placeholder="Buscar por nombre o ID de reserva"
+              placeholder="Buscar por nombre o reservation_id"
             />
-            <button
-              type="button"
-              onClick={executeClientSearch}
-              className="rounded-2xl bg-slate-950 px-6 py-4 text-sm font-black text-white"
-            >
-              <Search size={16} className="mr-2 inline" />Buscar
-            </button>
           </div>
         </div>
-        <div className="mt-5">
-          {filteredAdminClients.length > 0 ? (
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-              <div className="overflow-x-auto">
-                <div className="grid min-w-[860px] grid-cols-[1fr_1fr_1.4fr_1fr_1.2fr] bg-slate-100 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-950">
-                  {["Cliente", "reservation_id", "Unidad", "Estado", "Asesora"].map((column) => (
-                    <div key={column} className="p-4">{column}</div>
-                  ))}
-                </div>
+        {normalizedClientSearch && (
+          <div className="mt-5">
+            {filteredAdminClients.length > 0 ? (
+              <div className="grid gap-3">
                 {filteredAdminClients.map((client) => {
-                  const selected = client.reservation_id === selectedAdminClient.reservation_id;
+                  const selected = client.reservation_id === selectedClientReservationId;
                   return (
                     <button
                       key={client.reservation_id}
                       type="button"
                       onClick={() => setSelectedClientReservationId(client.reservation_id)}
                       className={cls(
-                        "grid min-w-[860px] grid-cols-[1fr_1fr_1.4fr_1fr_1.2fr] border-t border-slate-100 text-left text-sm font-semibold text-slate-800",
-                        selected ? "bg-blue-50" : "bg-white hover:bg-slate-50",
+                        "rounded-3xl border p-4 text-left transition",
+                        selected ? "border-blue-200 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
                       )}
                     >
-                      <div className="p-4 font-black text-slate-950">{client.name}</div>
-                      <div className="p-4">{client.reservation_id}</div>
-                      <div className="p-4">{client.unit}</div>
-                      <div className="p-4">{client.status}</div>
-                      <div className="p-4">{client.seller}</div>
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                          <div className="text-lg font-black text-slate-950">{client.name}</div>
+                          <div className="mt-1 text-sm font-bold text-slate-500">{client.reservation_id}</div>
+                        </div>
+                        <div className="grid gap-2 text-sm font-semibold leading-6 text-slate-700 md:grid-cols-3 lg:max-w-4xl">
+                          <span>{client.unit}</span>
+                          <span>{client.status}</span>
+                          <span>{client.seller}</span>
+                        </div>
+                      </div>
                     </button>
                   );
                 })}
               </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-base font-black text-slate-700">
-              No se encontraron clientes con ese criterio.
-            </div>
-          )}
-        </div>
-        {selectedAdminClient && (
-          <div className="mt-5 grid gap-3 md:grid-cols-4">
-            <InfoCard title="Cliente seleccionado" value={selectedAdminClient.name} detail={selectedAdminClient.reservation_id} />
-            <InfoCard title="Unidad" value={selectedAdminClient.unit} />
-            <InfoCard title="Estado" value={selectedAdminClient.status} />
-            <InfoCard title="Asesora" value={selectedAdminClient.seller} />
+            ) : (
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-base font-black text-slate-700">
+                No se encontraron clientes con ese criterio.
+              </div>
+            )}
           </div>
         )}
       </Card>
 
-      {selectedAdminClient && <DemoLiveFileMovementsPanel client={selectedAdminClient} />}
+      {selectedAdminClient && (
+        <>
+          <Card>
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+              <div className="flex gap-5">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-slate-950 text-3xl font-black text-white">{selectedClientInitials}</div>
+                <div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge tone="green">Expediente seleccionado</Badge>
+                    <Badge tone="amber">Fixture/local demo</Badge>
+                    <Badge tone="violet">Validación humana requerida</Badge>
+                  </div>
+                  <h2 className="mt-3 text-3xl font-black text-slate-950">{selectedAdminClient.name}</h2>
+                  <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
+                    Expediente demo abierto desde una búsqueda explícita. Los datos siguientes son simulados y crecen hacia abajo dentro del expediente del cliente seleccionado.
+                  </p>
+                </div>
+              </div>
+              <Badge tone="dark">{selectedAdminClient.reservation_id}</Badge>
+            </div>
 
+            <div className="mt-5 grid gap-3 md:grid-cols-4">
+              <InfoCard title="Cliente seleccionado" value={selectedAdminClient.name} detail={selectedAdminClient.reservation_id} />
+              <InfoCard title="Unidad" value={selectedAdminClient.unit} />
+              <InfoCard title="Estado" value={selectedAdminClient.status} />
+              <InfoCard title="Asesora" value={selectedAdminClient.seller} />
+            </div>
+          </Card>
+
+          {hasDetailedDemoFile ? (
+            <DemoLiveFileMovementsPanel client={selectedAdminClient} />
+          ) : (
+            <Card className="border-dashed border-slate-200 bg-slate-50">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                <div>
+                  <Badge tone="amber">Fixture/local demo</Badge>
+                  <h2 className="mt-3 text-2xl font-black text-slate-950">Expediente sin movimientos detallados</h2>
+                  <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
+                    Este fixture no tiene todavía movimientos simulados detallados asociados.
+                  </p>
+                </div>
+                <Badge tone="dark">{selectedAdminClient.reservation_id}</Badge>
+              </div>
+            </Card>
+          )}
+
+          {hasDetailedDemoFile && (
+            <>
       <Card>
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex gap-5">
             <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-slate-950 text-4xl font-black text-white">{profile.cliente.initials}</div>
             <div>
-              <h2 className="text-4xl font-black text-slate-950">{profile.cliente.name}</h2>
+              <h2 className="text-3xl font-black text-slate-950">Perfil operativo del expediente</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {profile.cliente.badges.map((badge) => <Badge key={badge.label} tone={badge.tone}>{badge.label}</Badge>)}
               </div>
@@ -1053,6 +1093,10 @@ function ClientPage({ demoFindings = [], setActive }) {
       <CommunicationsHub channels={profile.comunicaciones} />
       <MartaProposalReviewCenter proposals={profile.propuestasMarta} />
       <TrackingBlock tracking={profile.seguimientoOperacional} />
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }
