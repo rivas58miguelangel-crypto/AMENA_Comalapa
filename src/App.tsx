@@ -113,6 +113,105 @@ type ClientTimelineItem = {
   title: string;
   description: string;
 };
+const configuredPublicReservationOrigin =
+  viteEnv.VITE_PUBLIC_RESERVATION_ORIGIN?.trim().replace(/\/$/, "") ||
+  parseUrlSafely(PUBLIC_RESERVATION_APP_URL)?.origin ||
+  "http://localhost:3001";
+const ALLOWED_RESERVATION_SOURCE_APPLICATIONS = new Set([
+  "hoperia_public_reservation_app",
+  "amena_public_reservation_app",
+]);
+
+type ReservationCompletedEvent = {
+  type: "hoperia.reservation.completed";
+  schemaVersion: "1.0";
+  eventId: string;
+  occurredAt: string;
+  sourceApplication: "hoperia_public_reservation_app" | "amena_public_reservation_app";
+  sourceOrigin: string;
+  reservationId: string;
+  reservationSessionId?: string;
+  client: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    dui?: string;
+  };
+  project: {
+    name: string;
+  };
+  selectedUnit: {
+    propertyType: string;
+    sector?: string;
+    towerOrBlock?: string;
+    level?: string;
+    model?: string;
+    unitOrLot: string;
+    sourceUnitId?: string;
+  };
+  sourceChannel: "public_web_app";
+  reservationStatus: "completed";
+  isDemo: true;
+};
+
+type LiveExpediente = {
+  reservationId: string;
+  expedienteId: string;
+  status: "initial";
+  eventId: string;
+  receivedAt: string;
+  sourceApplication: ReservationCompletedEvent["sourceApplication"];
+  sourceOrigin: string;
+  client: ReservationCompletedEvent["client"];
+  project: ReservationCompletedEvent["project"];
+  selectedUnit: ReservationCompletedEvent["selectedUnit"];
+  sourceChannel: "public_web_app";
+  isDemo: true;
+  persisted: false;
+};
+
+type AdminLiveDemoResetRequest = {
+  type: "hoperia.demo.live.reset";
+  schemaVersion: "1.0";
+  resetId: string;
+  requestedAt: string;
+  sourceApplication: "hoperia_admin_demo";
+};
+
+type PublicLiveDemoResetAck = {
+  type: "hoperia.demo.live.reset.ack";
+  schemaVersion: "1.0";
+  resetId: string;
+  acknowledgedAt: string;
+  sourceApplication: ReservationCompletedEvent["sourceApplication"];
+  status: "reset_complete";
+};
+
+type LiveDemoResetStatus = "idle" | "requesting" | "completed" | "timeout" | "error";
+
+type LiveDemoResetNotice = {
+  title: string;
+  detail: string;
+};
+
+type AdminClient = {
+  name: string;
+  reservation_id: string;
+  expediente_id?: string;
+  unit: string;
+  status: string;
+  seller: string;
+  liveExpediente?: LiveExpediente;
+};
+
+type ReceptionNotice = {
+  kind: "accepted" | "rejected";
+  title: string;
+  detail: string;
+  reservationId?: string;
+  expedienteId?: string;
+};
 
 type ClientCommunicationMessage = {
   from: string;
@@ -501,6 +600,19 @@ function AppShell() {
   });
   const [demoFindings, setDemoFindings] = useState([]);
   const [demoContext, setDemoContext] = useState(null);
+  const [liveExpediente, setLiveExpediente] = useState<LiveExpediente | null>(null);
+  const [autoSelectReservationId, setAutoSelectReservationId] = useState<string | null>(null);
+  const [receptionNotice, setReceptionNotice] = useState<ReceptionNotice | null>(null);
+  const [publicReservationWindowNotice, setPublicReservationWindowNotice] = useState<string | null>(null);
+  const [liveDemoResetStatus, setLiveDemoResetStatus] = useState<LiveDemoResetStatus>("idle");
+  const [liveDemoResetNotice, setLiveDemoResetNotice] = useState<LiveDemoResetNotice | null>(null);
+  const [liveDemoResetToken, setLiveDemoResetToken] = useState(0);
+  const publicReservationWindowRef = useRef<Window | null>(null);
+  const liveExpedienteRef = useRef<LiveExpediente | null>(null);
+  const processedEventIds = useRef(new Set<string>());
+  const expedienteIdByReservationId = useRef(new Map<string, string>());
+  const pendingResetIdRef = useRef<string | null>(null);
+  const resetTimeoutRef = useRef<number | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("amena.activeSection", active);
@@ -517,6 +629,265 @@ function AppShell() {
     window.addEventListener("hashchange", syncFromHash);
     return () => window.removeEventListener("hashchange", syncFromHash);
   }, []);
+
+  const openPublicReservation = () => {
+    if (publicReservationWindowRef.current && !publicReservationWindowRef.current.closed) {
+      publicReservationWindowRef.current.focus();
+      setPublicReservationWindowNotice("App Pública Ruta 2 enfocada. Completa y confirma la reserva para transmitirla.");
+      return;
+    }
+
+    const reservationWindow = window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
+    if (!reservationWindow) {
+      publicReservationWindowRef.current = null;
+      setPublicReservationWindowNotice("No se pudo abrir la App Pública. El navegador pudo bloquear la ventana; permite ventanas emergentes y reintenta.");
+      return;
+    }
+
+    publicReservationWindowRef.current = reservationWindow;
+    reservationWindow.focus();
+    setPublicReservationWindowNotice("App Pública Ruta 2 abierta en una ventana separada. Completa y confirma la reserva para transmitirla.");
+  };
+
+  const clearResetTimeout = () => {
+    if (resetTimeoutRef.current !== null) {
+      window.clearTimeout(resetTimeoutRef.current);
+      resetTimeoutRef.current = null;
+    }
+  };
+
+  const clearAdminLiveDemoState = (notice: LiveDemoResetNotice) => {
+    clearResetTimeout();
+    pendingResetIdRef.current = null;
+    liveExpedienteRef.current = null;
+    setLiveExpediente(null);
+    setAutoSelectReservationId(null);
+    setReceptionNotice(null);
+    setPublicReservationWindowNotice(null);
+    processedEventIds.current.clear();
+    expedienteIdByReservationId.current.clear();
+    setLiveDemoResetToken((current) => current + 1);
+    setLiveDemoResetStatus("completed");
+    setLiveDemoResetNotice(notice);
+    setActive("demo");
+  };
+
+  const createLiveDemoResetId = () => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+      const randomBytes = crypto.getRandomValues(new Uint8Array(16));
+      return `reset-${Array.from(randomBytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+    }
+    return `reset-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  };
+
+  const requestLiveDemoReset = () => {
+    const confirmed = window.confirm(
+      "Se limpiará la reserva viva actual tanto en la App Pública como en el Admin. Los fixtures históricos y las FASE 04/05 permanecerán intactos. ¿Continuar?",
+    );
+    if (!confirmed) return;
+
+    const publicReservationWindow = publicReservationWindowRef.current;
+    if (!publicReservationWindow || publicReservationWindow.closed) {
+      clearResetTimeout();
+      pendingResetIdRef.current = null;
+      setLiveDemoResetStatus("error");
+      setLiveDemoResetNotice({
+        title: "No fue posible solicitar el reinicio",
+        detail: "La ventana de la App Pública no está disponible.",
+      });
+      return;
+    }
+
+    clearResetTimeout();
+    const resetId = createLiveDemoResetId();
+    const resetRequest: AdminLiveDemoResetRequest = {
+      type: "hoperia.demo.live.reset",
+      schemaVersion: "1.0",
+      resetId,
+      requestedAt: new Date().toISOString(),
+      sourceApplication: "hoperia_admin_demo",
+    };
+
+    pendingResetIdRef.current = resetId;
+    setLiveDemoResetStatus("requesting");
+    setLiveDemoResetNotice({
+      title: "Reinicio solicitado",
+      detail: "Esperando confirmación de la App Pública.",
+    });
+
+    try {
+      publicReservationWindow.postMessage(resetRequest, configuredPublicReservationOrigin);
+    } catch {
+      pendingResetIdRef.current = null;
+      setLiveDemoResetStatus("error");
+      setLiveDemoResetNotice({
+        title: "No fue posible solicitar el reinicio",
+        detail: "La ventana de la App Pública no está disponible.",
+      });
+      return;
+    }
+
+    resetTimeoutRef.current = window.setTimeout(() => {
+      if (pendingResetIdRef.current !== resetId) return;
+      pendingResetIdRef.current = null;
+      resetTimeoutRef.current = null;
+      setLiveDemoResetStatus("timeout");
+      setLiveDemoResetNotice({
+        title: "Reinicio no confirmado",
+        detail: "La App Pública no respondió; el estado del Admin se conserva.",
+      });
+    }, 5000);
+  };
+
+  const clearOnlyAdminLiveDemoState = () => {
+    const confirmed = window.confirm(
+      "La App Pública no será reiniciada. Solo se limpiará el estado vivo del Admin. ¿Continuar?",
+    );
+    if (!confirmed) return;
+
+    clearAdminLiveDemoState({
+      title: "Estado local del Admin limpiado",
+      detail: "La App Pública debe reiniciarse por separado.",
+    });
+  };
+
+  useEffect(() => () => clearResetTimeout(), []);
+
+  useEffect(() => {
+    const isNonEmptyString = (value: unknown): value is string =>
+      typeof value === "string" && value.trim().length > 0;
+
+    const isReservationCompletedEvent = (value: unknown): value is ReservationCompletedEvent => {
+      if (!value || typeof value !== "object") return false;
+      const data = value as Partial<ReservationCompletedEvent>;
+      const client = data.client as ReservationCompletedEvent["client"] | undefined;
+      const project = data.project as ReservationCompletedEvent["project"] | undefined;
+      const selectedUnit = data.selectedUnit as ReservationCompletedEvent["selectedUnit"] | undefined;
+
+      return data.type === "hoperia.reservation.completed" &&
+        data.schemaVersion === "1.0" &&
+        ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "") &&
+        isNonEmptyString(data.sourceOrigin) &&
+        data.reservationStatus === "completed" &&
+        data.isDemo === true &&
+        data.sourceChannel === "public_web_app" &&
+        isNonEmptyString(data.eventId) &&
+        isNonEmptyString(data.reservationId) &&
+        isNonEmptyString(data.occurredAt) &&
+        isNonEmptyString(client?.firstName) &&
+        isNonEmptyString(client?.lastName) &&
+        isNonEmptyString(client?.email) &&
+        isNonEmptyString(client?.phone) &&
+        isNonEmptyString(project?.name) &&
+        isNonEmptyString(selectedUnit?.propertyType) &&
+        isNonEmptyString(selectedUnit?.unitOrLot);
+    };
+
+    const isPublicLiveDemoResetAck = (value: unknown): value is PublicLiveDemoResetAck => {
+      if (!value || typeof value !== "object") return false;
+      const data = value as Partial<PublicLiveDemoResetAck>;
+
+      return data.type === "hoperia.demo.live.reset.ack" &&
+        data.schemaVersion === "1.0" &&
+        isNonEmptyString(data.resetId) &&
+        isNonEmptyString(data.acknowledgedAt) &&
+        ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "") &&
+        data.status === "reset_complete";
+    };
+
+    const rejectReservation = (detail: string) => {
+      setReceptionNotice({
+        kind: "rejected",
+        title: "Evento de reserva rechazado",
+        detail,
+      });
+    };
+
+    const handleReservationMessage = (event: MessageEvent<unknown>) => {
+      if (event.origin !== configuredPublicReservationOrigin) {
+        return;
+      }
+
+      if (event.source !== publicReservationWindowRef.current) {
+        return;
+      }
+
+      if (!event.data || typeof event.data !== "object") {
+        return;
+      }
+
+      const eventType = (event.data as { type?: unknown }).type;
+      if (eventType === "hoperia.demo.live.reset.ack") {
+        if (!isPublicLiveDemoResetAck(event.data)) return;
+        if (event.data.resetId !== pendingResetIdRef.current) return;
+
+        clearAdminLiveDemoState({
+          title: "Demostración en vivo reiniciada",
+          detail: "Admin y App Pública confirmaron la limpieza coordinada.",
+        });
+        return;
+      }
+
+      if (eventType !== "hoperia.reservation.completed") {
+        return;
+      }
+
+      if (!isReservationCompletedEvent(event.data)) {
+        rejectReservation("Contrato ausente o incompleto.");
+        return;
+      }
+
+      const reservationEvent = event.data;
+      if (processedEventIds.current.has(reservationEvent.eventId)) {
+        return;
+      }
+
+      const existingExpedienteId = expedienteIdByReservationId.current.get(reservationEvent.reservationId);
+      const expedienteId = existingExpedienteId || buildLiveExpedienteId(reservationEvent.reservationId);
+      const currentLiveExpediente = liveExpedienteRef.current;
+      const nextLiveExpediente: LiveExpediente = {
+        reservationId: reservationEvent.reservationId,
+        expedienteId,
+        status: "initial",
+        eventId: reservationEvent.eventId,
+        receivedAt: currentLiveExpediente?.reservationId === reservationEvent.reservationId
+          ? currentLiveExpediente.receivedAt
+          : new Date().toISOString(),
+        sourceApplication: reservationEvent.sourceApplication,
+        sourceOrigin: reservationEvent.sourceOrigin,
+        client: reservationEvent.client,
+        project: reservationEvent.project,
+        selectedUnit: reservationEvent.selectedUnit,
+        sourceChannel: reservationEvent.sourceChannel,
+        isDemo: reservationEvent.isDemo,
+        persisted: false,
+      };
+
+      processedEventIds.current.add(reservationEvent.eventId);
+      expedienteIdByReservationId.current.set(reservationEvent.reservationId, expedienteId);
+      liveExpedienteRef.current = nextLiveExpediente;
+      setLiveExpediente(nextLiveExpediente);
+      setAutoSelectReservationId(reservationEvent.reservationId);
+      if (pendingResetIdRef.current === null) {
+        setLiveDemoResetStatus("idle");
+        setLiveDemoResetNotice(null);
+      }
+      setReceptionNotice({
+        kind: "accepted",
+        title: "Reserva recibida desde la App Pública",
+        detail: "Expediente Vivo inicial creado · Demo · No persistido",
+        reservationId: reservationEvent.reservationId,
+        expedienteId,
+      });
+      setActive("client");
+    };
+
+    window.addEventListener("message", handleReservationMessage);
+    return () => window.removeEventListener("message", handleReservationMessage);
+  }, [configuredPublicReservationOrigin]);
   const Page = {
     executive: ExecutivePage,
     client: ClientPage,
@@ -536,11 +907,70 @@ function AppShell() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-amber-50 text-slate-950">
       <div className="mx-auto max-w-[1800px] space-y-5 p-3 sm:p-5">
         <TopNav active={active} setActive={setActive} />
+        {publicReservationWindowNotice && (
+          <div className="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm font-bold leading-6 text-blue-900">
+            {publicReservationWindowNotice}
+          </div>
+        )}
+        {receptionNotice && (
+          <div className={cls(
+            "rounded-2xl border px-5 py-4 text-sm font-bold leading-6",
+            receptionNotice.kind === "accepted"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              : "border-amber-200 bg-amber-50 text-amber-900",
+          )}>
+            <div className="font-black">{receptionNotice.title}</div>
+            <div>{receptionNotice.detail}</div>
+            {receptionNotice.reservationId && <div>Reservation ID: {receptionNotice.reservationId}</div>}
+            {receptionNotice.expedienteId && <div>Expediente ID: {receptionNotice.expedienteId}</div>}
+          </div>
+        )}
+        {liveDemoResetNotice && (
+          <div className={cls(
+            "rounded-2xl border px-5 py-4 text-sm font-bold leading-6",
+            liveDemoResetStatus === "completed"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              : liveDemoResetStatus === "requesting"
+                ? "border-blue-200 bg-blue-50 text-blue-900"
+                : "border-amber-200 bg-amber-50 text-amber-900",
+          )}>
+            <div className="font-black">{liveDemoResetNotice.title}</div>
+            <div>{liveDemoResetNotice.detail}</div>
+          </div>
+        )}
+        {(liveExpediente || receptionNotice?.kind === "accepted" || liveDemoResetStatus === "requesting") && (
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              disabled={liveDemoResetStatus === "requesting"}
+              onClick={requestLiveDemoReset}
+              className={cls(
+                "rounded-2xl px-5 py-3 text-sm font-black text-white",
+                liveDemoResetStatus === "requesting" ? "cursor-wait bg-slate-400" : "bg-slate-950 hover:bg-slate-800",
+              )}
+            >
+              Reiniciar demostración en vivo
+            </button>
+          </div>
+        )}
+        {(liveDemoResetStatus === "timeout" || liveDemoResetStatus === "error") && liveExpediente && (
+          <button
+            type="button"
+            onClick={clearOnlyAdminLiveDemoState}
+            className="rounded-2xl border border-amber-300 bg-white px-5 py-3 text-sm font-black text-amber-900 hover:bg-amber-50"
+          >
+            Limpiar solo estado local del Admin
+          </button>
+        )}
         <Page
           demoContext={demoContext}
           demoFindings={demoFindings}
+          liveExpediente={liveExpediente}
+          autoSelectReservationId={autoSelectReservationId}
+          liveDemoResetToken={liveDemoResetToken}
           onDemoContextInjected={setDemoContext}
           onDemoFindingsInjected={setDemoFindings}
+          onOpenPublicReservation={openPublicReservation}
           setActive={setActive}
         />
       </div>
@@ -622,6 +1052,33 @@ const normalizeDemoIdSegment = (value) =>
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, "-")
     .replace(/^-|-$/g, "") || "DEMO";
+
+const buildLiveExpedienteId = (reservationId) => {
+  const normalizedReservationId = normalizeDemoIdSegment(reservationId);
+  const knownReservationPrefixes = ["HOP-RES-", "AMENA-RES-"];
+  const matchingPrefix = knownReservationPrefixes.find((prefix) => normalizedReservationId.startsWith(prefix));
+  const expedienteSegment = matchingPrefix
+    ? normalizedReservationId.slice(matchingPrefix.length)
+    : normalizedReservationId;
+
+  return `HOP-EXP-${normalizeDemoIdSegment(expedienteSegment || normalizedReservationId)}`;
+};
+
+const formatDemoDateTime = (value) => {
+  try {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat("es-GT", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
+  } catch {
+    return value;
+  }
+};
 
 const buildDemoLiveFile = (client) => {
   const reservationId = client?.reservation_id || "HOP-RES-DEMO";
@@ -888,15 +1345,16 @@ function ExecutivePage({ demoFindings = [], setActive }) {
   );
 }
 
-function ClientPage({ demoFindings = [], setActive }) {
+function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReservationId = null, liveDemoResetToken = 0, setActive }) {
   const profile = clientOperationalProfile;
   const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="client" />;
   const [clientSearch, setClientSearch] = useState("");
   const [selectedClientReservationId, setSelectedClientReservationId] = useState(null);
-  const adminClients = [
+  const baseAdminClients: AdminClient[] = [
     {
       name: profile.cliente.name,
       reservation_id: "HOP-RES-000784",
+      expediente_id: "EXP-DEMO-HOP-RES-000784",
       unit: profile.unidadReservada.label,
       status: profile.pipeline.status,
       seller: profile.vendedora.label,
@@ -916,20 +1374,54 @@ function ClientPage({ demoFindings = [], setActive }) {
       seller: "Ana Guardado · VND-017",
     },
   ];
+  const liveUnit = liveExpediente
+    ? [
+        liveExpediente.selectedUnit.sector,
+        liveExpediente.selectedUnit.towerOrBlock,
+        liveExpediente.selectedUnit.level,
+        liveExpediente.selectedUnit.model,
+        liveExpediente.selectedUnit.unitOrLot,
+      ].filter(Boolean).join(" · ")
+    : "";
+  const liveClient: AdminClient | null = liveExpediente
+    ? {
+        name: `${liveExpediente.client.firstName} ${liveExpediente.client.lastName}`.trim(),
+        reservation_id: liveExpediente.reservationId,
+        expediente_id: liveExpediente.expedienteId,
+        unit: liveUnit || liveExpediente.selectedUnit.unitOrLot,
+        status: "Expediente inicial",
+        seller: "App Pública de Reservas",
+        liveExpediente,
+      }
+    : null;
+  const adminClients: AdminClient[] = liveClient
+    ? [liveClient, ...baseAdminClients.filter((client) => client.reservation_id !== liveClient.reservation_id)]
+    : baseAdminClients;
+  useEffect(() => {
+    if (autoSelectReservationId) setSelectedClientReservationId(autoSelectReservationId);
+  }, [autoSelectReservationId]);
+  useEffect(() => {
+    if (liveDemoResetToken === 0) return;
+    setClientSearch("");
+    setSelectedClientReservationId(null);
+  }, [liveDemoResetToken]);
   const normalizedClientSearch = clientSearch.trim().toLowerCase();
+  const effectiveSelectedClientReservationId = selectedClientReservationId || autoSelectReservationId;
   const filteredAdminClients = normalizedClientSearch
     ? adminClients.filter((client) =>
-        `${client.name} ${client.reservation_id}`.toLowerCase().includes(normalizedClientSearch),
+        `${client.name} ${client.reservation_id} ${client.unit} ${client.status}`.toLowerCase().includes(normalizedClientSearch),
       )
     : [];
-  const selectedAdminClient = adminClients.find((client) => client.reservation_id === selectedClientReservationId) || null;
+  const selectedAdminClient = adminClients.find((client) => client.reservation_id === effectiveSelectedClientReservationId) || null;
   const selectedClientInitials = selectedAdminClient?.name
     .split(" ")
     .map((part) => part[0])
     .join("")
     .slice(0, 2)
     .toUpperCase() || "EV";
-  const hasDetailedDemoFile = selectedAdminClient?.reservation_id === "HOP-RES-000784";
+  const selectedLiveExpediente = selectedAdminClient?.liveExpediente || null;
+  const hasInitialLiveExpediente = selectedLiveExpediente?.status === "initial";
+  const hasDetailedDemoFile = !hasInitialLiveExpediente && selectedAdminClient?.reservation_id === "HOP-RES-000784";
 
   return (
     <div className="space-y-5">
@@ -965,7 +1457,7 @@ function ClientPage({ demoFindings = [], setActive }) {
             {filteredAdminClients.length > 0 ? (
               <div className="grid gap-3">
                 {filteredAdminClients.map((client) => {
-                  const selected = client.reservation_id === selectedClientReservationId;
+                  const selected = client.reservation_id === effectiveSelectedClientReservationId;
                   return (
                     <button
                       key={client.reservation_id}
@@ -1008,13 +1500,15 @@ function ClientPage({ demoFindings = [], setActive }) {
                 <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-slate-950 text-3xl font-black text-white">{selectedClientInitials}</div>
                 <div>
                   <div className="flex flex-wrap gap-2">
-                    <Badge tone="green">Expediente seleccionado</Badge>
-                    <Badge tone="amber">Fixture/local demo</Badge>
-                    <Badge tone="violet">Validación humana requerida</Badge>
+                    <Badge tone={hasInitialLiveExpediente ? "blue" : "green"}>{hasInitialLiveExpediente ? "Reserva recibida" : "Expediente seleccionado"}</Badge>
+                    <Badge tone={hasInitialLiveExpediente ? "amber" : "amber"}>{hasInitialLiveExpediente ? "Demo · No persistido" : "Fixture/local demo"}</Badge>
+                    <Badge tone={hasInitialLiveExpediente ? "slate" : "violet"}>{hasInitialLiveExpediente ? "Marta pendiente / opcional" : "Validación humana requerida"}</Badge>
                   </div>
                   <h2 className="mt-3 text-3xl font-black text-slate-950">{selectedAdminClient.name}</h2>
                   <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
-                    Expediente demo abierto desde una búsqueda explícita. Los datos siguientes son simulados y crecen hacia abajo dentro del expediente del cliente seleccionado.
+                    {hasInitialLiveExpediente
+                      ? "Expediente Vivo inicial recibido desde la App Pública. El snapshot queda disponible para enriquecimiento posterior, sin movimientos posteriores todavía."
+                      : "Expediente demo abierto desde una búsqueda explícita. Los datos siguientes son simulados y crecen hacia abajo dentro del expediente del cliente seleccionado."}
                   </p>
                 </div>
               </div>
@@ -1029,7 +1523,41 @@ function ClientPage({ demoFindings = [], setActive }) {
             </div>
           </Card>
 
-          {hasDetailedDemoFile ? (
+          {hasInitialLiveExpediente ? (
+            <Card className="border-blue-200 bg-blue-50">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div>
+                  <Badge tone="blue">Expediente Vivo inicial</Badge>
+                  <h2 className="mt-3 text-2xl font-black text-slate-950">Reserva completada</h2>
+                  <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
+                    Snapshot recibido desde la App Pública. Marta permanece pendiente y opcional como enriquecimiento posterior.
+                  </p>
+                </div>
+                <Badge tone="dark">{selectedLiveExpediente.expedienteId}</Badge>
+              </div>
+              <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <InfoCard title="reservationId" value={selectedLiveExpediente.reservationId} />
+                <InfoCard title="expedienteId" value={selectedLiveExpediente.expedienteId} />
+                <InfoCard title="Nombre" value={selectedLiveExpediente.client.firstName + " " + selectedLiveExpediente.client.lastName} />
+                <InfoCard title="Correo" value={selectedLiveExpediente.client.email} />
+                <InfoCard title="Teléfono" value={selectedLiveExpediente.client.phone} />
+                <InfoCard title="Proyecto" value={selectedLiveExpediente.project.name} />
+                <InfoCard title="Tipo" value={selectedLiveExpediente.selectedUnit.propertyType} />
+                <InfoCard title="Sector" value={selectedLiveExpediente.selectedUnit.sector || "No informado"} />
+                <InfoCard title="Torre / manzana" value={selectedLiveExpediente.selectedUnit.towerOrBlock || "No informado"} />
+                <InfoCard title="Nivel" value={selectedLiveExpediente.selectedUnit.level || "No informado"} />
+                <InfoCard title="Modelo" value={selectedLiveExpediente.selectedUnit.model || "No informado"} />
+                <InfoCard title="Unidad / lote" value={selectedLiveExpediente.selectedUnit.unitOrLot} />
+                <InfoCard title="Fecha / hora" value={formatDemoDateTime(selectedLiveExpediente.receivedAt)} />
+                <InfoCard title="Origen" value={selectedLiveExpediente.sourceApplication} />
+                <InfoCard title="Canal" value={selectedLiveExpediente.sourceChannel} />
+                <InfoCard title="Estado" value="Reserva completada" detail="Sin movimientos posteriores" />
+              </div>
+              <div className="mt-5 rounded-2xl border border-blue-200 bg-white p-4 text-sm font-bold leading-6 text-slate-700">
+                Todavía no existen movimientos posteriores. Marta y otras aplicaciones podrán enriquecer este expediente después.
+              </div>
+            </Card>
+          ) : hasDetailedDemoFile ? (
             <DemoLiveFileMovementsPanel client={selectedAdminClient} />
           ) : (
             <Card className="border-dashed border-slate-200 bg-slate-50">
@@ -1820,8 +2348,10 @@ function DashboardsPage() {
 function DemoPage({
   demoContext,
   demoFindings = [],
+  liveExpediente = null,
   onDemoContextInjected,
   onDemoFindingsInjected,
+  onOpenPublicReservation,
   setActive,
 }) {
   const phases = [
@@ -2151,6 +2681,10 @@ function DemoPage({
   };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
+  const liveSnapshot = liveExpediente || null;
+  const liveSelectedUnit = liveSnapshot?.selectedUnit || null;
+  const liveClientName = liveSnapshot ? `${liveSnapshot.client.firstName} ${liveSnapshot.client.lastName}`.trim() : selectedVolunteer.name;
+  const liveLevelAndModel = liveSelectedUnit ? [liveSelectedUnit.level, liveSelectedUnit.model].filter(Boolean).join(" · ") : "";
   const simulatedDataInjected = activeDemoContext?.status === "injected" && simulatedReservationClients.length > 0 && simulatedInternalMessages.length > 0 && simulatedSellerReports.length > 0 && simulatedVapiCallLogs.length > 0;
   const effectiveDemoContext = activeDemoContext || demoContext;
   const phaseFiveFindings = simulatedIntelligenceSignals.length
@@ -2493,15 +3027,14 @@ function DemoPage({
               App Pública requiere otro puerto
             </button>
           ) : (
-            <a
-              href={PUBLIC_RESERVATION_APP_URL}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={onOpenPublicReservation}
               className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"
             >
               <ExternalLink size={16} className="mr-2" />
               Abrir experiencia pública de reserva
-            </a>
+            </button>
           )}
         </div>
       </Card>
@@ -2566,23 +3099,24 @@ function DemoPage({
         </Card>
         <div id="demo-reservation-live" className="scroll-mt-64">
         <Card>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo se representa como dato demo para iniciar el ciclo escénico de seguimiento.</p></div><div className="flex flex-wrap gap-2"><Badge tone="slate">Reserva base preparada</Badge><Badge tone="blue">Datos simulados</Badge><Badge tone="amber">No persistido</Badge></div></div>
-          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button onClick={validateReservation} className="rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"><Search size={16} className="mr-2 inline" />Validar reserva demo</button></div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo se representa como dato demo para iniciar el ciclo escénico de seguimiento.</p></div><div className="flex flex-wrap gap-2"><Badge tone={liveExpediente ? "blue" : "slate"}>{liveExpediente ? "Reserva recibida desde App Pública" : "Reserva base preparada"}</Badge><Badge tone="blue">{liveExpediente ? "Datos capturados en vivo" : "Datos simulados"}</Badge><Badge tone="amber">Demo · No persistido</Badge></div></div>
+          <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button disabled={Boolean(liveExpediente)} onClick={validateReservation} className={cls("rounded-2xl px-5 py-4 text-sm font-black", liveExpediente ? "bg-slate-200 text-slate-600" : "bg-emerald-600 text-white")}><Search size={16} className="mr-2 inline" />{liveExpediente ? "Validación demo separada" : "Validar reserva demo"}</button></div>
           <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">El acceso técnico al registro externo queda fuera del recorrido comercial; esta validación solo actualiza el escenario local.</p>
+          {liveExpediente && <p className="mt-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black leading-6 text-blue-900">La reserva viva recibida desde la App Pública es la autoridad del caso. La validación demo local permanece separada y no crea ni duplica el Expediente Vivo.</p>}
           <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-600">Última actualización: hace 12 segundos</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
-            <InfoCard title="Nombre del cliente" value={selectedVolunteer.name || "Sin registro"} />
-            <InfoCard title="Teléfono" value={selectedVolunteer.whatsapp || selectedPhone} />
-            <InfoCard title="Email" value={selectedVolunteer.email || "Pendiente"} />
-            <InfoCard title="Tipo de propiedad" value="Apartamento" />
-            <InfoCard title="Sector" value="Sector 01" />
-            <InfoCard title="Torre / manzana" value="Torre 3" />
-            <InfoCard title="Nivel / modelo" value="Nivel 7 · Modelo A" />
-            <InfoCard title="Unidad / lote" value="A704" />
-            <InfoCard title="Estado de reserva" value={reservationStatus.reservation} />
-            <InfoCard title="Estado WhatsApp" value={reservationStatus.whatsapp} />
-            <InfoCard title="Estado email" value={reservationStatus.email} />
-            <InfoCard title="Evidencia de registro" value={reservationStatus.evidence} />
+            <InfoCard title="Nombre del cliente" value={liveClientName || "Sin registro"} />
+            <InfoCard title="Teléfono" value={liveSnapshot?.client.phone || selectedVolunteer.whatsapp || selectedPhone} />
+            <InfoCard title="Email" value={liveSnapshot?.client.email || selectedVolunteer.email || "Pendiente"} />
+            <InfoCard title="Tipo de propiedad" value={liveSelectedUnit?.propertyType || "Apartamento"} />
+            <InfoCard title="Sector" value={liveSelectedUnit?.sector || "Sector 01"} />
+            <InfoCard title="Torre / manzana" value={liveSelectedUnit?.towerOrBlock || "Torre 3"} />
+            <InfoCard title="Nivel / modelo" value={liveLevelAndModel || "Nivel 7 · Modelo A"} />
+            <InfoCard title="Unidad / lote" value={liveSelectedUnit?.unitOrLot || "A704"} />
+            <InfoCard title="Estado de reserva" value={liveExpediente ? "Confirmada" : reservationStatus.reservation} />
+            <InfoCard title="Estado WhatsApp" value={liveExpediente ? "No incluido en evento" : reservationStatus.whatsapp} />
+            <InfoCard title="Estado email" value={liveExpediente ? "No incluido en evento" : reservationStatus.email} />
+            <InfoCard title="Evidencia de registro" value={liveExpediente ? "Evento recibido · demo/no persistido" : reservationStatus.evidence} />
           </div>
           {simulatedDataInjected && (
             <div className="mt-5">
