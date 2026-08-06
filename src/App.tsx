@@ -179,6 +179,14 @@ type AdminLiveDemoResetRequest = {
   sourceApplication: "hoperia_admin_demo";
 };
 
+type ReservationReplayRequest = {
+  type: "hoperia.reservation.replay.request";
+  schemaVersion: "1.0";
+  requestId: string;
+  requestedAt: string;
+  sourceApplication: "hoperia_admin_demo";
+};
+
 type PublicLiveDemoResetAck = {
   type: "hoperia.demo.live.reset.ack";
   schemaVersion: "1.0";
@@ -212,6 +220,8 @@ type ReceptionNotice = {
   reservationId?: string;
   expedienteId?: string;
 };
+
+const liveExpedienteStorageKey = "hoperia.admin.live_expediente.v1";
 
 type ClientCommunicationMessage = {
   from: string;
@@ -613,6 +623,79 @@ function AppShell() {
   const expedienteIdByReservationId = useRef(new Map<string, string>());
   const pendingResetIdRef = useRef<string | null>(null);
   const resetTimeoutRef = useRef<number | null>(null);
+  const pendingReplayRequestIdRef = useRef<string | null>(null);
+  const replayTimeoutRef = useRef<number | null>(null);
+  const [reservationReplayNotice, setReservationReplayNotice] = useState<LiveDemoResetNotice | null>(null);
+  const [reservationReplayStatus, setReservationReplayStatus] = useState<"idle" | "requesting" | "received" | "empty" | "error">("idle");
+  const isNonEmptyString = (value: unknown): value is string =>
+    typeof value === "string" && value.trim().length > 0;
+
+  const isReservationCompletedEvent = (value: unknown): value is ReservationCompletedEvent => {
+    if (!value || typeof value !== "object") return false;
+    const data = value as Partial<ReservationCompletedEvent>;
+    const client = data.client as ReservationCompletedEvent["client"] | undefined;
+    const project = data.project as ReservationCompletedEvent["project"] | undefined;
+    const selectedUnit = data.selectedUnit as ReservationCompletedEvent["selectedUnit"] | undefined;
+
+    return data.type === "hoperia.reservation.completed" &&
+      data.schemaVersion === "1.0" &&
+      ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "") &&
+      isNonEmptyString(data.sourceOrigin) &&
+      data.reservationStatus === "completed" &&
+      data.isDemo === true &&
+      data.sourceChannel === "public_web_app" &&
+      isNonEmptyString(data.eventId) &&
+      isNonEmptyString(data.reservationId) &&
+      isNonEmptyString(data.occurredAt) &&
+      isNonEmptyString(client?.firstName) &&
+      isNonEmptyString(client?.lastName) &&
+      isNonEmptyString(client?.email) &&
+      isNonEmptyString(client?.phone) &&
+      isNonEmptyString(project?.name) &&
+      isNonEmptyString(selectedUnit?.propertyType) &&
+      isNonEmptyString(selectedUnit?.unitOrLot);
+  };
+
+  const isLiveExpediente = (value: unknown): value is LiveExpediente => {
+    if (!value || typeof value !== "object") return false;
+    const data = value as Partial<LiveExpediente>;
+    const client = data.client as LiveExpediente["client"] | undefined;
+    const project = data.project as LiveExpediente["project"] | undefined;
+    const selectedUnit = data.selectedUnit as LiveExpediente["selectedUnit"] | undefined;
+
+    return isNonEmptyString(data.reservationId) &&
+      isNonEmptyString(data.expedienteId) &&
+      data.status === "initial" &&
+      isNonEmptyString(data.eventId) &&
+      isNonEmptyString(data.receivedAt) &&
+      ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "") &&
+      isNonEmptyString(data.sourceOrigin) &&
+      data.sourceChannel === "public_web_app" &&
+      data.isDemo === true &&
+      data.persisted === false &&
+      isNonEmptyString(client?.firstName) &&
+      isNonEmptyString(client?.lastName) &&
+      isNonEmptyString(client?.email) &&
+      isNonEmptyString(client?.phone) &&
+      isNonEmptyString(project?.name) &&
+      isNonEmptyString(selectedUnit?.propertyType) &&
+      isNonEmptyString(selectedUnit?.unitOrLot);
+  };
+
+  const storeLiveExpediente = (nextLiveExpediente: LiveExpediente) => {
+    window.localStorage.setItem(liveExpedienteStorageKey, JSON.stringify(nextLiveExpediente));
+  };
+
+  const clearStoredLiveExpediente = () => {
+    window.localStorage.removeItem(liveExpedienteStorageKey);
+  };
+
+  const createReplayRequestId = () => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `replay-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  };
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("amena.activeSection", active);
@@ -656,16 +739,86 @@ function AppShell() {
     }
   };
 
+  const clearReplayTimeout = () => {
+    if (replayTimeoutRef.current !== null) {
+      window.clearTimeout(replayTimeoutRef.current);
+      replayTimeoutRef.current = null;
+    }
+  };
+
+  const sendReservationReplayRequest = (detail = "Solicitando a Ruta 2 la última reserva demo disponible.") => {
+    const reservationWindow = publicReservationWindowRef.current && !publicReservationWindowRef.current.closed
+      ? publicReservationWindowRef.current
+      : window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
+
+    if (!reservationWindow) {
+      setReservationReplayStatus("error");
+      setReservationReplayNotice({
+        title: "No fue posible solicitar replay",
+        detail: "La ventana de Ruta 2 no está disponible o fue bloqueada por el navegador.",
+      });
+      return;
+    }
+
+    publicReservationWindowRef.current = reservationWindow;
+    reservationWindow.focus();
+    clearReplayTimeout();
+
+    const requestId = createReplayRequestId();
+    const replayRequest: ReservationReplayRequest = {
+      type: "hoperia.reservation.replay.request",
+      schemaVersion: "1.0",
+      requestId,
+      requestedAt: new Date().toISOString(),
+      sourceApplication: "hoperia_admin_demo",
+    };
+
+    pendingReplayRequestIdRef.current = requestId;
+    setReservationReplayStatus("requesting");
+    setReservationReplayNotice({
+      title: "Recuperación solicitada",
+      detail,
+    });
+
+    try {
+      reservationWindow.postMessage(replayRequest, configuredPublicReservationOrigin);
+    } catch (error) {
+      pendingReplayRequestIdRef.current = null;
+      setReservationReplayStatus("error");
+      setReservationReplayNotice({
+        title: "No fue posible solicitar replay",
+        detail: error instanceof Error ? error.message : "Error local al solicitar la última reserva demo.",
+      });
+      return;
+    }
+
+    replayTimeoutRef.current = window.setTimeout(() => {
+      if (pendingReplayRequestIdRef.current !== requestId) return;
+      pendingReplayRequestIdRef.current = null;
+      replayTimeoutRef.current = null;
+      setReservationReplayStatus("empty");
+      setReservationReplayNotice({
+        title: "Sin reserva recuperable",
+        detail: "Ruta 2 no respondió con una reserva demo almacenada. Completa una reserva o verifica que la ventana pública siga abierta.",
+      });
+    }, 5000);
+  };
+
   const clearAdminLiveDemoState = (notice: LiveDemoResetNotice) => {
     clearResetTimeout();
+    clearReplayTimeout();
     pendingResetIdRef.current = null;
+    pendingReplayRequestIdRef.current = null;
     liveExpedienteRef.current = null;
     setLiveExpediente(null);
     setAutoSelectReservationId(null);
     setReceptionNotice(null);
     setPublicReservationWindowNotice(null);
+    setReservationReplayNotice(null);
+    setReservationReplayStatus("idle");
     processedEventIds.current.clear();
     expedienteIdByReservationId.current.clear();
+    clearStoredLiveExpediente();
     setLiveDemoResetToken((current) => current + 1);
     setLiveDemoResetStatus("completed");
     setLiveDemoResetNotice(notice);
@@ -754,38 +907,44 @@ function AppShell() {
     });
   };
 
-  useEffect(() => () => clearResetTimeout(), []);
+  useEffect(() => () => {
+    clearResetTimeout();
+    clearReplayTimeout();
+  }, []);
 
   useEffect(() => {
-    const isNonEmptyString = (value: unknown): value is string =>
-      typeof value === "string" && value.trim().length > 0;
+    try {
+      const raw = window.localStorage.getItem(liveExpedienteStorageKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!isLiveExpediente(parsed)) {
+        clearStoredLiveExpediente();
+        return;
+      }
 
-    const isReservationCompletedEvent = (value: unknown): value is ReservationCompletedEvent => {
-      if (!value || typeof value !== "object") return false;
-      const data = value as Partial<ReservationCompletedEvent>;
-      const client = data.client as ReservationCompletedEvent["client"] | undefined;
-      const project = data.project as ReservationCompletedEvent["project"] | undefined;
-      const selectedUnit = data.selectedUnit as ReservationCompletedEvent["selectedUnit"] | undefined;
+      liveExpedienteRef.current = parsed;
+      processedEventIds.current.add(parsed.eventId);
+      expedienteIdByReservationId.current.set(parsed.reservationId, parsed.expedienteId);
+      setLiveExpediente(parsed);
+      setAutoSelectReservationId(parsed.reservationId);
+      setReceptionNotice({
+        kind: "accepted",
+        title: "Reserva recuperada desde este Centro de Mando",
+        detail: "Expediente Vivo inicial rehidratado · Demo · No persistido",
+        reservationId: parsed.reservationId,
+        expedienteId: parsed.expedienteId,
+      });
+      setReservationReplayStatus("received");
+      setReservationReplayNotice({
+        title: "Reserva demo recuperada",
+        detail: `Reservation ID: ${parsed.reservationId}`,
+      });
+    } catch {
+      clearStoredLiveExpediente();
+    }
+  }, []);
 
-      return data.type === "hoperia.reservation.completed" &&
-        data.schemaVersion === "1.0" &&
-        ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "") &&
-        isNonEmptyString(data.sourceOrigin) &&
-        data.reservationStatus === "completed" &&
-        data.isDemo === true &&
-        data.sourceChannel === "public_web_app" &&
-        isNonEmptyString(data.eventId) &&
-        isNonEmptyString(data.reservationId) &&
-        isNonEmptyString(data.occurredAt) &&
-        isNonEmptyString(client?.firstName) &&
-        isNonEmptyString(client?.lastName) &&
-        isNonEmptyString(client?.email) &&
-        isNonEmptyString(client?.phone) &&
-        isNonEmptyString(project?.name) &&
-        isNonEmptyString(selectedUnit?.propertyType) &&
-        isNonEmptyString(selectedUnit?.unitOrLot);
-    };
-
+  useEffect(() => {
     const isPublicLiveDemoResetAck = (value: unknown): value is PublicLiveDemoResetAck => {
       if (!value || typeof value !== "object") return false;
       const data = value as Partial<PublicLiveDemoResetAck>;
@@ -842,6 +1001,19 @@ function AppShell() {
 
       const reservationEvent = event.data;
       if (processedEventIds.current.has(reservationEvent.eventId)) {
+        if (pendingReplayRequestIdRef.current !== null) {
+          clearReplayTimeout();
+          pendingReplayRequestIdRef.current = null;
+          setReservationReplayStatus("received");
+          setReservationReplayNotice({
+            title: "Reserva demo ya disponible",
+            detail: `Reservation ID: ${reservationEvent.reservationId}`,
+          });
+        } else if (reservationReplayStatus === "empty" || reservationReplayStatus === "error") {
+          clearReplayTimeout();
+          setReservationReplayStatus("idle");
+          setReservationReplayNotice(null);
+        }
         return;
       }
 
@@ -869,8 +1041,22 @@ function AppShell() {
       processedEventIds.current.add(reservationEvent.eventId);
       expedienteIdByReservationId.current.set(reservationEvent.reservationId, expedienteId);
       liveExpedienteRef.current = nextLiveExpediente;
+      storeLiveExpediente(nextLiveExpediente);
       setLiveExpediente(nextLiveExpediente);
       setAutoSelectReservationId(reservationEvent.reservationId);
+      if (pendingReplayRequestIdRef.current !== null) {
+        clearReplayTimeout();
+        pendingReplayRequestIdRef.current = null;
+        setReservationReplayStatus("received");
+        setReservationReplayNotice({
+          title: "Reserva demo recuperada",
+          detail: `Reservation ID: ${reservationEvent.reservationId}`,
+        });
+      } else {
+        clearReplayTimeout();
+        setReservationReplayStatus("idle");
+        setReservationReplayNotice(null);
+      }
       if (pendingResetIdRef.current === null) {
         setLiveDemoResetStatus("idle");
         setLiveDemoResetNotice(null);
@@ -938,8 +1124,32 @@ function AppShell() {
             <div>{liveDemoResetNotice.detail}</div>
           </div>
         )}
-        {(liveExpediente || receptionNotice?.kind === "accepted" || liveDemoResetStatus === "requesting") && (
-          <div className="flex flex-wrap gap-3">
+        {reservationReplayNotice && (
+          <div className={cls(
+            "rounded-2xl border px-5 py-4 text-sm font-bold leading-6",
+            reservationReplayStatus === "received"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              : reservationReplayStatus === "requesting"
+                ? "border-blue-200 bg-blue-50 text-blue-900"
+                : "border-amber-200 bg-amber-50 text-amber-900",
+          )}>
+            <div className="font-black">{reservationReplayNotice.title}</div>
+            <div>{reservationReplayNotice.detail}</div>
+          </div>
+        )}
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            disabled={reservationReplayStatus === "requesting"}
+            onClick={() => sendReservationReplayRequest("Solicitud manual desde Centro de Mando. Ruta 2 reenviará la última reserva demo guardada si existe.")}
+            className={cls(
+              "rounded-2xl px-5 py-3 text-sm font-black text-white",
+              reservationReplayStatus === "requesting" ? "cursor-wait bg-slate-400" : "bg-blue-700 hover:bg-blue-800",
+            )}
+          >
+            Recuperar última reserva demo
+          </button>
+          {(liveExpediente || receptionNotice?.kind === "accepted" || liveDemoResetStatus === "requesting") && (
             <button
               type="button"
               disabled={liveDemoResetStatus === "requesting"}
@@ -951,8 +1161,8 @@ function AppShell() {
             >
               Reiniciar demostración en vivo
             </button>
-          </div>
-        )}
+          )}
+        </div>
         {(liveDemoResetStatus === "timeout" || liveDemoResetStatus === "error") && liveExpediente && (
           <button
             type="button"
@@ -1195,7 +1405,7 @@ function DemoLiveFileMovementsPanel({ client }) {
             <Badge tone="violet">Movimientos simulados post-reserva</Badge>
             <Badge tone="green">Acciones sugeridas para validacion humana</Badge>
           </div>
-          <h2 className="mt-3 text-3xl font-black text-slate-950">Expediente Vivo demo</h2>
+          <h2 className="mt-3 text-3xl font-black text-slate-950">Expediente demo detallado · Carlos Méndez</h2>
           <p className="mt-2 max-w-5xl text-base font-semibold leading-7 text-slate-800">
             Esta vista fixture/local muestra como una reserva demo se convierte en expediente y recibe movimientos posteriores. H - OperIA Intelligence sugiere acciones trazables para revision humana; no decide ni ejecuta automaticamente.
           </p>
@@ -1204,8 +1414,9 @@ function DemoLiveFileMovementsPanel({ client }) {
       </div>
 
       <div className="mt-5 rounded-2xl border border-amber-100 bg-white/70 px-4 py-3 text-sm font-semibold leading-6 text-slate-700">
-        <span className="font-black text-slate-950">Reserva demo:</span> {liveFile.reservation_id} · Fixture/local · Sin persistencia
-        <span className="ml-2 text-xs font-bold text-slate-500">Referencia interna: {liveFile.expediente_id}</span>
+        <span className="font-black text-slate-950">Titular del expediente:</span> {client?.name || "Cliente demo"}
+        <span className="ml-2 text-slate-500">· Reservation ID: {liveFile.reservation_id}</span>
+        <span className="ml-2 text-xs font-bold text-slate-500">Referencia técnica demo: {liveFile.expediente_id}</span>
       </div>
 
       <div className="mt-5 rounded-3xl border border-amber-100 bg-white p-4">
@@ -1241,6 +1452,7 @@ function DemoLiveFileMovementsPanel({ client }) {
                 <InfoCard title="Fuente" value={movement.source} />
                 <InfoCard title="Verificación" value={movement.verification_status} />
                 <InfoCard title="Ordenamiento" value={movement.ordering_bucket} />
+                <InfoCard title="Titular del expediente" value={client?.name || "Cliente demo"} />
                 <InfoCard title="Responsable humano" value={movement.human_owner} />
               </div>
               <div className="mt-4 space-y-3 text-sm font-semibold leading-6 text-slate-800">
@@ -1422,6 +1634,13 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
   const selectedLiveExpediente = selectedAdminClient?.liveExpediente || null;
   const hasInitialLiveExpediente = selectedLiveExpediente?.status === "initial";
   const hasDetailedDemoFile = !hasInitialLiveExpediente && selectedAdminClient?.reservation_id === "HOP-RES-000784";
+  const clientPageBadges = selectedAdminClient
+    ? [
+        REPORT_DATE,
+        hasInitialLiveExpediente ? "Expediente recibido" : hasDetailedDemoFile ? "Expediente demo detallado" : "Expediente seleccionado",
+        selectedAdminClient.status,
+      ]
+    : [REPORT_DATE, "Sin expediente seleccionado", "Vista de búsqueda"];
 
   return (
     <div className="space-y-5">
@@ -1430,7 +1649,7 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
         subtitle="Expediente vivo desde la reserva hasta la entrega: Marta acompaña conversaciones, H - OperIA Intelligence ordena señales y la vendedora revisa tono, prioridad y siguiente paso."
         icon={UserRound}
         sync={martaSync.client}
-        badges={[REPORT_DATE, profile.cliente.name, profile.pipeline.status]}
+        badges={clientPageBadges}
         syncNote="Este porcentaje indica qué tan conectado está el expediente post-reserva: Marta acompaña dudas y conversaciones; H - OperIA Intelligence interpreta señales; la vendedora revisa y ejecuta el siguiente paso."
       />
       {demoEvidenceMirror}
@@ -1504,7 +1723,8 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
                     <Badge tone={hasInitialLiveExpediente ? "amber" : "amber"}>{hasInitialLiveExpediente ? "Demo · No persistido" : "Fixture/local demo"}</Badge>
                     <Badge tone={hasInitialLiveExpediente ? "slate" : "violet"}>{hasInitialLiveExpediente ? "Marta pendiente / opcional" : "Validación humana requerida"}</Badge>
                   </div>
-                  <h2 className="mt-3 text-3xl font-black text-slate-950">{selectedAdminClient.name}</h2>
+                  <h2 className="mt-3 text-3xl font-black text-slate-950">Expediente seleccionado</h2>
+                  <div className="mt-2 text-base font-black text-slate-800">Titular del expediente: {selectedAdminClient.name}</div>
                   <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
                     {hasInitialLiveExpediente
                       ? "Expediente Vivo inicial recibido desde la App Pública. El snapshot queda disponible para enriquecimiento posterior, sin movimientos posteriores todavía."
@@ -1512,11 +1732,14 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
                   </p>
                 </div>
               </div>
-              <Badge tone="dark">{selectedAdminClient.reservation_id}</Badge>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold leading-6 text-slate-700">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Reservation ID</div>
+                <div className="mt-1 font-black text-slate-950">{selectedAdminClient.reservation_id}</div>
+              </div>
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-4">
-              <InfoCard title="Cliente seleccionado" value={selectedAdminClient.name} detail={selectedAdminClient.reservation_id} />
+              <InfoCard title="Titular del expediente" value={selectedAdminClient.name} detail={selectedAdminClient.reservation_id} />
               <InfoCard title="Unidad" value={selectedAdminClient.unit} />
               <InfoCard title="Estado" value={selectedAdminClient.status} />
               <InfoCard title="Asesora" value={selectedAdminClient.seller} />
@@ -1533,25 +1756,34 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
                     Snapshot recibido desde la App Pública. Marta permanece pendiente y opcional como enriquecimiento posterior.
                   </p>
                 </div>
-                <Badge tone="dark">{selectedLiveExpediente.expedienteId}</Badge>
+                <div className="rounded-2xl border border-blue-200 bg-white/80 px-4 py-3 text-sm font-bold leading-6 text-slate-700">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Expediente ID</div>
+                  <div className="mt-1 font-black text-slate-950">{selectedLiveExpediente.expedienteId}</div>
+                </div>
               </div>
-              <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                <InfoCard title="reservationId" value={selectedLiveExpediente.reservationId} />
-                <InfoCard title="expedienteId" value={selectedLiveExpediente.expedienteId} />
-                <InfoCard title="Nombre" value={selectedLiveExpediente.client.firstName + " " + selectedLiveExpediente.client.lastName} />
-                <InfoCard title="Correo" value={selectedLiveExpediente.client.email} />
-                <InfoCard title="Teléfono" value={selectedLiveExpediente.client.phone} />
-                <InfoCard title="Proyecto" value={selectedLiveExpediente.project.name} />
-                <InfoCard title="Tipo" value={selectedLiveExpediente.selectedUnit.propertyType} />
-                <InfoCard title="Sector" value={selectedLiveExpediente.selectedUnit.sector || "No informado"} />
-                <InfoCard title="Torre / manzana" value={selectedLiveExpediente.selectedUnit.towerOrBlock || "No informado"} />
-                <InfoCard title="Nivel" value={selectedLiveExpediente.selectedUnit.level || "No informado"} />
-                <InfoCard title="Modelo" value={selectedLiveExpediente.selectedUnit.model || "No informado"} />
-                <InfoCard title="Unidad / lote" value={selectedLiveExpediente.selectedUnit.unitOrLot} />
-                <InfoCard title="Fecha / hora" value={formatDemoDateTime(selectedLiveExpediente.receivedAt)} />
-                <InfoCard title="Origen" value={selectedLiveExpediente.sourceApplication} />
-                <InfoCard title="Canal" value={selectedLiveExpediente.sourceChannel} />
-                <InfoCard title="Estado" value="Reserva completada" detail="Sin movimientos posteriores" />
+              <div className="mt-5 rounded-3xl border border-blue-100 bg-white p-4">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Resumen ejecutivo</div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <InfoCard title="Titular" value={selectedLiveExpediente.client.firstName + " " + selectedLiveExpediente.client.lastName} detail={`${selectedLiveExpediente.client.email} · ${selectedLiveExpediente.client.phone}`} />
+                  <InfoCard title="Unidad" value={selectedAdminClient.unit} detail={selectedLiveExpediente.project.name} />
+                  <InfoCard title="Estado" value="Reserva completada" detail="Sin movimientos posteriores" />
+                  <InfoCard title="Siguiente paso" value="Marta pendiente / opcional" detail="Enriquecimiento posterior del expediente." />
+                </div>
+              </div>
+              <div className="mt-4 rounded-3xl border border-blue-100 bg-white/70 p-4">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Identificadores y origen</div>
+                <div className="mt-4 grid gap-3 text-sm font-semibold leading-6 text-slate-700 md:grid-cols-2 xl:grid-cols-5">
+                  <div><span className="font-black text-slate-950">Reservation ID:</span> {selectedLiveExpediente.reservationId}</div>
+                  <div><span className="font-black text-slate-950">Expediente ID:</span> {selectedLiveExpediente.expedienteId}</div>
+                  <div><span className="font-black text-slate-950">Fecha y hora:</span> {formatDemoDateTime(selectedLiveExpediente.receivedAt)}</div>
+                  <div><span className="font-black text-slate-950">Origen:</span> {selectedLiveExpediente.sourceApplication}</div>
+                  <div><span className="font-black text-slate-950">Canal:</span> {selectedLiveExpediente.sourceChannel}</div>
+                  <div><span className="font-black text-slate-950">Tipo:</span> {selectedLiveExpediente.selectedUnit.propertyType}</div>
+                  <div><span className="font-black text-slate-950">Sector:</span> {selectedLiveExpediente.selectedUnit.sector || "No informado"}</div>
+                  <div><span className="font-black text-slate-950">Torre o manzana:</span> {selectedLiveExpediente.selectedUnit.towerOrBlock || "No informado"}</div>
+                  <div><span className="font-black text-slate-950">Nivel:</span> {selectedLiveExpediente.selectedUnit.level || "No informado"}</div>
+                  <div><span className="font-black text-slate-950">Modelo:</span> {selectedLiveExpediente.selectedUnit.model || "No informado"}</div>
+                </div>
               </div>
               <div className="mt-5 rounded-2xl border border-blue-200 bg-white p-4 text-sm font-bold leading-6 text-slate-700">
                 Todavía no existen movimientos posteriores. Marta y otras aplicaciones podrán enriquecer este expediente después.
@@ -1581,7 +1813,7 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
           <div className="flex gap-5">
             <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-slate-950 text-4xl font-black text-white">{profile.cliente.initials}</div>
             <div>
-              <h2 className="text-3xl font-black text-slate-950">Perfil operativo del expediente</h2>
+              <h2 className="text-3xl font-black text-slate-950">Expediente demo detallado · Carlos Méndez</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {profile.cliente.badges.map((badge) => <Badge key={badge.label} tone={badge.tone}>{badge.label}</Badge>)}
               </div>
