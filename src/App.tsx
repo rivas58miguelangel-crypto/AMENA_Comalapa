@@ -1138,17 +1138,6 @@ function AppShell() {
           </div>
         )}
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            disabled={reservationReplayStatus === "requesting"}
-            onClick={() => sendReservationReplayRequest("Solicitud manual desde Centro de Mando. Ruta 2 reenviará la última reserva demo guardada si existe.")}
-            className={cls(
-              "rounded-2xl px-5 py-3 text-sm font-black text-white",
-              reservationReplayStatus === "requesting" ? "cursor-wait bg-slate-400" : "bg-blue-700 hover:bg-blue-800",
-            )}
-          >
-            Recuperar última reserva demo
-          </button>
           {(liveExpediente || receptionNotice?.kind === "accepted" || liveDemoResetStatus === "requesting") && (
             <button
               type="button"
@@ -1178,6 +1167,8 @@ function AppShell() {
           liveExpediente={liveExpediente}
           autoSelectReservationId={autoSelectReservationId}
           liveDemoResetToken={liveDemoResetToken}
+          reservationReplayStatus={reservationReplayStatus}
+          onRequestReservationReplay={sendReservationReplayRequest}
           onDemoContextInjected={setDemoContext}
           onDemoFindingsInjected={setDemoFindings}
           onOpenPublicReservation={openPublicReservation}
@@ -1557,7 +1548,7 @@ function ExecutivePage({ demoFindings = [], setActive }) {
   );
 }
 
-function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReservationId = null, liveDemoResetToken = 0, setActive }) {
+function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, setActive }) {
   const profile = clientOperationalProfile;
   const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="client" />;
   const [clientSearch, setClientSearch] = useState("");
@@ -1671,6 +1662,19 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
             />
           </div>
         </div>
+        {!selectedAdminClient && !liveExpediente && (
+          <button
+            type="button"
+            disabled={reservationReplayStatus === "requesting"}
+            onClick={() => onRequestReservationReplay("Solicitud manual desde Centro de Mando. Ruta 2 reenviará la última reserva demo guardada si existe.")}
+            className={cls(
+              "mt-4 rounded-2xl px-5 py-3 text-sm font-black text-white",
+              reservationReplayStatus === "requesting" ? "cursor-wait bg-slate-400" : "bg-blue-700 hover:bg-blue-800",
+            )}
+          >
+            Recuperar última reserva demo
+          </button>
+        )}
         {normalizedClientSearch && (
           <div className="mt-5">
             {filteredAdminClients.length > 0 ? (
