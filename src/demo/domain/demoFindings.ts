@@ -35,6 +35,10 @@ export interface DemoInjectedFinding {
   adminTargetPage: DemoAdminTargetPage;
   adminTargetSection: string;
   operationalRecommendation: string;
+  recommendedAction: string;
+  responsibleRole: string;
+  responsibleArea?: string;
+  responsiblePerson?: string;
   associatedEvidence: Array<{
     id: string;
     label: string;

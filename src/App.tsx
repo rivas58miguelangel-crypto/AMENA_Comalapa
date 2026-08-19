@@ -596,6 +596,15 @@ function AiObservation({ title = "Observaciones estratégicas de H - OperIA Inte
   );
 }
 
+const intelligenceActionTextClass = "font-black text-violet-800";
+
+const formatDemoFindingResponsible = (finding) =>
+  [
+    finding?.responsiblePerson,
+    finding?.responsibleRole,
+    finding?.responsibleArea,
+  ].filter(Boolean).join(" · ");
+
 function SimpleTable({ columns, rows }) {
   return (
     <div className="max-w-full overflow-hidden rounded-3xl border border-slate-200 bg-white">
@@ -1338,8 +1347,9 @@ function AdminOperationalEvidenceAnchors({ demoFindings = [], targetPage }) {
       {mirrorBlocks.map(({ finding, evidence }) => (
         <div key={`${finding.id}-${evidence.id}`} id={evidence.adminTargetAnchor} className="scroll-mt-64">
           <AiObservation title={evidence.adminTargetDetail || evidence.adminTargetSection || finding.title}>
-            <p>{finding.summary}</p>
-            <p className="mt-3"><span className="font-black text-slate-950">Recomendación operacional:</span> {finding.operationalRecommendation}</p>
+            <p><span className="font-black text-slate-950">Interpretación:</span> {finding.summary}</p>
+            <p className="mt-3"><span className="font-black text-slate-950">Responsable:</span> {formatDemoFindingResponsible(finding)}</p>
+            <p className={`mt-3 ${intelligenceActionTextClass}`}><span>Acción sugerida por H - OperIA Intelligence:</span> {finding.recommendedAction}</p>
           </AiObservation>
         </div>
       ))}
@@ -3627,8 +3637,9 @@ function DemoPage({
             <div>
               <h3 className="text-3xl font-black text-slate-950">FASE 05 H - OperIA Intelligence</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Índice escénico de hallazgos prioritarios que H - OperIA Intelligence interpreta después de la Empresa Demo y ubica dentro de páginas internas del Admin.</p>
+              <p className="mt-2 max-w-4xl text-sm font-black leading-6 text-violet-800">Escenario demo / corrida simulada / no persistida. Los hallazgos actuales son fixtures trazables a la corrida, no inferencia real contra Supabase.</p>
             </div>
-            <div className="flex flex-wrap gap-2"><Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveDemoActive ? "Demo activa" : "Sin demo activa"}</Badge><Badge tone="violet">Datos simulados</Badge></div>
+            <div className="flex flex-wrap gap-2"><Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveDemoActive ? "Demo activa" : "Sin demo activa"}</Badge><Badge tone="violet">Datos simulados</Badge><Badge tone="amber">No persistido</Badge></div>
           </div>
           {!phaseFiveDemoActive && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-base font-black text-amber-900">Esperando corrida simulada</div>}
           <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -3641,7 +3652,7 @@ function DemoPage({
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
               <h3 className="text-3xl font-black text-slate-950">Hallazgos prioritarios cargados en Admin</h3>
-              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada hallazgo muestra dónde debe revisarse dentro del Admin, de qué fuente nace y qué verificación externa corresponde antes de tratarlo como hecho.</p>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada hallazgo muestra qué detectó Intelligence, por qué importa, quién debe actuar, qué acción ejecutar y dónde abrir la evidencia operacional.</p>
             </div>
             <Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveFindings.length} hallazgos</Badge>
           </div>
@@ -3663,12 +3674,18 @@ function DemoPage({
                   <div className="rounded-2xl bg-white p-4">
                     <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Hallazgo detectado</div>
                     <p className="mt-2 text-base font-semibold leading-7 text-slate-800">{signal.summary}</p>
-                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Motivo de priorización</div>
+                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Por qué importa</div>
                     <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{signal.operationalRecommendation}</p>
+                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-violet-700">Acción sugerida por H - OperIA Intelligence</div>
+                    <p className={`mt-2 text-sm leading-6 ${intelligenceActionTextClass}`}>{signal.recommendedAction}</p>
                   </div>
                   <div className="rounded-2xl bg-white p-4">
                     <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Fuente del dato</div>
                     <p className="mt-2 text-base font-black text-slate-950">{demoFindingSourceLabels[signal.source] || signal.source}</p>
+                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Responsable</div>
+                    <p className="mt-2 text-base font-black text-slate-950">{formatDemoFindingResponsible(signal)}</p>
+                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Corrida demo</div>
+                    <p className="mt-2 text-sm font-bold text-slate-700">{signal.demoRunId ? signal.demoRunId.replace("demo-", "").slice(0, 8) : demoRunIdShort} · simulada · no persistida</p>
                     <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Ver evidencias en Admin</div>
                     <div className="mt-2 grid gap-2">
                       {(signal.associatedEvidence.length ? signal.associatedEvidence : [{

@@ -40,7 +40,11 @@ export function createDemoInjectedFindings(
       adminTargetPage: "executive",
       adminTargetSection: "Prioridades ejecutivas posteriores a la reserva",
       operationalRecommendation:
-        "Revisar los casos transversales en comité comercial y asignar responsables por riesgo antes del próximo corte ejecutivo.",
+        "La dirección debe convertir los riesgos transversales detectados en una agenda operativa con responsables y fecha de seguimiento.",
+      recommendedAction:
+        "Dirección Comercial debe abrir el comité de riesgos post-reserva, asignar un responsable por cada caso transversal y registrar fecha de seguimiento antes del próximo corte ejecutivo.",
+      responsibleRole: "Dirección Comercial",
+      responsibleArea: "Dirección / Comité comercial",
       associatedEvidence: [
         evidence(
           "demo-evidence-01",
@@ -107,7 +111,11 @@ export function createDemoInjectedFindings(
       adminTargetPage: "client",
       adminTargetSection: "Timeline del cliente",
       operationalRecommendation:
-        "Unificar reserva, conversacion y seguimiento comercial para que la vendedora revise contexto completo antes de contactar al cliente.",
+        "La reserva, las dudas financieras y el seguimiento humano deben quedar en un solo expediente antes del siguiente contacto.",
+      recommendedAction:
+        "La vendedora asignada debe consolidar reserva, dudas financieras y seguimiento humano en el Expediente Vivo antes de contactar al cliente.",
+      responsibleRole: "Vendedora asignada",
+      responsibleArea: "Coordinación Comercial",
       associatedEvidence: [
         evidence(
           "demo-evidence-02",
@@ -134,7 +142,11 @@ export function createDemoInjectedFindings(
       adminTargetPage: "construction",
       adminTargetSection: "Unidades con presion comercial",
       operationalRecommendation:
-        "Validar disponibilidad, avance y narrativa tecnica antes de ofrecer alternativas de inventario al cliente.",
+        "Las preferencias comerciales deben contrastarse con disponibilidad y avance antes de prometer alternativas o fechas.",
+      recommendedAction:
+        "Coordinación Comercial debe confirmar disponibilidad y avance con Inventario/Obra antes de ofrecer una alternativa o fecha al cliente.",
+      responsibleRole: "Coordinación Comercial",
+      responsibleArea: "Inventario / Obra",
       associatedEvidence: [
         evidence(
           "demo-evidence-03",
@@ -161,7 +173,11 @@ export function createDemoInjectedFindings(
       adminTargetPage: "documents",
       adminTargetSection: "Checklist documental critico",
       operationalRecommendation:
-        "Solicitar documentos faltantes con mensaje especifico por cliente y dejar evidencia del proximo compromiso.",
+        "El bloqueo documental debe convertirse en solicitud puntual con compromiso registrado.",
+      recommendedAction:
+        "Responsable de Documentos debe solicitar el faltante específico en la próxima interacción y registrar el compromiso en el expediente.",
+      responsibleRole: "Responsable de Documentos",
+      responsibleArea: "Documentos",
       associatedEvidence: [
         evidence(
           "demo-evidence-04",
@@ -188,7 +204,11 @@ export function createDemoInjectedFindings(
       adminTargetPage: "payments",
       adminTargetSection: "Compromisos de pago sensibles",
       operationalRecommendation:
-        "Priorizar llamadas financieras y registrar nuevo compromiso con monto, fecha, responsable y evidencia.",
+        "Los bloqueos de prima, cuota o claridad financiera requieren contacto y compromiso verificable.",
+      recommendedAction:
+        "Finanzas / Cobros debe contactar hoy los casos con prima o cuota pendiente, confirmar fecha de pago y registrar el compromiso en el expediente.",
+      responsibleRole: "Finanzas / Cobros",
+      responsibleArea: "Finanzas",
       associatedEvidence: [
         evidence(
           "demo-evidence-05",
@@ -215,7 +235,11 @@ export function createDemoInjectedFindings(
       adminTargetPage: "service",
       adminTargetSection: "Alertas criticas del cliente",
       operationalRecommendation:
-        "Escalar el caso a servicio, legal y direccion comercial con trazabilidad de mensajes, contrato y respuesta autorizada.",
+        "El riesgo legal debe escalarse con evidencia contractual y respuesta autorizada.",
+      recommendedAction:
+        "Servicio al Cliente debe abrir escalación con Legal y Dirección Comercial, adjuntar mensajes/contrato y registrar la respuesta autorizada.",
+      responsibleRole: "Servicio al Cliente",
+      responsibleArea: "Servicio / Legal / Dirección Comercial",
       associatedEvidence: [
         evidence(
           "demo-evidence-06",
@@ -242,7 +266,11 @@ export function createDemoInjectedFindings(
       adminTargetPage: "sellers",
       adminTargetSection: "Seguimientos prioritarios",
       operationalRecommendation:
-        "Revisar los seguimientos sugeridos por Marta antes de responder y documentar la decision humana tomada.",
+        "Las sugerencias de Marta deben pasar por revisión humana cuando hay señales de prioridad o tono sensible.",
+      recommendedAction:
+        "La vendedora asignada debe revisar tono, prioridad y siguiente paso sugerido por Marta antes de responder y documentar la decisión tomada.",
+      responsibleRole: "Vendedora asignada",
+      responsibleArea: "Ventas / Vendedoras",
       associatedEvidence: [
         evidence(
           "demo-evidence-07",
