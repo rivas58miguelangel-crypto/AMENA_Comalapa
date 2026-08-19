@@ -153,6 +153,7 @@ type ReservationCompletedEvent = {
   sourceChannel: "public_web_app";
   reservationStatus: "completed";
   isDemo: true;
+  bridgeId?: string;
 };
 
 type LiveExpediente = {
@@ -185,6 +186,23 @@ type ReservationReplayRequest = {
   requestId: string;
   requestedAt: string;
   sourceApplication: "hoperia_admin_demo";
+  bridgeId?: string;
+};
+
+type AdminBridgeReadyMessage = {
+  type: "hoperia.admin.bridge.ready";
+  schemaVersion: "1.0";
+  bridgeId: string;
+  issuedAt: string;
+  sourceApplication: "hoperia_admin_demo";
+};
+
+type PublicBridgeAckMessage = {
+  type: "hoperia.public.bridge.ack";
+  schemaVersion: "1.0";
+  bridgeId: string;
+  acknowledgedAt: string;
+  sourceApplication: ReservationCompletedEvent["sourceApplication"];
 };
 
 type PublicLiveDemoResetAck = {
@@ -618,6 +636,8 @@ function AppShell() {
   const [liveDemoResetNotice, setLiveDemoResetNotice] = useState<LiveDemoResetNotice | null>(null);
   const [liveDemoResetToken, setLiveDemoResetToken] = useState(0);
   const publicReservationWindowRef = useRef<Window | null>(null);
+  const publicReservationBridgeIdRef = useRef<string | null>(null);
+  const publicReservationBridgeSourceRef = useRef<MessageEventSource | null>(null);
   const liveExpedienteRef = useRef<LiveExpediente | null>(null);
   const processedEventIds = useRef(new Set<string>());
   const expedienteIdByReservationId = useRef(new Map<string, string>());
@@ -696,6 +716,67 @@ function AppShell() {
     }
     return `replay-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
   };
+  const createBridgeId = () => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `bridge-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  };
+
+  const isPublicBridgeAckMessage = (value: unknown): value is PublicBridgeAckMessage => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+    const data = value as Partial<PublicBridgeAckMessage>;
+
+    return data.type === "hoperia.public.bridge.ack" &&
+      data.schemaVersion === "1.0" &&
+      isNonEmptyString(data.bridgeId) &&
+      isNonEmptyString(data.acknowledgedAt) &&
+      ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "");
+  };
+
+  const sendPublicReservationBridge = (reservationWindow: Window, bridgeId: string) => {
+    const bridgeMessage: AdminBridgeReadyMessage = {
+      type: "hoperia.admin.bridge.ready",
+      schemaVersion: "1.0",
+      bridgeId,
+      issuedAt: new Date().toISOString(),
+      sourceApplication: "hoperia_admin_demo",
+    };
+
+    reservationWindow.postMessage(bridgeMessage, configuredPublicReservationOrigin);
+  };
+
+  const preparePublicReservationBridge = (reservationWindow: Window) => {
+    const bridgeId = createBridgeId();
+    publicReservationBridgeIdRef.current = bridgeId;
+    publicReservationBridgeSourceRef.current = null;
+    sendPublicReservationBridge(reservationWindow, bridgeId);
+    [500, 1500].forEach((delay) => {
+      window.setTimeout(() => {
+        if (
+          publicReservationBridgeIdRef.current === bridgeId &&
+          publicReservationWindowRef.current === reservationWindow &&
+          !reservationWindow.closed
+        ) {
+          sendPublicReservationBridge(reservationWindow, bridgeId);
+        }
+      }, delay);
+    });
+  };
+
+  const isExpectedReservationSource = (event: MessageEvent<unknown>, bridgeId?: string) => (
+    (
+      event.source !== null &&
+      publicReservationWindowRef.current !== null &&
+      event.source === publicReservationWindowRef.current
+    ) ||
+    (
+      Boolean(bridgeId) &&
+      bridgeId === publicReservationBridgeIdRef.current &&
+      event.source !== null &&
+      event.source === publicReservationBridgeSourceRef.current
+    )
+  );
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("amena.activeSection", active);
@@ -715,6 +796,7 @@ function AppShell() {
 
   const openPublicReservation = () => {
     if (publicReservationWindowRef.current && !publicReservationWindowRef.current.closed) {
+      preparePublicReservationBridge(publicReservationWindowRef.current);
       publicReservationWindowRef.current.focus();
       setPublicReservationWindowNotice("App Pública Ruta 2 enfocada. Completa y confirma la reserva para transmitirla.");
       return;
@@ -728,6 +810,7 @@ function AppShell() {
     }
 
     publicReservationWindowRef.current = reservationWindow;
+    preparePublicReservationBridge(reservationWindow);
     reservationWindow.focus();
     setPublicReservationWindowNotice("App Pública Ruta 2 abierta en una ventana separada. Completa y confirma la reserva para transmitirla.");
   };
@@ -761,6 +844,9 @@ function AppShell() {
     }
 
     publicReservationWindowRef.current = reservationWindow;
+    if (!publicReservationBridgeIdRef.current || !publicReservationBridgeSourceRef.current) {
+      preparePublicReservationBridge(reservationWindow);
+    }
     reservationWindow.focus();
     clearReplayTimeout();
 
@@ -771,6 +857,7 @@ function AppShell() {
       requestId,
       requestedAt: new Date().toISOString(),
       sourceApplication: "hoperia_admin_demo",
+      ...(publicReservationBridgeIdRef.current ? { bridgeId: publicReservationBridgeIdRef.current } : {}),
     };
 
     pendingReplayRequestIdRef.current = requestId;
@@ -780,8 +867,17 @@ function AppShell() {
       detail,
     });
 
-    try {
+    const postReplayRequest = () => {
       reservationWindow.postMessage(replayRequest, configuredPublicReservationOrigin);
+    };
+
+    try {
+      postReplayRequest();
+      window.setTimeout(() => {
+        if (pendingReplayRequestIdRef.current === requestId && !reservationWindow.closed) {
+          postReplayRequest();
+        }
+      }, 700);
     } catch (error) {
       pendingReplayRequestIdRef.current = null;
       setReservationReplayStatus("error");
@@ -970,7 +1066,19 @@ function AppShell() {
         return;
       }
 
-      if (event.source !== publicReservationWindowRef.current) {
+      if (event.data && typeof event.data === "object" && !Array.isArray(event.data)) {
+        const eventType = (event.data as { type?: unknown }).type;
+        if (eventType === "hoperia.public.bridge.ack") {
+          if (!isPublicBridgeAckMessage(event.data)) return;
+          if (event.data.bridgeId !== publicReservationBridgeIdRef.current) return;
+          if (event.source !== publicReservationWindowRef.current) return;
+
+          publicReservationBridgeSourceRef.current = event.source;
+          return;
+        }
+      }
+
+      if (!isExpectedReservationSource(event, (event.data as { bridgeId?: string } | null)?.bridgeId)) {
         return;
       }
 
@@ -1765,6 +1873,19 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
                   <div className="mt-1 font-black text-slate-950">{selectedLiveExpediente.expedienteId}</div>
                 </div>
               </div>
+              <button
+                type="button"
+                disabled={reservationReplayStatus === "requesting"}
+                onClick={() => onRequestReservationReplay("Prueba técnica/demo de recuperación. Ruta 2 reenviará la última reserva demo guardada sin reiniciar la experiencia.")}
+                className={cls(
+                  "mt-5 rounded-2xl border px-5 py-3 text-sm font-black",
+                  reservationReplayStatus === "requesting"
+                    ? "cursor-wait border-slate-200 bg-slate-100 text-slate-500"
+                    : "border-blue-300 bg-white text-blue-900 hover:bg-blue-100",
+                )}
+              >
+                Probar replay de última reserva demo
+              </button>
               <div className="mt-5 rounded-3xl border border-blue-100 bg-white p-4">
                 <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Resumen ejecutivo</div>
                 <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
