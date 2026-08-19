@@ -628,6 +628,7 @@ function AppShell() {
   });
   const [demoFindings, setDemoFindings] = useState([]);
   const [demoContext, setDemoContext] = useState(null);
+  const [demoCommandEvidenceState, setDemoCommandEvidenceState] = useState(null);
   const [liveExpediente, setLiveExpediente] = useState<LiveExpediente | null>(null);
   const [autoSelectReservationId, setAutoSelectReservationId] = useState<string | null>(null);
   const [receptionNotice, setReceptionNotice] = useState<ReceptionNotice | null>(null);
@@ -1272,6 +1273,7 @@ function AppShell() {
         <Page
           demoContext={demoContext}
           demoFindings={demoFindings}
+          demoCommandEvidenceState={demoCommandEvidenceState}
           liveExpediente={liveExpediente}
           autoSelectReservationId={autoSelectReservationId}
           liveDemoResetToken={liveDemoResetToken}
@@ -1279,6 +1281,7 @@ function AppShell() {
           onRequestReservationReplay={sendReservationReplayRequest}
           onDemoContextInjected={setDemoContext}
           onDemoFindingsInjected={setDemoFindings}
+          onDemoCommandEvidenceStateChange={setDemoCommandEvidenceState}
           onOpenPublicReservation={openPublicReservation}
           setActive={setActive}
         />
@@ -2705,9 +2708,11 @@ function DashboardsPage() {
 function DemoPage({
   demoContext,
   demoFindings = [],
+  demoCommandEvidenceState = null,
   liveExpediente = null,
   onDemoContextInjected,
   onDemoFindingsInjected,
+  onDemoCommandEvidenceStateChange,
   onOpenPublicReservation,
   setActive,
 }) {
@@ -3611,6 +3616,8 @@ function DemoPage({
           evidence: simulatedOperationalEvidence.length,
         }}
         onInjectSimulatedData={injectSimulatedData}
+        persistedState={demoCommandEvidenceState}
+        onPersistState={onDemoCommandEvidenceStateChange}
       />
       </div>
 

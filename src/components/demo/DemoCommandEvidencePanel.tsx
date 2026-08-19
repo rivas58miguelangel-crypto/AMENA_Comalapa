@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadCloud } from "lucide-react";
 
 type DemoContext = {
@@ -31,6 +31,8 @@ type DemoCommandEvidencePanelProps = {
   simulatedDataInjected: boolean;
   counts: DemoEvidenceCounts;
   onInjectSimulatedData: (quantities: DemoInjectionQuantities) => void;
+  persistedState?: DemoCommandEvidencePanelState | null;
+  onPersistState?: (state: DemoCommandEvidencePanelState | null) => void;
 };
 
 type DemoInjectionQuantities = {
@@ -51,6 +53,34 @@ type ScenicFlowStatus =
   | "regenerated"
   | "approved"
   | "injected";
+
+type DemoCommandEvidencePanelState = {
+  auditStatus: string;
+  flowStatus: ScenicFlowStatus;
+  rejectedRegenerated: boolean;
+  quantities: DemoInjectionQuantities;
+  prospectCompanyName: string;
+  projectName: string;
+  scenarioName: string;
+  loadedCounts: DemoEvidenceCounts | null;
+  loadedAt: string;
+};
+
+const defaultQuantities: DemoInjectionQuantities = {
+  reservations: 20,
+  vapiLogs: 20,
+  sellerReports: 20,
+  messages: 20,
+};
+
+const emptyCounts: DemoEvidenceCounts = {
+  reservations: 0,
+  messages: 0,
+  sellerReports: 0,
+  vapiLogs: 0,
+  whatsappFollowups: 0,
+  evidence: 0,
+};
 
 const toneClasses: Record<Tone, string> = {
   slate: "border-slate-200 bg-slate-100 text-slate-900",
@@ -100,26 +130,28 @@ export default function DemoCommandEvidencePanel({
   simulatedDataInjected,
   counts,
   onInjectSimulatedData,
+  persistedState = null,
+  onPersistState,
 }: DemoCommandEvidencePanelProps) {
-  const [auditStatus, setAuditStatus] = useState("Pendiente de auditoría");
-  const [flowStatus, setFlowStatus] = useState<ScenicFlowStatus>("idle");
-  const [rejectedRegenerated, setRejectedRegenerated] = useState(false);
+  const [auditStatus, setAuditStatus] = useState(persistedState?.auditStatus || "Pendiente de auditoría");
+  const [flowStatus, setFlowStatus] = useState<ScenicFlowStatus>(persistedState?.flowStatus || "idle");
+  const [rejectedRegenerated, setRejectedRegenerated] = useState(persistedState?.rejectedRegenerated || false);
   const layerTwoRef = useRef<HTMLDivElement | null>(null);
   const [quantities, setQuantities] = useState<DemoInjectionQuantities>({
-    reservations: 20,
-    vapiLogs: 20,
-    sellerReports: 20,
-    messages: 20,
+    ...defaultQuantities,
+    ...persistedState?.quantities,
   });
   const [prospectCompanyName, setProspectCompanyName] = useState(
-    demoContext?.prospectCompanyName || "Empresa Demo",
+    persistedState?.prospectCompanyName || demoContext?.prospectCompanyName || "Empresa Demo",
   );
   const [projectName, setProjectName] = useState(
-    demoContext?.projectName || "Proyecto de Empresa Demo",
+    persistedState?.projectName || demoContext?.projectName || "Proyecto de Empresa Demo",
   );
   const [scenarioName, setScenarioName] = useState(
-    demoContext?.scenarioName || "Lanzamiento comercial de proyecto habitacional",
+    persistedState?.scenarioName || demoContext?.scenarioName || "Lanzamiento comercial de proyecto habitacional",
   );
+  const [loadedCounts, setLoadedCounts] = useState<DemoEvidenceCounts | null>(persistedState?.loadedCounts || null);
+  const [loadedAt, setLoadedAt] = useState(persistedState?.loadedAt || "");
   const updateQuantity = (
     key: keyof DemoInjectionQuantities,
     value: string,
@@ -129,48 +161,89 @@ export default function DemoCommandEvidencePanel({
     setAuditStatus("Pendiente de auditoría");
     setFlowStatus("idle");
     setRejectedRegenerated(false);
+    setLoadedCounts(null);
+    setLoadedAt("");
+    onPersistState?.(null);
   };
   const resetGeneration = () => {
     setAuditStatus("Pendiente de auditoría");
     setFlowStatus("idle");
     setRejectedRegenerated(false);
-    setQuantities({
-      reservations: 20,
-      vapiLogs: 20,
-      sellerReports: 20,
-      messages: 20,
-    });
+    setQuantities(defaultQuantities);
     setProspectCompanyName("");
     setProjectName("");
     setScenarioName("");
+    setLoadedCounts(null);
+    setLoadedAt("");
+    onPersistState?.(null);
   };
+  useEffect(() => {
+    if (!onPersistState) return;
+    const hasMeaningfulState = flowStatus !== "idle" || loadedCounts !== null;
+    if (!hasMeaningfulState) return;
+
+    onPersistState({
+      auditStatus,
+      flowStatus,
+      rejectedRegenerated,
+      quantities,
+      prospectCompanyName,
+      projectName,
+      scenarioName,
+      loadedCounts,
+      loadedAt,
+    });
+  }, [
+    auditStatus,
+    flowStatus,
+    rejectedRegenerated,
+    quantities,
+    prospectCompanyName,
+    projectName,
+    scenarioName,
+    loadedCounts,
+    loadedAt,
+    onPersistState,
+  ]);
+  const visibleCounts = loadedCounts && flowStatus === "injected" ? loadedCounts : emptyCounts;
+  const demoLoaded = flowStatus === "injected" && loadedCounts !== null;
+  const effectiveDemoContext = demoLoaded
+    ? demoContext || {
+        demoRunId: "demo-local-session",
+        prospectCompanyName: prospectCompanyName || "Empresa Demo",
+        projectName: projectName || "Proyecto de Empresa Demo",
+        scenarioName: scenarioName || "Lanzamiento comercial de proyecto habitacional",
+        status: "injected",
+        injectedAt: loadedAt,
+      }
+    : null;
   const injectionCategories = [
     {
       label: "Gestion de Reservas",
       key: "reservations" as const,
-      sent: counts.reservations,
+      sent: visibleCounts.reservations,
     },
     {
       label: "Marta Voz / Vapi",
       key: "vapiLogs" as const,
-      sent: counts.vapiLogs,
+      sent: visibleCounts.vapiLogs,
     },
     {
       label: "Registro de Seguimiento Comercial",
       key: "sellerReports" as const,
-      sent: counts.sellerReports,
+      sent: visibleCounts.sellerReports,
     },
     {
       label: "Mensajes entre el Equipo",
       key: "messages" as const,
-      sent: counts.messages,
+      sent: visibleCounts.messages,
     },
   ];
   const totalSent =
-    counts.reservations +
-    counts.vapiLogs +
-    counts.sellerReports +
-    counts.messages;
+    visibleCounts.reservations +
+    visibleCounts.vapiLogs +
+    visibleCounts.sellerReports +
+    visibleCounts.messages;
   const hasGeneratedData = flowStatus !== "idle";
   const hasAuditedData =
     flowStatus === "audited" ||
@@ -246,8 +319,8 @@ export default function DemoCommandEvidencePanel({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <StatusBadge tone={simulatedDataInjected ? "green" : "amber"}>
-            {simulatedDataInjected ? "Datos demo cargados" : "Preparación"}
+          <StatusBadge tone={demoLoaded ? "green" : "amber"}>
+            {demoLoaded ? "Datos demo cargados" : "Preparación"}
           </StatusBadge>
           <StatusBadge tone="violet">Datos simulados</StatusBadge>
           <StatusBadge tone="amber">No persistido</StatusBadge>
@@ -470,12 +543,26 @@ export default function DemoCommandEvidencePanel({
           <button
             disabled={!canInjectDemo}
             onClick={() => {
+              const nextLoadedAt = new Date().toLocaleString("es-SV", {
+                dateStyle: "short",
+                timeStyle: "short",
+              });
+              const nextLoadedCounts = {
+                reservations: quantities.reservations,
+                messages: quantities.messages,
+                sellerReports: quantities.sellerReports,
+                vapiLogs: quantities.vapiLogs,
+                whatsappFollowups: 0,
+                evidence: 6,
+              };
               onInjectSimulatedData({
                 ...quantities,
                 prospectCompanyName: prospectCompanyName.trim() || "Empresa Demo",
                 projectName: projectName.trim() || "Proyecto de Empresa Demo",
                 scenarioName: scenarioName.trim() || "Lanzamiento comercial de proyecto habitacional",
               });
+              setLoadedCounts(nextLoadedCounts);
+              setLoadedAt(nextLoadedAt);
               setFlowStatus("injected");
               setAuditStatus("Empresa Demo simulada cargada");
             }}
@@ -498,10 +585,10 @@ export default function DemoCommandEvidencePanel({
           Resumen posterior a la carga ejecutada desde la preparación simulada.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <SummaryItem label="Empresa demo" value={demoContext?.prospectCompanyName || "Pendiente"} />
-          <SummaryItem label="Proyecto" value={demoContext?.projectName || "Proyecto de Empresa Demo"} />
-          <SummaryItem label="Fecha / última actualización" value={demoContext?.injectedAt || "Pendiente"} />
-          <SummaryItem label="Estado demo" value={simulatedDataInjected ? "Cargado localmente" : "Pendiente"} />
+          <SummaryItem label="Empresa demo" value={effectiveDemoContext?.prospectCompanyName || "Pendiente"} />
+          <SummaryItem label="Proyecto" value={effectiveDemoContext?.projectName || "Proyecto de Empresa Demo"} />
+          <SummaryItem label="Fecha / última actualización" value={effectiveDemoContext?.injectedAt || "Pendiente"} />
+          <SummaryItem label="Estado demo" value={demoLoaded ? "Cargado localmente" : "Pendiente"} />
           <SummaryItem label="Persistencia" value="No persistido" />
         </div>
         <div className="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-white">
@@ -514,10 +601,10 @@ export default function DemoCommandEvidencePanel({
               <div className="p-4">Total demo</div>
             </div>
             <div className="grid min-w-[720px] grid-cols-5 border-t border-slate-100 text-sm font-black text-slate-950">
-              <div className="p-4">{counts.reservations}</div>
-              <div className="p-4">{counts.vapiLogs}</div>
-              <div className="p-4">{counts.sellerReports}</div>
-              <div className="p-4">{counts.messages}</div>
+              <div className="p-4">{visibleCounts.reservations}</div>
+              <div className="p-4">{visibleCounts.vapiLogs}</div>
+              <div className="p-4">{visibleCounts.sellerReports}</div>
+              <div className="p-4">{visibleCounts.messages}</div>
               <div className="p-4">{totalSent}</div>
             </div>
           </div>
