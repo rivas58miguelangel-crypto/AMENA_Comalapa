@@ -7,7 +7,7 @@
 Poder repetir dentro de meses o años el proceso completo de conexión WhatsApp–Meta–H-OperIA sin reconstruirlo desde cero, reduciendo una jornada de diagnóstico a una ejecución guiada de aproximadamente 30 minutos cuando las credenciales y plantillas ya estén aprobadas.
 
 ## 1. Alcance y estado certificado
-- **Caso 1:** envío del enlace de la App Pública de Reservas al voluntario desde el Centro Demo. Infraestructura existente; certificación/prueba final pendiente.
+- **Caso 1:** envío del enlace de la App Pública de Reservas al voluntario desde el Centro Demo. Probado de extremo a extremo y recibido en WhatsApp real.
 - **Caso 2:** envío del resumen al terminar la experiencia en Ruta 2. Probado de extremo a extremo y recibido en WhatsApp real.
 - No guardar en documentación tokens, Phone Number IDs, WABA IDs ni números personales.
 - `provider_accepted` no equivale a `delivered` ni `read`. La recepción se confirma humanamente en Ruta 2.
@@ -31,8 +31,9 @@ App Pública de Reservas: `https://reservas.automatizahoy.ai`
 ### Caso 1
 - Nombre: `h_operia_demo_reservation_link`
 - Uso: enviar enlace de reservas
-- Idioma Graph exacto: **pendiente certificar por GET**
-- Estado: aprobada según UI
+- Idioma Graph certificado: `es_ES`
+- Estado: `APPROVED`
+- Categoría: `UTILITY`
 
 ### Caso 2
 - Nombre: `h_operia_reservation_summary`
@@ -40,7 +41,7 @@ App Pública de Reservas: `https://reservas.automatizahoy.ai`
 - Estado: `APPROVED`
 - Categoría: `UTILITY`
 
-**Regla:** nunca asumir que “Spanish (SPA)” equivale a `language.code = "es"`. Certificar el valor exacto por Graph API antes del primer envío real.
+**Regla reutilizable:** antes del primer envío de cualquier plantilla Meta, certificar por Graph API su `name`, `language` exacto, `status` y `category`. Nunca asumir que “Spanish (SPA)” equivale a `language.code = "es"`.
 
 ## 5. Environment en Dokploy
 Servicio: **API del Centro Demo → Environment**
@@ -236,18 +237,22 @@ Certificación funcional:
 - Decidir si requiere nueva plantilla/variables y nueva aprobación Meta.
 - Paso 12 de Ruta 2 “Enviar enlace a mi WhatsApp” para Marta: no crítico para la demo inmediata.
 
-## 16. Caso 1 — siguiente trabajo
-Antes del primer envío real:
-1. confirmar `h_operia_demo_reservation_link` en la WABA;
-2. obtener `language` exacto por GET;
-3. comparar con backend actual (`es`);
-4. corregir solo si hay discrepancia;
-5. commit/push;
-6. Deploy/Rebuild;
-7. `/health`;
-8. CORS;
-9. un único envío real;
-10. recepción humana.
+## 16. Caso 1 — certificación final
+Plantilla certificada:
+```json
+{"found":true,"name":"h_operia_demo_reservation_link","language":"es_ES","status":"APPROVED","category":"UTILITY"}
+```
+
+El backend se corrigió para enviar `language.code = "es_ES"` exclusivamente en `POST /send-whatsapp`.
+
+Prueba real certificada:
+`Centro Demo → Demo API → Meta Cloud API → WhatsApp del voluntario`
+
+El mensaje fue recibido con el enlace público `https://reservas.automatizahoy.ai`, mensaje de prueba autorizada, instrucción de confirmación de apertura y footer de demostración autorizada.
+
+Commit publicado:
+- `d50378e66920dce2535140e7e09bf3b18734da73`
+- `fix: use approved whatsapp link locale`
 
 ## 17. Ruta rápida — 30 minutos
 | Min. | Paso | Criterio |
@@ -283,9 +288,11 @@ Antes del primer envío real:
 - En terminal inestable, usar comandos cortos.
 
 ## 20. Checklist final
-- [ ] Plantilla aprobada en la WABA correcta.
-- [ ] Nombre exacto certificado.
-- [ ] `language` exacto certificado por GET.
+- [x] Caso 1 certificado: plantilla `h_operia_demo_reservation_link`, `es_ES`, `APPROVED`, `UTILITY` y recepción humana.
+- [x] Caso 2 certificado: plantilla `h_operia_reservation_summary`, `es_ES`, `APPROVED`, `UTILITY` y recepción humana.
+- [ ] Plantilla aprobada en la WABA correcta para cualquier plantilla nueva.
+- [ ] Nombre exacto certificado para cualquier plantilla nueva.
+- [ ] `language` exacto certificado por GET para cualquier plantilla nueva.
 - [ ] Token crudo y vigente.
 - [ ] Phone Number ID crudo.
 - [ ] CORS correcto.
