@@ -365,7 +365,7 @@ const clientOperationalProfile: ClientOperationalProfile = {
     { title: "Email", value: "PDF abierto" },
     { title: "Calendario", value: "Cita creada" },
     { title: "Evidencia de la Operación", value: "Log insertado" },
-    { title: "Registro de Seguimiento Comercial", value: "Pipeline actualizado" },
+    { title: "Seguimiento Comercial de Vendedoras", value: "Pipeline actualizado" },
   ],
   timeline: [
     { time: "10:04", title: "Reserva recibida desde Reservas del proyecto", description: "El Centro de Mando crea el expediente operacional vivo." },
@@ -2729,7 +2729,7 @@ function DemoPage({
   const phases = [
     { title: "FASE 01", name: "Reserva en vivo y validación operacional", text: "La reserva crea el cliente operacional y selecciona la unidad que dará origen al resto del ciclo.", nextStep: "validar cliente, unidad, fuente, estado y evidencia visible." },
     { title: "FASE 02", name: "Marta · Acompañamiento Multicanal", text: "Marta acompaña por voz o texto y registra cada interacción como dato estructurado para evidencia, seguimiento e inteligencia.", nextStep: "revisar por separado Marta Voz / Vapi y Marta WhatsApp / Texto." },
-    { title: "FASE 03", name: "Registro de Seguimiento Comercial y Mensajes entre el Equipo", text: "Desde clientes reservados mostraremos reportes de vendedoras, objeciones, prioridades, próximos pasos y coordinación interna.", nextStep: "revisar seguimiento comercial y mensajes operacionales del equipo." },
+    { title: "FASE 03", name: "Coordinación y Seguimiento Operacional", text: "Aportes humanos posteriores a la reserva, provenientes del seguimiento comercial y de la coordinación del equipo.", nextStep: "revisar las capas de seguimiento comercial y mensajería operacional del equipo." },
     { title: "FASE 04", name: "Centro de Mando y Evidencia de la Operación", text: "Configuraremos, auditaremos, regeneraremos y cargaremos localmente datos simulados para una corrida demo no persistida.", nextStep: "validar cantidades, calidad, trazabilidad y evidencia de la corrida demo local." },
     { title: "FASE 05", name: "H - OperIA Intelligence", text: "Transformaremos la operación ampliada en impactos visibles, riesgos, oportunidades, prioridades y recomendaciones.", nextStep: "cargar Empresa Demo y revisar los impactos generados por la operación." },
     { title: "FASE 06", name: "Cierre ejecutivo futuro", text: "Capacidad futura y no operativa: referencia conceptual sin consulta de fuentes reales, sin generación de decisiones operativas y sin persistencia.", nextStep: "conservar la referencia de producto sin presentarla como una capacidad disponible." },
@@ -2847,7 +2847,7 @@ function DemoPage({
       adminTarget: "executive",
       section: "Prioridades de dirección",
       finding: "La operación posterior a la reserva concentra riesgos comerciales, financieros y de servicio que requieren revisión ejecutiva antes de la siguiente junta.",
-      source: "Mensajes entre el Equipo",
+      source: "Mensajería Operacional del Equipo",
       adminLink: "Centro Ejecutivo -> Prioridades de dirección",
       externalVerification: null,
       supabaseTable: "demo_executive_priorities",
@@ -2879,7 +2879,7 @@ function DemoPage({
       adminTarget: "construction",
       section: "Unidades con presión comercial",
       finding: "La preferencia por modelos familiares debe cruzarse con disponibilidad y avance de construcción antes de prometer fechas o alternativas.",
-      source: "Registro de Seguimiento Comercial",
+      source: "Seguimiento Comercial de Vendedoras",
       adminLink: "Inventario / Construcción -> Unidades con presión comercial",
       externalVerification: "Supabase",
       supabaseTable: "demo_inventory_units",
@@ -2911,7 +2911,7 @@ function DemoPage({
       adminTarget: "payments",
       section: "Compromisos de pago sensibles",
       finding: `${reports.filter((item) => item.objection === "Monto de prima").length || "Varios"} casos mencionan prima, cuota o claridad financiera como bloqueo para avanzar.`,
-      source: "Registro de Seguimiento Comercial",
+      source: "Seguimiento Comercial de Vendedoras",
       adminLink: "Finanzas / Pagos -> Compromisos de pago sensibles",
       externalVerification: "Supabase",
       supabaseTable: "demo_payment_commitments",
@@ -2927,7 +2927,7 @@ function DemoPage({
       adminTarget: "service",
       section: "Alertas críticas del cliente",
       finding: "Carlos Armando Domínguez manifestó intención de presentar una demanda judicial por inconsistencias entre la información comercial recibida y el contrato firmado.",
-      source: "Registro de Seguimiento Comercial",
+      source: "Seguimiento Comercial de Vendedoras",
       adminLink: "Servicio Cliente -> Alertas críticas",
       externalVerification: "Supabase",
       supabaseTable: "demo_customer_service_cases",
@@ -2954,8 +2954,8 @@ function DemoPage({
   ];
   const createSimulatedOperationalEvidence = (demoRunId, clients, messages, reports, signals, vapiLogs, whatsappFollowups) => [
     { id: "sim-evidence-01", demoRunId, page: "Aplicacion de Reservas", section: "Clientes/reservas", summary: `${clients.length} registros de reserva simulados`, status: "Visible" },
-    { id: "sim-evidence-02", demoRunId, page: "Mensajes entre el Equipo", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: "Visible" },
-    { id: "sim-evidence-03", demoRunId, page: "Aplicacion de Vendedoras", section: "Reportes humanos", summary: `${reports.length} reportes de interacciones posteriores`, status: "Visible" },
+    { id: "sim-evidence-02", demoRunId, page: "Mensajería Operacional del Equipo", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: "Visible" },
+    { id: "sim-evidence-03", demoRunId, page: "Seguimiento Comercial de Vendedoras", section: "Reportes humanos", summary: `${reports.length} reportes de interacciones posteriores`, status: "Visible" },
     { id: "sim-evidence-04", demoRunId, page: "Marta Voz / Vapi", section: "Logs de llamadas", summary: `${vapiLogs.length} logs de voz simulados con salida estructurada`, status: "Visible" },
     { id: "sim-evidence-05", demoRunId, page: "Marta WhatsApp Texto", section: "Seguimientos conversacionales", summary: `${whatsappFollowups.length} seguimientos de texto simulados`, status: "Visible" },
     { id: "sim-evidence-06", demoRunId, page: "H - OperIA Intelligence", section: "Senales derivadas", summary: `${signals.length} senales ejecutivas generadas`, status: "Generado" },
@@ -3025,8 +3025,8 @@ function DemoPage({
     reservations: "Reservas",
     marta_voice_vapi: "Marta Voz / VAPI",
     marta_text_whatsapp: "Marta WhatsApp / Texto",
-    commercial_follow_up: "Registro de Seguimiento Comercial",
-    team_messages: "Mensajes entre el Equipo",
+    commercial_follow_up: "Seguimiento Comercial de Vendedoras",
+    team_messages: "Mensajería Operacional del Equipo",
     documents: "Documentos",
     payments: "Finanzas / Pagos",
     customer_service: "Servicio Cliente",
@@ -3322,15 +3322,15 @@ function DemoPage({
     ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
     : [
         ["Perfil Operacional", "Expediente del cliente", "Reserva vinculada", "Datos, comunicación y seguimiento quedan visibles para revisión.", reservationStatus.evidence === "Generada" ? "Visible" : "Pendiente", "Ver evidencia"],
-        ["Registro de Seguimiento Comercial", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", "Pendiente", "Abrir página"],
-        ["Mensajes entre el Equipo", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", "Pendiente", "Abrir página"],
+        ["Seguimiento Comercial de Vendedoras", "Seguimientos activos", "Tarea comercial creada", "La vendedora puede continuar el seguimiento desde su app.", "Pendiente", "Abrir página"],
+        ["Mensajería Operacional del Equipo", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", "Pendiente", "Abrir página"],
       ];
   const derivedChanges = [
     { phase: "Fase 01", source: "Reservas", page: "Reserva pública", section: "Cliente, unidad, fuente y estado", change: `${simulatedReservationClients.length} reservas disponibles para seguimiento`, observation: "Clientes operacionales y unidades que originan el ciclo.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-reservation-live" },
     { phase: "Fase 02", source: "Marta Voz / Vapi", page: "Marta Multicanal", section: "Voz, llamadas y structured output", change: `${simulatedVapiCallLogs.length} logs de llamadas disponibles`, observation: "Intenciones, bloqueos, urgencia y casos que requieren intervención humana.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-vapi-voice" },
     { phase: "Fase 02", source: "Marta WhatsApp", page: "Marta Multicanal", section: "WhatsApp / Texto", change: `${simulatedMartaWhatsAppFollowups.length} seguimientos conversacionales`, observation: "Respuestas, intención detectada y siguiente acción por texto.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-whatsapp" },
-    { phase: "Fase 03", source: "Vendedoras", page: "Registro de Seguimiento Comercial", section: "Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
-    { phase: "Fase 03", source: "Mensajes entre el Equipo", page: "Mensajes entre el Equipo", section: "Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
+    { phase: "Fase 03", source: "Seguimiento Comercial de Vendedoras", page: "Coordinación y Seguimiento Operacional", section: "Capa 1 · Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
+    { phase: "Fase 03", source: "Mensajería Operacional del Equipo", page: "Coordinación y Seguimiento Operacional", section: "Capa 2 · Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
     { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias de la corrida demo local`, observation: "Datos simulados configurados, auditados, regenerados cuando corresponde y cargados sin persistencia.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
     { phase: "Fase 05", source: "H - OperIA Intelligence", page: "Inteligencia Operativa", section: "Hallazgos prioritarios cargados", change: `${phaseFiveFindings.length} hallazgos priorizados dentro del Admin`, observation: "La actividad operacional se interpreta como hallazgos verificables en páginas internas.", status: phaseFiveDemoActive ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
     { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Referencia conceptual", change: `${phaseFiveFindings.length} señales de referencia conceptual`, observation: "No consulta fuentes reales, no genera decisiones operativas y no persiste resultados.", status: phaseFiveDemoActive ? "Referencia futura / no operativa" : "Futura / no operativa", targetId: "demo-executive-close" },
@@ -3568,11 +3568,16 @@ function DemoPage({
       </div>
 
       <div ref={(element) => { phaseSectionRefs.current[2] = element; }} className="scroll-mt-64">
+        <div className="mb-5">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">FASE 03</div>
+          <h3 className="mt-2 text-3xl font-black text-slate-950">Coordinación y Seguimiento Operacional</h3>
+          <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">Aportes humanos posteriores a la reserva, provenientes del seguimiento comercial y de la coordinación del equipo.</p>
+        </div>
         <div id="demo-commercial-operations" className="scroll-mt-64">
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h3 className="text-3xl font-black text-slate-950">FASE 03 Registro de Seguimiento Comercial</h3>
+              <h3 className="text-3xl font-black text-slate-950">CAPA 1 — Seguimiento Comercial de Vendedoras</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia de actividades realizadas en la app de vendedoras: interacciones, objeciones, prioridades y próximos pasos.</p>
             </div>
             {simulatedDataInjected && (
@@ -3595,8 +3600,8 @@ function DemoPage({
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h3 className="text-3xl font-black text-slate-950">FASE 03 Mensajes entre el Equipo</h3>
-              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia separada de mensajería interna posterior a la reserva: responsables, destinatarios, temas y prioridad operativa.</p>
+              <h3 className="text-3xl font-black text-slate-950">CAPA 2 — Mensajería Operacional del Equipo</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Evidencia de coordinación interna posterior a la reserva: responsables, destinatarios, temas, decisiones y prioridad operativa.</p>
             </div>
           </div>
           <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
