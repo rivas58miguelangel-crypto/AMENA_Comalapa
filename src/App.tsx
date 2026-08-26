@@ -178,6 +178,7 @@ type ReservationCompletedEvent = {
   sourceChannel: "public_web_app";
   reservationStatus: "completed";
   isDemo: true;
+  demoRunId?: string;
   bridgeId?: string;
 };
 
@@ -194,6 +195,7 @@ type LiveExpediente = {
   selectedUnit: ReservationCompletedEvent["selectedUnit"];
   sourceChannel: "public_web_app";
   isDemo: true;
+  demoRunId: string;
   persisted: false;
 };
 
@@ -211,6 +213,7 @@ type ReservationReplayRequest = {
   requestId: string;
   requestedAt: string;
   sourceApplication: "hoperia_admin_demo";
+  demoRunId: string;
   bridgeId?: string;
 };
 
@@ -218,6 +221,8 @@ type AdminBridgeReadyMessage = {
   type: "hoperia.admin.bridge.ready";
   schemaVersion: "1.0";
   bridgeId: string;
+  mode: "integrated";
+  demoRunId: string;
   issuedAt: string;
   sourceApplication: "hoperia_admin_demo";
 };
@@ -228,6 +233,8 @@ type PublicBridgeAckMessage = {
   bridgeId: string;
   acknowledgedAt: string;
   sourceApplication: ReservationCompletedEvent["sourceApplication"];
+  mode: "integrated";
+  demoRunId: string;
 };
 
 type PublicLiveDemoResetAck = {
@@ -236,6 +243,7 @@ type PublicLiveDemoResetAck = {
   resetId: string;
   acknowledgedAt: string;
   sourceApplication: ReservationCompletedEvent["sourceApplication"];
+  demoRunId: string;
   status: "reset_complete";
 };
 
@@ -264,7 +272,9 @@ type ReceptionNotice = {
   expedienteId?: string;
 };
 
+const activeDemoSessionStorageKey = "hoperia.admin.active_demo_session.v1";
 const liveExpedienteStorageKey = "hoperia.admin.live_expediente.v1";
+const liveExpedienteStorageKeyForRun = (demoRunId: string) => `${liveExpedienteStorageKey}.${encodeURIComponent(demoRunId)}`;
 
 type ClientCommunicationMessage = {
   from: string;
@@ -663,7 +673,16 @@ function AppShell() {
   const [demoFindings, setDemoFindings] = useState([]);
   const [demoContext, setDemoContext] = useState(null);
   const [demoCommandEvidenceState, setDemoCommandEvidenceState] = useState(null);
-  const [activeDemoSession, setActiveDemoSession] = useState<DemoSession | null>(null);
+  const [activeDemoSession, setActiveDemoSession] = useState<DemoSession | null>(() => {
+    try {
+      const raw = window.localStorage.getItem(activeDemoSessionStorageKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as Partial<DemoSession>;
+      return typeof parsed.demoRunId === "string" && parsed.demoRunId.trim() && typeof parsed.startedAt === "string" && parsed.startedAt.trim()
+        ? { demoRunId: parsed.demoRunId, startedAt: parsed.startedAt }
+        : null;
+    } catch { return null; }
+  });
   const [demoSessionStatus, setDemoSessionStatus] = useState<DemoSessionStatus>("idle");
   const [demoSessionNotice, setDemoSessionNotice] = useState<string | null>(null);
   const [demoSessionResetToken, setDemoSessionResetToken] = useState(0);
@@ -678,6 +697,7 @@ function AppShell() {
   const publicReservationWindowRef = useRef<Window | null>(null);
   const publicReservationBridgeIdRef = useRef<string | null>(null);
   const publicReservationBridgeSourceRef = useRef<MessageEventSource | null>(null);
+  const activeDemoSessionRef = useRef<DemoSession | null>(activeDemoSession);
   const liveExpedienteRef = useRef<LiveExpediente | null>(null);
   const processedEventIds = useRef(new Set<string>());
   const expedienteIdByReservationId = useRef(new Map<string, string>());
@@ -687,6 +707,7 @@ function AppShell() {
   const replayTimeoutRef = useRef<number | null>(null);
   const pendingDemoSessionIntentRef = useRef<DemoSessionIntent | null>(null);
   const pendingReservationResetAfterBridgeRef = useRef<DemoSessionIntent | null>(null);
+  const pendingDemoRunIdRef = useRef<string | null>(null);
   const bridgeTimeoutRef = useRef<number | null>(null);
   const bridgeRetryIntervalRef = useRef<number | null>(null);
   const bridgeRetryTimeoutsRef = useRef<number[]>([]);
@@ -694,6 +715,10 @@ function AppShell() {
   const [reservationReplayStatus, setReservationReplayStatus] = useState<"idle" | "requesting" | "received" | "empty" | "error">("idle");
   const isNonEmptyString = (value: unknown): value is string =>
     typeof value === "string" && value.trim().length > 0;
+
+  useEffect(() => {
+    activeDemoSessionRef.current = activeDemoSession;
+  }, [activeDemoSession]);
 
   const isReservationCompletedEvent = (value: unknown): value is ReservationCompletedEvent => {
     if (!value || typeof value !== "object") return false;
@@ -748,11 +773,11 @@ function AppShell() {
   };
 
   const storeLiveExpediente = (nextLiveExpediente: LiveExpediente) => {
-    window.localStorage.setItem(liveExpedienteStorageKey, JSON.stringify(nextLiveExpediente));
+    window.localStorage.setItem(liveExpedienteStorageKeyForRun(nextLiveExpediente.demoRunId), JSON.stringify(nextLiveExpediente));
   };
 
-  const clearStoredLiveExpediente = () => {
-    window.localStorage.removeItem(liveExpedienteStorageKey);
+  const clearStoredLiveExpediente = (demoRunId?: string) => {
+    if (demoRunId) window.localStorage.removeItem(liveExpedienteStorageKeyForRun(demoRunId));
   };
 
   const createReplayRequestId = () => {
@@ -779,11 +804,13 @@ function AppShell() {
       ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "");
   };
 
-  const sendPublicReservationBridge = (reservationWindow: Window, bridgeId: string) => {
+  const sendPublicReservationBridge = (reservationWindow: Window, bridgeId: string, demoRunId: string) => {
     const bridgeMessage: AdminBridgeReadyMessage = {
       type: "hoperia.admin.bridge.ready",
       schemaVersion: "1.0",
       bridgeId,
+      mode: "integrated",
+      demoRunId,
       issuedAt: new Date().toISOString(),
       sourceApplication: "hoperia_admin_demo",
     };
@@ -791,12 +818,12 @@ function AppShell() {
     reservationWindow.postMessage(bridgeMessage, configuredPublicReservationOrigin);
   };
 
-  const preparePublicReservationBridge = (reservationWindow: Window) => {
+  const preparePublicReservationBridge = (reservationWindow: Window, demoRunId: string) => {
     clearBridgeRetryTimeouts();
     const bridgeId = createBridgeId();
     publicReservationBridgeIdRef.current = bridgeId;
     publicReservationBridgeSourceRef.current = null;
-    sendPublicReservationBridge(reservationWindow, bridgeId);
+    sendPublicReservationBridge(reservationWindow, bridgeId, demoRunId);
     bridgeRetryTimeoutsRef.current = [500, 1500].map((delay) => (
       window.setTimeout(() => {
         if (
@@ -804,7 +831,7 @@ function AppShell() {
           publicReservationWindowRef.current === reservationWindow &&
           !reservationWindow.closed
         ) {
-          sendPublicReservationBridge(reservationWindow, bridgeId);
+          sendPublicReservationBridge(reservationWindow, bridgeId, demoRunId);
         }
       }, delay)
     ));
@@ -841,8 +868,21 @@ function AppShell() {
   }, []);
 
   const openPublicReservation = () => {
+    if (!activeDemoSession) {
+      const standaloneWindow = window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
+      if (standaloneWindow) {
+        publicReservationWindowRef.current = standaloneWindow;
+        setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
+        setPublicReservationWindowNotice("App Pública Ruta 2 abierta en modo standalone. Su evidencia no alimentará Centro Demo.");
+        standaloneWindow.focus();
+      } else {
+        setPublicReservationWindowNotice("No se pudo abrir la App Pública. El navegador pudo bloquear la ventana; permite ventanas emergentes y reintenta.");
+      }
+      return;
+    }
+    const demoRunId = activeDemoSession.demoRunId;
     if (publicReservationWindowRef.current && !publicReservationWindowRef.current.closed) {
-      preparePublicReservationBridge(publicReservationWindowRef.current);
+      preparePublicReservationBridge(publicReservationWindowRef.current, demoRunId);
       publicReservationWindowRef.current.focus();
       setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
       setPublicReservationWindowNotice("App Pública Ruta 2 enfocada. Completa y confirma la reserva para transmitirla.");
@@ -857,7 +897,7 @@ function AppShell() {
     }
 
     publicReservationWindowRef.current = reservationWindow;
-    preparePublicReservationBridge(reservationWindow);
+    preparePublicReservationBridge(reservationWindow, demoRunId);
     setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
     reservationWindow.focus();
     setPublicReservationWindowNotice("App Pública Ruta 2 abierta en una ventana separada. Completa y confirma la reserva para transmitirla.");
@@ -901,7 +941,7 @@ function AppShell() {
       ? publicReservationWindowRef.current
       : window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
 
-    if (!reservationWindow) {
+    if (!reservationWindow || !activeDemoSession) {
       setReservationReplayStatus("error");
       setReservationReplayNotice({
         title: "No fue posible solicitar replay",
@@ -912,7 +952,7 @@ function AppShell() {
 
     publicReservationWindowRef.current = reservationWindow;
     if (!publicReservationBridgeIdRef.current || !publicReservationBridgeSourceRef.current) {
-      preparePublicReservationBridge(reservationWindow);
+      preparePublicReservationBridge(reservationWindow, activeDemoSession.demoRunId);
     }
     reservationWindow.focus();
     clearReplayTimeout();
@@ -924,6 +964,7 @@ function AppShell() {
       requestId,
       requestedAt: new Date().toISOString(),
       sourceApplication: "hoperia_admin_demo",
+      demoRunId: activeDemoSession.demoRunId,
       ...(publicReservationBridgeIdRef.current ? { bridgeId: publicReservationBridgeIdRef.current } : {}),
     };
 
@@ -981,7 +1022,7 @@ function AppShell() {
     setReservationReplayStatus("idle");
     processedEventIds.current.clear();
     expedienteIdByReservationId.current.clear();
-    clearStoredLiveExpediente();
+    clearStoredLiveExpediente(activeDemoSession?.demoRunId);
     setLiveDemoResetToken((current) => current + 1);
     setLiveDemoResetStatus("completed");
     setLiveDemoResetNotice(notice);
@@ -1006,7 +1047,7 @@ function AppShell() {
     return `demo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
   };
 
-  const clearDemoSessionLocalState = () => {
+  const clearDemoSessionLocalState = (demoRunId?: string) => {
     clearResetTimeout();
     clearReplayTimeout();
     clearBridgeTimeout();
@@ -1021,7 +1062,7 @@ function AppShell() {
     liveExpedienteRef.current = null;
     processedEventIds.current.clear();
     expedienteIdByReservationId.current.clear();
-    clearStoredLiveExpediente();
+    clearStoredLiveExpediente(demoRunId);
     setLiveExpediente(null);
     setAutoSelectReservationId(null);
     setReceptionNotice(null);
@@ -1051,7 +1092,7 @@ function AppShell() {
     setDemoSessionNotice(detail);
   };
 
-  const reconnectPublicReservationForDemoSession = (intent: DemoSessionIntent) => {
+  const reconnectPublicReservationForDemoSession = (intent: DemoSessionIntent, demoRunId: string) => {
     const reservationWindow = publicReservationWindowRef.current && !publicReservationWindowRef.current.closed
       ? publicReservationWindowRef.current
       : window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
@@ -1066,7 +1107,7 @@ function AppShell() {
     pendingReservationResetAfterBridgeRef.current = intent;
     setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
     setDemoSessionNotice("Reconectando Ruta 2 para limpiar de forma segura la corrida anterior.");
-    preparePublicReservationBridge(reservationWindow);
+    preparePublicReservationBridge(reservationWindow, demoRunId);
     const bridgeId = publicReservationBridgeIdRef.current;
     reservationWindow.focus();
     clearBridgeTimeout();
@@ -1090,33 +1131,35 @@ function AppShell() {
     }, 5000);
   };
 
-  const completeDemoSessionPreparation = (intent: DemoSessionIntent) => {
-    clearDemoSessionLocalState();
+  const completeDemoSessionPreparation = (intent: DemoSessionIntent, demoRunId: string) => {
+    clearDemoSessionLocalState(demoRunId);
     pendingDemoSessionIntentRef.current = null;
     setActive("demo");
 
     if (intent === "finalize") {
       setActiveDemoSession(null);
+      window.localStorage.removeItem(activeDemoSessionStorageKey);
       setDemoSessionStatus("idle");
       setDemoSessionNotice("Demostración finalizada. No existe una sesión activa.");
       return;
     }
 
-    const demoRunId = createDemoSessionId();
-    setActiveDemoSession({ demoRunId, startedAt: new Date().toISOString() });
+    const session = { demoRunId, startedAt: new Date().toISOString() };
+    setActiveDemoSession(session);
+    window.localStorage.setItem(activeDemoSessionStorageKey, JSON.stringify(session));
     setDemoSessionStatus("active");
     setDemoSessionNotice("Nueva demostración preparada sin estado heredado.");
   };
 
-  const requestReservationResetForDemoSession = (intent: DemoSessionIntent) => {
+  const requestReservationResetForDemoSession = (intent: DemoSessionIntent, demoRunId: string) => {
     const reservationWindow = publicReservationWindowRef.current;
     if (!reservationWindow || reservationWindow.closed) {
-      reconnectPublicReservationForDemoSession(intent);
+      reconnectPublicReservationForDemoSession(intent, demoRunId);
       return;
     }
 
     if (!publicReservationBridgeIdRef.current || !publicReservationBridgeSourceRef.current) {
-      reconnectPublicReservationForDemoSession(intent);
+      reconnectPublicReservationForDemoSession(intent, demoRunId);
       return;
     }
 
@@ -1127,6 +1170,7 @@ function AppShell() {
       resetId,
       requestedAt: new Date().toISOString(),
       sourceApplication: "hoperia_admin_demo",
+      demoRunId,
     };
 
     pendingResetIdRef.current = resetId;
@@ -1146,15 +1190,21 @@ function AppShell() {
   const prepareDemoSession = (intent: DemoSessionIntent) => {
     if (demoSessionStatus === "preparing") return;
     pendingDemoSessionIntentRef.current = intent;
+    const targetDemoRunId = intent === "finalize" ? activeDemoSession?.demoRunId : createDemoSessionId();
+    if (!targetDemoRunId) {
+      blockDemoSessionPreparation("No existe una corrida activa para finalizar.");
+      return;
+    }
+    pendingDemoRunIdRef.current = targetDemoRunId;
     setDemoSessionStatus("preparing");
     setDemoSessionNotice("Verificando y limpiando el estado efímero de la corrida anterior.");
 
     if (liveExpedienteRef.current) {
-      requestReservationResetForDemoSession(intent);
+      requestReservationResetForDemoSession(intent, targetDemoRunId);
       return;
     }
 
-    completeDemoSessionPreparation(intent);
+    completeDemoSessionPreparation(intent, targetDemoRunId);
   };
 
   const requestLiveDemoReset = () => {
@@ -1188,11 +1238,17 @@ function AppShell() {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(liveExpedienteStorageKey);
+      const demoRunId = activeDemoSessionRef.current?.demoRunId;
+      if (!demoRunId) return;
+      const raw = window.localStorage.getItem(liveExpedienteStorageKeyForRun(demoRunId));
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (!isLiveExpediente(parsed)) {
-        clearStoredLiveExpediente();
+        clearStoredLiveExpediente(demoRunId);
+        return;
+      }
+      if (parsed.demoRunId !== demoRunId) {
+        clearStoredLiveExpediente(demoRunId);
         return;
       }
 
@@ -1214,7 +1270,7 @@ function AppShell() {
         detail: `Reservation ID: ${parsed.reservationId}`,
       });
     } catch {
-      clearStoredLiveExpediente();
+      clearStoredLiveExpediente(activeDemoSessionRef.current?.demoRunId);
     }
   }, []);
 
@@ -1249,6 +1305,8 @@ function AppShell() {
         if (eventType === "hoperia.public.bridge.ack") {
           if (!isPublicBridgeAckMessage(event.data)) return;
           if (event.data.bridgeId !== publicReservationBridgeIdRef.current) return;
+          const expectedDemoRunId = pendingDemoRunIdRef.current || activeDemoSessionRef.current?.demoRunId;
+          if (event.data.demoRunId !== expectedDemoRunId) return;
           if (event.source !== publicReservationWindowRef.current) return;
 
           publicReservationBridgeSourceRef.current = event.source;
@@ -1259,7 +1317,8 @@ function AppShell() {
             clearBridgeTimeout();
             clearBridgeRetryInterval();
             pendingReservationResetAfterBridgeRef.current = null;
-            requestReservationResetForDemoSession(intent);
+            const demoRunId = pendingDemoRunIdRef.current;
+            if (demoRunId) requestReservationResetForDemoSession(intent, demoRunId);
           }
           return;
         }
@@ -1277,10 +1336,12 @@ function AppShell() {
       if (eventType === "hoperia.demo.live.reset.ack") {
         if (!isPublicLiveDemoResetAck(event.data)) return;
         if (event.data.resetId !== pendingResetIdRef.current) return;
+        if (event.data.demoRunId !== pendingDemoRunIdRef.current) return;
 
         const intent = pendingDemoSessionIntentRef.current;
         if (intent) {
-          completeDemoSessionPreparation(intent);
+          const demoRunId = pendingDemoRunIdRef.current;
+          if (demoRunId) completeDemoSessionPreparation(intent, demoRunId);
         } else {
           clearAdminLiveDemoState({
             title: "Demostración en vivo reiniciada",
@@ -1300,6 +1361,10 @@ function AppShell() {
       }
 
       const reservationEvent = event.data;
+      if (!activeDemoSessionRef.current || reservationEvent.demoRunId !== activeDemoSessionRef.current.demoRunId) {
+        rejectReservation("Evento rechazado: no pertenece a la sesión integrada activa.");
+        return;
+      }
       if (processedEventIds.current.has(reservationEvent.eventId)) {
         if (pendingReplayRequestIdRef.current !== null) {
           clearReplayTimeout();
@@ -1335,6 +1400,7 @@ function AppShell() {
         selectedUnit: reservationEvent.selectedUnit,
         sourceChannel: reservationEvent.sourceChannel,
         isDemo: reservationEvent.isDemo,
+        demoRunId: reservationEvent.demoRunId,
         persisted: false,
       };
 
