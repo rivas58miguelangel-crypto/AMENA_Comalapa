@@ -122,6 +122,31 @@ const ALLOWED_RESERVATION_SOURCE_APPLICATIONS = new Set([
   "amena_public_reservation_app",
 ]);
 
+type DemoSession = {
+  demoRunId: string;
+  startedAt: string;
+};
+
+type DemoSessionStatus = "idle" | "preparing" | "active" | "blocked";
+type DemoSessionIntent = "start" | "finalize";
+type DemoParticipantStatus = "available" | "open" | "connected" | "not_integrated" | "future";
+
+const demoParticipantDefaults: Record<string, DemoParticipantStatus> = {
+  reservations: "available",
+  marta: "not_integrated",
+  sellers: "not_integrated",
+  messaging: "not_integrated",
+  ux: "future",
+};
+
+const demoParticipants = [
+  { id: "reservations", name: "App Pública de Reservas", detail: "Bridge publicado disponible", status: "available" as const },
+  { id: "marta", name: "Marta", detail: "Integración futura", status: "not_integrated" as const },
+  { id: "sellers", name: "Registro de Seguimiento Comercial / Vendedoras", detail: "Integración futura", status: "not_integrated" as const },
+  { id: "messaging", name: "Mensajería Operacional", detail: "Integración futura", status: "not_integrated" as const },
+  { id: "ux", name: "Experiencia del Usuario / UX", detail: "Aplicación futura prevista", status: "future" as const },
+];
+
 type ReservationCompletedEvent = {
   type: "hoperia.reservation.completed";
   schemaVersion: "1.0";
@@ -479,7 +504,7 @@ function Card({ children, className = "" }) {
   return <div className={cls("min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6", className)}>{children}</div>;
 }
 
-function TopNav({ active, setActive }) {
+function TopNav({ active, setActive, onStartDemoSession }) {
   return (
     <div className="hoperia-admin-topnav">
       <div className="hoperia-admin-topnav-row">
@@ -494,8 +519,8 @@ function TopNav({ active, setActive }) {
         </div>
         <div className="hoperia-admin-actions">
           <Badge tone="dark">Integración demostrativa: {martaSync[active]}%</Badge>
-          <button onClick={() => setActive("demo")} className="hoperia-admin-demo-button">
-            <Smartphone size={16} className="mr-2 inline" />Iniciar demostración
+          <button onClick={onStartDemoSession} className="hoperia-admin-demo-button">
+            <Smartphone size={16} className="mr-2 inline" />Iniciar nueva demostración
           </button>
         </div>
       </div>
@@ -638,6 +663,11 @@ function AppShell() {
   const [demoFindings, setDemoFindings] = useState([]);
   const [demoContext, setDemoContext] = useState(null);
   const [demoCommandEvidenceState, setDemoCommandEvidenceState] = useState(null);
+  const [activeDemoSession, setActiveDemoSession] = useState<DemoSession | null>(null);
+  const [demoSessionStatus, setDemoSessionStatus] = useState<DemoSessionStatus>("idle");
+  const [demoSessionNotice, setDemoSessionNotice] = useState<string | null>(null);
+  const [demoSessionResetToken, setDemoSessionResetToken] = useState(0);
+  const [demoParticipantStatuses, setDemoParticipantStatuses] = useState(demoParticipantDefaults);
   const [liveExpediente, setLiveExpediente] = useState<LiveExpediente | null>(null);
   const [autoSelectReservationId, setAutoSelectReservationId] = useState<string | null>(null);
   const [receptionNotice, setReceptionNotice] = useState<ReceptionNotice | null>(null);
@@ -655,6 +685,11 @@ function AppShell() {
   const resetTimeoutRef = useRef<number | null>(null);
   const pendingReplayRequestIdRef = useRef<string | null>(null);
   const replayTimeoutRef = useRef<number | null>(null);
+  const pendingDemoSessionIntentRef = useRef<DemoSessionIntent | null>(null);
+  const pendingReservationResetAfterBridgeRef = useRef<DemoSessionIntent | null>(null);
+  const bridgeTimeoutRef = useRef<number | null>(null);
+  const bridgeRetryIntervalRef = useRef<number | null>(null);
+  const bridgeRetryTimeoutsRef = useRef<number[]>([]);
   const [reservationReplayNotice, setReservationReplayNotice] = useState<LiveDemoResetNotice | null>(null);
   const [reservationReplayStatus, setReservationReplayStatus] = useState<"idle" | "requesting" | "received" | "empty" | "error">("idle");
   const isNonEmptyString = (value: unknown): value is string =>
@@ -757,11 +792,12 @@ function AppShell() {
   };
 
   const preparePublicReservationBridge = (reservationWindow: Window) => {
+    clearBridgeRetryTimeouts();
     const bridgeId = createBridgeId();
     publicReservationBridgeIdRef.current = bridgeId;
     publicReservationBridgeSourceRef.current = null;
     sendPublicReservationBridge(reservationWindow, bridgeId);
-    [500, 1500].forEach((delay) => {
+    bridgeRetryTimeoutsRef.current = [500, 1500].map((delay) => (
       window.setTimeout(() => {
         if (
           publicReservationBridgeIdRef.current === bridgeId &&
@@ -770,8 +806,8 @@ function AppShell() {
         ) {
           sendPublicReservationBridge(reservationWindow, bridgeId);
         }
-      }, delay);
-    });
+      }, delay)
+    ));
   };
 
   const isExpectedReservationSource = (event: MessageEvent<unknown>, bridgeId?: string) => (
@@ -808,6 +844,7 @@ function AppShell() {
     if (publicReservationWindowRef.current && !publicReservationWindowRef.current.closed) {
       preparePublicReservationBridge(publicReservationWindowRef.current);
       publicReservationWindowRef.current.focus();
+      setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
       setPublicReservationWindowNotice("App Pública Ruta 2 enfocada. Completa y confirma la reserva para transmitirla.");
       return;
     }
@@ -821,6 +858,7 @@ function AppShell() {
 
     publicReservationWindowRef.current = reservationWindow;
     preparePublicReservationBridge(reservationWindow);
+    setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
     reservationWindow.focus();
     setPublicReservationWindowNotice("App Pública Ruta 2 abierta en una ventana separada. Completa y confirma la reserva para transmitirla.");
   };
@@ -837,6 +875,25 @@ function AppShell() {
       window.clearTimeout(replayTimeoutRef.current);
       replayTimeoutRef.current = null;
     }
+  };
+
+  const clearBridgeTimeout = () => {
+    if (bridgeTimeoutRef.current !== null) {
+      window.clearTimeout(bridgeTimeoutRef.current);
+      bridgeTimeoutRef.current = null;
+    }
+  };
+
+  const clearBridgeRetryInterval = () => {
+    if (bridgeRetryIntervalRef.current !== null) {
+      window.clearInterval(bridgeRetryIntervalRef.current);
+      bridgeRetryIntervalRef.current = null;
+    }
+  };
+
+  const clearBridgeRetryTimeouts = () => {
+    bridgeRetryTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    bridgeRetryTimeoutsRef.current = [];
   };
 
   const sendReservationReplayRequest = (detail = "Solicitando a Ruta 2 la última reserva demo disponible.") => {
@@ -942,25 +999,127 @@ function AppShell() {
     return `reset-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
   };
 
-  const requestLiveDemoReset = () => {
-    const confirmed = window.confirm(
-      "Se limpiará la reserva viva actual tanto en la App Pública como en el Admin. Los fixtures históricos y las FASE 04/05 permanecerán intactos. ¿Continuar?",
-    );
-    if (!confirmed) return;
+  const createDemoSessionId = () => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return `demo-${crypto.randomUUID()}`;
+    }
+    return `demo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  };
 
-    const publicReservationWindow = publicReservationWindowRef.current;
-    if (!publicReservationWindow || publicReservationWindow.closed) {
-      clearResetTimeout();
-      pendingResetIdRef.current = null;
-      setLiveDemoResetStatus("error");
-      setLiveDemoResetNotice({
-        title: "No fue posible solicitar el reinicio",
-        detail: "La ventana de la App Pública no está disponible.",
-      });
+  const clearDemoSessionLocalState = () => {
+    clearResetTimeout();
+    clearReplayTimeout();
+    clearBridgeTimeout();
+    clearBridgeRetryInterval();
+    clearBridgeRetryTimeouts();
+    pendingResetIdRef.current = null;
+    pendingReplayRequestIdRef.current = null;
+    pendingReservationResetAfterBridgeRef.current = null;
+    publicReservationBridgeIdRef.current = null;
+    publicReservationBridgeSourceRef.current = null;
+    publicReservationWindowRef.current = null;
+    liveExpedienteRef.current = null;
+    processedEventIds.current.clear();
+    expedienteIdByReservationId.current.clear();
+    clearStoredLiveExpediente();
+    setLiveExpediente(null);
+    setAutoSelectReservationId(null);
+    setReceptionNotice(null);
+    setPublicReservationWindowNotice(null);
+    setReservationReplayNotice(null);
+    setReservationReplayStatus("idle");
+    setLiveDemoResetStatus("idle");
+    setLiveDemoResetNotice(null);
+    setDemoContext(null);
+    setDemoFindings([]);
+    setDemoCommandEvidenceState(null);
+    setDemoParticipantStatuses(demoParticipantDefaults);
+    setLiveDemoResetToken((current) => current + 1);
+    setDemoSessionResetToken((current) => current + 1);
+  };
+
+  const blockDemoSessionPreparation = (detail: string) => {
+    clearResetTimeout();
+    clearBridgeTimeout();
+    clearBridgeRetryInterval();
+    clearBridgeRetryTimeouts();
+    pendingResetIdRef.current = null;
+    pendingDemoSessionIntentRef.current = null;
+    pendingReservationResetAfterBridgeRef.current = null;
+    setActiveDemoSession(null);
+    setDemoSessionStatus("blocked");
+    setDemoSessionNotice(detail);
+  };
+
+  const reconnectPublicReservationForDemoSession = (intent: DemoSessionIntent) => {
+    const reservationWindow = publicReservationWindowRef.current && !publicReservationWindowRef.current.closed
+      ? publicReservationWindowRef.current
+      : window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
+
+    if (!reservationWindow) {
+      blockDemoSessionPreparation("No fue posible reconectar Ruta 2 para limpiar la corrida anterior. Permite la ventana emergente y reintenta la preparación.");
       return;
     }
 
-    clearResetTimeout();
+    publicReservationWindowRef.current = reservationWindow;
+    publicReservationBridgeSourceRef.current = null;
+    pendingReservationResetAfterBridgeRef.current = intent;
+    setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
+    setDemoSessionNotice("Reconectando Ruta 2 para limpiar de forma segura la corrida anterior.");
+    preparePublicReservationBridge(reservationWindow);
+    const bridgeId = publicReservationBridgeIdRef.current;
+    reservationWindow.focus();
+    clearBridgeTimeout();
+    clearBridgeRetryInterval();
+    bridgeRetryIntervalRef.current = window.setInterval(() => {
+      if (
+        !bridgeId ||
+        publicReservationBridgeIdRef.current !== bridgeId ||
+        publicReservationWindowRef.current !== reservationWindow ||
+        reservationWindow.closed ||
+        pendingReservationResetAfterBridgeRef.current !== intent
+      ) {
+        clearBridgeRetryInterval();
+        return;
+      }
+      sendPublicReservationBridge(reservationWindow, bridgeId);
+    }, 600);
+    bridgeTimeoutRef.current = window.setTimeout(() => {
+      if (pendingReservationResetAfterBridgeRef.current !== intent) return;
+      blockDemoSessionPreparation("Ruta 2 no confirmó el bridge de limpieza. La corrida anterior se conserva identificada; reintenta la preparación.");
+    }, 5000);
+  };
+
+  const completeDemoSessionPreparation = (intent: DemoSessionIntent) => {
+    clearDemoSessionLocalState();
+    pendingDemoSessionIntentRef.current = null;
+    setActive("demo");
+
+    if (intent === "finalize") {
+      setActiveDemoSession(null);
+      setDemoSessionStatus("idle");
+      setDemoSessionNotice("Demostración finalizada. No existe una sesión activa.");
+      return;
+    }
+
+    const demoRunId = createDemoSessionId();
+    setActiveDemoSession({ demoRunId, startedAt: new Date().toISOString() });
+    setDemoSessionStatus("active");
+    setDemoSessionNotice("Nueva demostración preparada sin estado heredado.");
+  };
+
+  const requestReservationResetForDemoSession = (intent: DemoSessionIntent) => {
+    const reservationWindow = publicReservationWindowRef.current;
+    if (!reservationWindow || reservationWindow.closed) {
+      reconnectPublicReservationForDemoSession(intent);
+      return;
+    }
+
+    if (!publicReservationBridgeIdRef.current || !publicReservationBridgeSourceRef.current) {
+      reconnectPublicReservationForDemoSession(intent);
+      return;
+    }
+
     const resetId = createLiveDemoResetId();
     const resetRequest: AdminLiveDemoResetRequest = {
       type: "hoperia.demo.live.reset",
@@ -971,34 +1130,40 @@ function AppShell() {
     };
 
     pendingResetIdRef.current = resetId;
-    setLiveDemoResetStatus("requesting");
-    setLiveDemoResetNotice({
-      title: "Reinicio solicitado",
-      detail: "Esperando confirmación de la App Pública.",
-    });
-
     try {
-      publicReservationWindow.postMessage(resetRequest, configuredPublicReservationOrigin);
+      reservationWindow.postMessage(resetRequest, configuredPublicReservationOrigin);
     } catch {
-      pendingResetIdRef.current = null;
-      setLiveDemoResetStatus("error");
-      setLiveDemoResetNotice({
-        title: "No fue posible solicitar el reinicio",
-        detail: "La ventana de la App Pública no está disponible.",
-      });
+      blockDemoSessionPreparation("No fue posible solicitar a Ruta 2 la limpieza de la corrida anterior. La evidencia residual se conserva; reintenta la preparación.");
       return;
     }
 
     resetTimeoutRef.current = window.setTimeout(() => {
       if (pendingResetIdRef.current !== resetId) return;
-      pendingResetIdRef.current = null;
-      resetTimeoutRef.current = null;
-      setLiveDemoResetStatus("timeout");
-      setLiveDemoResetNotice({
-        title: "Reinicio no confirmado",
-        detail: "La App Pública no respondió; el estado del Admin se conserva.",
-      });
+      blockDemoSessionPreparation("Ruta 2 no confirmó la limpieza de la corrida anterior. La evidencia residual se conserva; reintenta la preparación.");
     }, 5000);
+  };
+
+  const prepareDemoSession = (intent: DemoSessionIntent) => {
+    if (demoSessionStatus === "preparing") return;
+    pendingDemoSessionIntentRef.current = intent;
+    setDemoSessionStatus("preparing");
+    setDemoSessionNotice("Verificando y limpiando el estado efímero de la corrida anterior.");
+
+    if (liveExpedienteRef.current) {
+      requestReservationResetForDemoSession(intent);
+      return;
+    }
+
+    completeDemoSessionPreparation(intent);
+  };
+
+  const requestLiveDemoReset = () => {
+    const confirmed = window.confirm(
+      "Se finalizará la demostración activa y se limpiará su estado efímero tanto en la App Pública como en el Admin. ¿Continuar?",
+    );
+    if (!confirmed) return;
+
+    prepareDemoSession("finalize");
   };
 
   const clearOnlyAdminLiveDemoState = () => {
@@ -1016,6 +1181,9 @@ function AppShell() {
   useEffect(() => () => {
     clearResetTimeout();
     clearReplayTimeout();
+    clearBridgeTimeout();
+    clearBridgeRetryInterval();
+    clearBridgeRetryTimeouts();
   }, []);
 
   useEffect(() => {
@@ -1084,6 +1252,15 @@ function AppShell() {
           if (event.source !== publicReservationWindowRef.current) return;
 
           publicReservationBridgeSourceRef.current = event.source;
+          setDemoParticipantStatuses((current) => ({ ...current, reservations: "connected" }));
+          clearBridgeRetryTimeouts();
+          const intent = pendingReservationResetAfterBridgeRef.current;
+          if (intent) {
+            clearBridgeTimeout();
+            clearBridgeRetryInterval();
+            pendingReservationResetAfterBridgeRef.current = null;
+            requestReservationResetForDemoSession(intent);
+          }
           return;
         }
       }
@@ -1101,10 +1278,15 @@ function AppShell() {
         if (!isPublicLiveDemoResetAck(event.data)) return;
         if (event.data.resetId !== pendingResetIdRef.current) return;
 
-        clearAdminLiveDemoState({
-          title: "Demostración en vivo reiniciada",
-          detail: "Admin y App Pública confirmaron la limpieza coordinada.",
-        });
+        const intent = pendingDemoSessionIntentRef.current;
+        if (intent) {
+          completeDemoSessionPreparation(intent);
+        } else {
+          clearAdminLiveDemoState({
+            title: "Demostración en vivo reiniciada",
+            detail: "Admin y App Pública confirmaron la limpieza coordinada.",
+          });
+        }
         return;
       }
 
@@ -1210,7 +1392,7 @@ function AppShell() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-amber-50 text-slate-950">
       <div className="mx-auto max-w-[1800px] space-y-5 p-3 sm:p-5">
-        <TopNav active={active} setActive={setActive} />
+        <TopNav active={active} setActive={setActive} onStartDemoSession={() => prepareDemoSession("start")} />
         {publicReservationWindowNotice && (
           <div className="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm font-bold leading-6 text-blue-900">
             {publicReservationWindowNotice}
@@ -1219,10 +1401,13 @@ function AppShell() {
         {receptionNotice && (
           <div className={cls(
             "rounded-2xl border px-5 py-4 text-sm font-bold leading-6",
-            receptionNotice.kind === "accepted"
+            demoSessionStatus === "blocked"
+              ? "border-amber-200 bg-amber-50 text-amber-900"
+              : receptionNotice.kind === "accepted"
               ? "border-emerald-200 bg-emerald-50 text-emerald-900"
               : "border-amber-200 bg-amber-50 text-amber-900",
           )}>
+            {demoSessionStatus === "blocked" && <div className="mb-2 text-xs font-black uppercase tracking-[0.18em]">Estado residual de corrida anterior</div>}
             <div className="font-black">{receptionNotice.title}</div>
             <div>{receptionNotice.detail}</div>
             {receptionNotice.reservationId && <div>Reservation ID: {receptionNotice.reservationId}</div>}
@@ -1245,18 +1430,23 @@ function AppShell() {
         {reservationReplayNotice && (
           <div className={cls(
             "rounded-2xl border px-5 py-4 text-sm font-bold leading-6",
-            reservationReplayStatus === "received"
+            demoSessionStatus === "blocked"
+              ? "border-amber-200 bg-amber-50 text-amber-900"
+              : reservationReplayStatus === "received"
               ? "border-emerald-200 bg-emerald-50 text-emerald-900"
               : reservationReplayStatus === "requesting"
                 ? "border-blue-200 bg-blue-50 text-blue-900"
                 : "border-amber-200 bg-amber-50 text-amber-900",
           )}>
+            {demoSessionStatus === "blocked" && <div className="mb-2 text-xs font-black uppercase tracking-[0.18em]">Estado residual de corrida anterior</div>}
             <div className="font-black">{reservationReplayNotice.title}</div>
             <div>{reservationReplayNotice.detail}</div>
           </div>
         )}
         <div className="flex flex-wrap gap-3">
           {(liveExpediente || receptionNotice?.kind === "accepted" || liveDemoResetStatus === "requesting") && (
+            <div className="flex flex-wrap items-center gap-3">
+              {demoSessionStatus === "blocked" && <span className="text-xs font-black uppercase tracking-[0.16em] text-amber-800">Estado residual · limpieza pendiente</span>}
             <button
               type="button"
               disabled={liveDemoResetStatus === "requesting"}
@@ -1268,21 +1458,18 @@ function AppShell() {
             >
               Reiniciar demostración en vivo
             </button>
+            </div>
           )}
         </div>
-        {(liveDemoResetStatus === "timeout" || liveDemoResetStatus === "error") && liveExpediente && (
-          <button
-            type="button"
-            onClick={clearOnlyAdminLiveDemoState}
-            className="rounded-2xl border border-amber-300 bg-white px-5 py-3 text-sm font-black text-amber-900 hover:bg-amber-50"
-          >
-            Limpiar solo estado local del Admin
-          </button>
-        )}
         <Page
           demoContext={demoContext}
           demoFindings={demoFindings}
           demoCommandEvidenceState={demoCommandEvidenceState}
+          activeDemoSession={activeDemoSession}
+          demoSessionStatus={demoSessionStatus}
+          demoSessionNotice={demoSessionNotice}
+          demoSessionResetToken={demoSessionResetToken}
+          demoParticipantStatuses={demoParticipantStatuses}
           liveExpediente={liveExpediente}
           autoSelectReservationId={autoSelectReservationId}
           liveDemoResetToken={liveDemoResetToken}
@@ -1292,6 +1479,8 @@ function AppShell() {
           onDemoFindingsInjected={setDemoFindings}
           onDemoCommandEvidenceStateChange={setDemoCommandEvidenceState}
           onOpenPublicReservation={openPublicReservation}
+          onStartDemoSession={() => prepareDemoSession("start")}
+          onFinalizeDemoSession={() => prepareDemoSession("finalize")}
           setActive={setActive}
         />
       </div>
@@ -2719,7 +2908,14 @@ function DemoPage({
   demoContext,
   demoFindings = [],
   demoCommandEvidenceState = null,
+  activeDemoSession = null,
+  demoSessionStatus = "idle",
+  demoSessionNotice = null,
+  demoSessionResetToken = 0,
+  demoParticipantStatuses = demoParticipantDefaults,
   liveExpediente = null,
+  onStartDemoSession,
+  onFinalizeDemoSession,
   onDemoContextInjected,
   onDemoFindingsInjected,
   onDemoCommandEvidenceStateChange,
@@ -2736,10 +2932,6 @@ function DemoPage({
   ];
   const emptyVolunteer = { name: "", role: "", company: "", whatsapp: "", email: "" };
   const baseVolunteer = { name: "Andrea López", role: "Gerente comercial", company: "Proyecto de Empresa Demo", whatsapp: "+503 7000-0000", email: "andrea@empresa.com", whatsappStatus: "Pendiente", emailStatus: "Pendiente", reservationStarted: "Pendiente", reservationCompleted: "Pendiente", finished: "No" };
-  const createDemoRunId = () => {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) return `demo-${crypto.randomUUID()}`;
-    return `demo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-  };
   const createSimulatedReservationClients = (demoRunId) => {
     const names = ["Carlos Mendez", "Andrea Lopez", "Sofia Rivera", "Mario Hernandez", "Lucia Alvarez", "Roberto Castillo", "Paola Garcia", "Jorge Morales", "Elena Torres", "Diego Ramirez", "Natalia Flores", "Victor Pineda", "Claudia Reyes", "Fernando Ortiz", "Gabriela Cruz", "Ricardo Salazar", "Monica Aguilar", "Hector Vasquez", "Daniela Mejia", "Oscar Campos"];
     const channels = ["App Reservas", "Landing publica", "Referido", "Campana digital"];
@@ -3052,6 +3244,22 @@ function DemoPage({
     hidden: "Oculto",
   };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
+  const hasActiveLiveReservation = Boolean(activeDemoSession && liveExpediente);
+  const sessionHeading = demoSessionStatus === "blocked"
+    ? "Sesión bloqueada"
+    : demoSessionStatus === "preparing"
+      ? "Preparando demostración"
+      : activeDemoSession
+        ? "Demostración en curso"
+        : "Sin sesión activa";
+  const phaseOneStatus = demoSessionStatus === "blocked"
+    ? "Pendiente de limpieza de corrida anterior"
+    : !activeDemoSession
+      ? "Disponible al iniciar sesión"
+      : hasActiveLiveReservation
+        ? "Reserva recibida"
+        : "Esperando reserva";
+  const hasSessionEvidence = Boolean(activeDemoSession);
   const selectedVolunteer = volunteers.find((item) => item.whatsapp === selectedPhone) || volunteers[0] || baseVolunteer;
   const liveSnapshot = liveExpediente || null;
   const liveSelectedUnit = liveSnapshot?.selectedUnit || null;
@@ -3081,7 +3289,37 @@ function DemoPage({
     setReservationStatus({ reservation: "Pendiente", whatsapp: "Pendiente", email: "Pendiente", evidence: "Pendiente" });
     setVisibleSendStatus({ whatsappStatus: "Pendiente", emailStatus: "Pendiente" });
   };
-  const phaseStatus = (index) => completedPhases.includes(index) ? "Completada" : activePhase === index ? "Activa" : "Pendiente";
+  useEffect(() => {
+    if (demoSessionResetToken === 0) return;
+    setActivePhase(0);
+    setCompletedPhases([]);
+    setVolunteerForm(emptyVolunteer);
+    setVolunteers([baseVolunteer]);
+    setSelectedPhone(baseVolunteer.whatsapp);
+    resetDemoEvidence();
+    setMartaStatus("Conversación pendiente");
+    setVapiStatus("Pendiente");
+    setActiveDemoContext(null);
+    setSimulatedReservationClients([]);
+    setSimulatedInternalMessages([]);
+    setSimulatedSellerReports([]);
+    setSimulatedVapiCallLogs([]);
+    setSimulatedMartaWhatsAppFollowups([]);
+    setSimulatedIntelligenceSignals([]);
+    setSimulatedOperationalEvidence([]);
+    setExecutiveQuery("");
+    setExecutiveQuestions(["¿Qué canal genera más ingresos netos y menos atrasos?", "¿Qué campañas generan leads de baja calidad?"]);
+    setExecutiveBreakdown("Ingresos netos por canal y campaña\nConversión por modelo, sector y unidad\nAcompañamiento del equipo y uso de Marta\nRiesgos financieros, documentales y de escrituración");
+    setSelectedBreakdowns(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
+    setExecutiveResponseReady(false);
+  }, [demoSessionResetToken]);
+  const phaseStatus = (index) => index === 0
+    ? phaseOneStatus
+    : completedPhases.includes(index)
+      ? "Completada"
+      : activePhase === index
+        ? "Activa"
+        : "Pendiente";
   const presentPhase = (index) => {
     setActivePhase(index);
     phaseSectionRefs.current[index]?.scrollIntoView({
@@ -3264,7 +3502,8 @@ function DemoPage({
     projectName?: string;
     scenarioName?: string;
   } = { reservations: 20, messages: 20, sellerReports: 20, vapiLogs: 20 }) => {
-    const nextDemoRunId = createDemoRunId();
+    if (!activeDemoSession) return;
+    const nextDemoRunId = activeDemoSession.demoRunId;
     const baseReservationClients = createSimulatedReservationClients(nextDemoRunId);
     const nextReservationClients = baseReservationClients.slice(0, quantities.reservations);
     const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, baseReservationClients).slice(0, quantities.messages);
@@ -3367,12 +3606,33 @@ function DemoPage({
   return (
     <div className="space-y-5">
       <PageHeader title="Centro Demo" subtitle="Tablero de mando escénico para ejecutar una demostración ejecutiva en vivo: reserva, mensajería, Marta, evidencia operacional, simulación e inteligencia." icon={Smartphone} sync={martaSync.demo} badges={["Operación viva", "Demo ejecutiva", "Evidencia de la Operación"]} syncNote="Mide el avance visible de la demostración: fases completadas, estados operacionales y señales generadas durante la presentación." />
+      <Card className="border-blue-100 bg-blue-50">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Sesión demo</div>
+            <h3 className="mt-2 text-2xl font-black text-slate-950">{sessionHeading}</h3>
+            {activeDemoSession && <p className="mt-2 text-sm font-semibold text-slate-700">demoRunId: {activeDemoSession.demoRunId}</p>}
+            {demoSessionNotice && <p className="mt-2 text-sm font-semibold text-slate-700">{demoSessionNotice}</p>}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {!activeDemoSession && demoSessionStatus === "blocked" && <button type="button" onClick={onStartDemoSession} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:cursor-wait disabled:bg-slate-400">Reintentar preparación</button>}
+            {activeDemoSession && <button type="button" disabled={demoSessionStatus === "preparing"} onClick={onFinalizeDemoSession} className="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-900 disabled:cursor-wait disabled:opacity-60">Finalizar demostración</button>}
+          </div>
+        </div>
+        {demoSessionStatus === "blocked" && <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black text-amber-900">No fue posible preparar una nueva demostración porque existe estado pendiente de la corrida anterior.</div>}
+        {activeDemoSession && <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">{demoParticipants.map((participant) => {
+          const status = demoParticipantStatuses[participant.id] || participant.status;
+          const label = status === "connected" ? "Conectada" : status === "open" ? "Abierta" : status === "available" ? "Disponible" : status === "future" ? "Prevista" : "No integrada";
+          const tone = status === "connected" ? "green" : status === "open" || status === "available" ? "blue" : status === "future" ? "violet" : "slate";
+          return <div key={participant.id} className="rounded-2xl border border-blue-100 bg-white p-4"><div className="text-sm font-black text-slate-950">{participant.name}</div><div className="mt-1 text-xs font-semibold leading-5 text-slate-600">{participant.detail}</div><div className="mt-3"><Badge tone={tone}>{label}</Badge></div></div>;
+        })}</div>}
+      </Card>
       <Card>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <InfoCard title="Empresa Activa" value={effectiveDemoContext?.prospectCompanyName || "Empresa Demo"} />
-          <InfoCard title="Proyecto Activo" value={effectiveDemoContext?.projectName || "Proyecto de Empresa Demo"} />
-          <InfoCard title="Escenario Activo" value={effectiveDemoContext?.scenarioName || "Centro Demo"} />
-          <InfoCard title="Estado" value={effectiveDemoContext?.status === "injected" ? "Demo local cargada" : effectiveDemoContext?.status || "Preparado"} />
+          <InfoCard title="Empresa configurada" value={effectiveDemoContext?.prospectCompanyName || "Empresa Demo"} />
+          <InfoCard title="Proyecto de referencia" value={effectiveDemoContext?.projectName || "Proyecto de Empresa Demo"} />
+          <InfoCard title="Escenario base" value={effectiveDemoContext?.scenarioName || "Centro Demo"} />
+          <InfoCard title="Estado de sesión" value={demoSessionStatus === "blocked" ? "Bloqueada · limpieza pendiente" : demoSessionStatus === "preparing" ? "Preparando limpieza segura" : activeDemoSession ? "Sesión demo activa" : "Sin sesión demo"} />
           <InfoCard title="Última actualización" value={effectiveDemoContext?.injectedAt || "Pendiente de carga demo"} />
         </div>
       </Card>
@@ -3471,10 +3731,10 @@ function DemoPage({
         </Card>
         <div id="demo-reservation-live" className="scroll-mt-64">
         <Card>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo se representa como dato demo para iniciar el ciclo escénico de seguimiento.</p></div><div className="flex flex-wrap gap-2"><Badge tone={liveExpediente ? "blue" : "slate"}>{liveExpediente ? "Reserva recibida desde App Pública" : "Reserva base preparada"}</Badge><Badge tone="blue">{liveExpediente ? "Datos capturados en vivo" : "Datos simulados"}</Badge><Badge tone="amber">Demo · No persistido</Badge></div></div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo se representa como dato demo para iniciar el ciclo escénico de seguimiento.</p></div><div className="flex flex-wrap gap-2"><Badge tone={demoSessionStatus === "blocked" ? "amber" : hasActiveLiveReservation ? "blue" : "slate"}>{phaseOneStatus}</Badge>{liveExpediente && demoSessionStatus === "blocked" && <Badge tone="amber">Estado residual anterior</Badge>}<Badge tone="amber">Demo · No persistido</Badge></div></div>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button disabled={Boolean(liveExpediente)} onClick={validateReservation} className={cls("rounded-2xl px-5 py-4 text-sm font-black", liveExpediente ? "bg-slate-200 text-slate-600" : "bg-emerald-600 text-white")}><Search size={16} className="mr-2 inline" />{liveExpediente ? "Validación demo separada" : "Validar reserva demo"}</button></div>
           <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">El acceso técnico al registro externo queda fuera del recorrido comercial; esta validación solo actualiza el escenario local.</p>
-          {liveExpediente && <p className="mt-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-black leading-6 text-blue-900">La reserva viva recibida desde la App Pública es la autoridad del caso. La validación demo local permanece separada y no crea ni duplica el Expediente Vivo.</p>}
+          {liveExpediente && <p className={cls("mt-3 rounded-2xl border px-4 py-3 text-sm font-black leading-6", demoSessionStatus === "blocked" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-blue-200 bg-blue-50 text-blue-900")}>{demoSessionStatus === "blocked" ? "Esta reserva pertenece a una corrida anterior pendiente de limpieza segura. No representa evidencia de una nueva sesión." : "La reserva viva recibida desde la App Pública es la autoridad del caso. La validación demo local permanece separada y no crea ni duplica el Expediente Vivo."}</p>}
           <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-600">Última actualización: hace 12 segundos</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <InfoCard title="Nombre del cliente" value={liveClientName || "Sin registro"} />
@@ -3585,7 +3845,7 @@ function DemoPage({
             )}
           </div>
           <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Actividad reciente</div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{hasSessionEvidence ? "Actividad reciente" : "Datos de referencia · sin evidencia de sesión"}</div>
             <div className="mt-3 grid gap-3 text-sm font-semibold text-slate-700 md:grid-cols-4">
               <div><span className="font-black text-slate-950">Asesora:</span> {latestSellerReport.sellerName}</div>
               <div><span className="font-black text-slate-950">Cliente:</span> {latestSellerReport.clientName}</div>
@@ -3605,7 +3865,7 @@ function DemoPage({
             </div>
           </div>
           <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Actividad reciente</div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{hasSessionEvidence ? "Actividad reciente" : "Datos de referencia · sin evidencia de sesión"}</div>
             <div className="mt-3 grid gap-3 text-sm font-semibold text-slate-700 md:grid-cols-4">
               <div><span className="font-black text-slate-950">Remitente:</span> {latestTeamMessage.fromRole}</div>
               <div><span className="font-black text-slate-950">Destinatario:</span> {latestTeamMessage.toRole}</div>
@@ -3622,6 +3882,7 @@ function DemoPage({
       <DemoCommandEvidencePanel
         demoContext={effectiveDemoContext}
         simulatedDataInjected={simulatedDataInjected}
+        hasActiveDemoSession={Boolean(activeDemoSession)}
         counts={{
           reservations: simulatedReservationClients.length,
           messages: simulatedInternalMessages.length,
@@ -3631,6 +3892,7 @@ function DemoPage({
           evidence: simulatedOperationalEvidence.length,
         }}
         onInjectSimulatedData={injectSimulatedData}
+        resetToken={demoSessionResetToken}
         persistedState={demoCommandEvidenceState}
         onPersistState={onDemoCommandEvidenceStateChange}
       />
@@ -3957,4 +4219,3 @@ function DemoInput({ label, placeholder }) {
 export default function DemoAmenaEnterpriseCommandCenter() {
   return <AppShell />;
 }
-
