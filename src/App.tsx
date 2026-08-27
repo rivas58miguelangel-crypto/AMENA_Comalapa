@@ -3330,6 +3330,8 @@ function DemoPage({
   const [simulatedMartaWhatsAppFollowups, setSimulatedMartaWhatsAppFollowups] = useState<any[]>([]);
   const [simulatedIntelligenceSignals, setSimulatedIntelligenceSignals] = useState<any[]>([]);
   const [simulatedOperationalEvidence, setSimulatedOperationalEvidence] = useState<any[]>([]);
+  const [isSimulatedRunDataOpen, setIsSimulatedRunDataOpen] = useState(false);
+  const [selectedSimulatedRunDataCategory, setSelectedSimulatedRunDataCategory] = useState<"reservations" | "vapi" | "sellerReports" | "messages">("reservations");
   const [executiveQuery, setExecutiveQuery] = useState("");
   const [executiveQuestions, setExecutiveQuestions] = useState(["¿Qué canal genera más ingresos netos y menos atrasos?", "¿Qué campañas generan leads de baja calidad?"]);
   const [executiveBreakdown, setExecutiveBreakdown] = useState("Ingresos netos por canal y campaña\nConversión por modelo, sector y unidad\nAcompañamiento del equipo y uso de Marta\nRiesgos financieros, documentales y de escrituración");
@@ -3427,6 +3429,63 @@ function DemoPage({
   const liveClientName = liveSnapshot ? `${liveSnapshot.client.firstName} ${liveSnapshot.client.lastName}`.trim() : selectedVolunteer.name;
   const liveLevelAndModel = liveSelectedUnit ? [liveSelectedUnit.level, liveSelectedUnit.model].filter(Boolean).join(" · ") : "";
   const simulatedDataInjected = activeDemoContext?.status === "injected";
+  const activeSimulatedDemoRunId = simulatedDataInjected ? activeDemoContext?.demoRunId || null : null;
+  const activeSimulatedReservationClients = activeSimulatedDemoRunId
+    ? simulatedReservationClients.filter((record) => record.demoRunId === activeSimulatedDemoRunId)
+    : [];
+  const activeSimulatedVapiCallLogs = activeSimulatedDemoRunId
+    ? simulatedVapiCallLogs.filter((record) => record.demoRunId === activeSimulatedDemoRunId)
+    : [];
+  const activeSimulatedSellerReports = activeSimulatedDemoRunId
+    ? simulatedSellerReports.filter((record) => record.demoRunId === activeSimulatedDemoRunId)
+    : [];
+  const activeSimulatedInternalMessages = activeSimulatedDemoRunId
+    ? simulatedInternalMessages.filter((record) => record.demoRunId === activeSimulatedDemoRunId)
+    : [];
+  const simulatedRunDataCategories = [
+    { id: "reservations" as const, label: "Gestión de Reservas", records: activeSimulatedReservationClients },
+    { id: "vapi" as const, label: "Marta Voz / VAPI", records: activeSimulatedVapiCallLogs },
+    { id: "sellerReports" as const, label: "Registro Comercial", records: activeSimulatedSellerReports },
+    { id: "messages" as const, label: "Mensajes entre el Equipo", records: activeSimulatedInternalMessages },
+  ];
+  const selectedSimulatedRunData = simulatedRunDataCategories.find((category) => category.id === selectedSimulatedRunDataCategory) || simulatedRunDataCategories[0];
+  const formatSimulatedRecordTime = (value): string | null => {
+    if (typeof value !== "string" || !value.trim()) return null;
+    const normalizedValue = value.trim();
+    if (/^(hoy|mañana|manana|ayer|hace|recientemente|esta mañana|esta manana|esta tarde)\b/i.test(normalizedValue)) {
+      return normalizedValue;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}T/.test(normalizedValue)) return null;
+    const date = new Date(normalizedValue);
+    if (Number.isNaN(date.getTime())) return null;
+    return new Intl.DateTimeFormat("es-GT", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
+  };
+  const reservationExecutiveSummary = (client) => [
+    client.name ? `${client.name} figura en la evidencia de reservas de esta corrida.` : "Registro de reserva incorporado a esta corrida.",
+    client.unit ? `Unidad: ${client.unit}.` : null,
+    client.reservationStatus ? `Estado: ${client.reservationStatus}.` : null,
+    client.source ? `Origen: ${client.source}.` : null,
+  ].filter(Boolean).join(" ");
+  const vapiExecutiveSummary = (log) => [
+    log.clientName && log.assistantName ? `${log.clientName} conversó con ${log.assistantName}.` : "Se registró una llamada en esta corrida.",
+    log.detectedIntent ? `Tema: ${log.detectedIntent}.` : null,
+    log.riskSignal ? `Riesgo: ${log.riskSignal}.` : null,
+    log.nextStep ? `Siguiente paso: ${log.nextStep}.` : null,
+  ].filter(Boolean).join(" ");
+  const sellerReportExecutiveSummary = (report) => [
+    report.clientName ? `${report.clientName} registra seguimiento comercial.` : "Se registró seguimiento comercial.",
+    report.interactionType ? `Interacción: ${report.interactionType}.` : null,
+    report.detectedNeed ? `Necesidad: ${report.detectedNeed}.` : null,
+    report.objection ? `Objeción: ${report.objection}.` : null,
+    report.sellerName ? `Responsable: ${report.sellerName}.` : null,
+    report.nextStep ? `Siguiente paso: ${report.nextStep}.` : null,
+  ].filter(Boolean).join(" ");
   const hasSimulatedReservations = simulatedDataInjected && simulatedReservationClients.length > 0;
   const hasSimulatedInternalMessages = simulatedDataInjected && simulatedInternalMessages.length > 0;
   const hasSimulatedSellerReports = simulatedDataInjected && simulatedSellerReports.length > 0;
@@ -3480,6 +3539,10 @@ function DemoPage({
     setSelectedBreakdowns(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
     setExecutiveResponseReady(false);
   }, [demoSessionResetToken]);
+  useEffect(() => {
+    setIsSimulatedRunDataOpen(false);
+    setSelectedSimulatedRunDataCategory("reservations");
+  }, [activeSimulatedDemoRunId, demoSessionResetToken]);
   const phaseStatus = (index) => index === 0
     ? phaseOneStatus
     : completedPhases.includes(index)
@@ -4075,6 +4138,90 @@ function DemoPage({
         persistedState={demoCommandEvidenceState}
         onPersistState={onDemoCommandEvidenceStateChange}
       />
+      {simulatedDataInjected && (
+        <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <button
+            type="button"
+            onClick={() => setIsSimulatedRunDataOpen((current) => !current)}
+            className="rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white"
+          >
+            {isSimulatedRunDataOpen ? "Ocultar datos simulados de esta corrida" : "Ver datos simulados de esta corrida"}
+          </button>
+          {isSimulatedRunDataOpen && (
+            <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50/60 p-4 sm:p-5">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Lectura ejecutiva · FASE 04</div>
+                  <h4 className="mt-2 text-xl font-black text-slate-950">Datos simulados de esta corrida</h4>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">Ejemplos generados localmente para la corrida activa. No se consultan ni conservan datos históricos.</p>
+                </div>
+                <Badge tone="blue">Corrida activa</Badge>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {simulatedRunDataCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setSelectedSimulatedRunDataCategory(category.id)}
+                    className={cls(
+                      "rounded-2xl border px-4 py-3 text-sm font-black",
+                      selectedSimulatedRunDataCategory === category.id
+                        ? "border-blue-700 bg-blue-700 text-white"
+                        : "border-blue-100 bg-white text-slate-800",
+                    )}
+                  >
+                    {category.label} · {category.records.length}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h5 className="text-lg font-black text-slate-950">{selectedSimulatedRunData.label} · {selectedSimulatedRunData.records.length}</h5>
+                  {selectedSimulatedRunData.records.length > 3 && <span className="text-sm font-bold text-slate-600">Mostrando 3 de {selectedSimulatedRunData.records.length} datos simulados generados.</span>}
+                </div>
+                {selectedSimulatedRunData.records.length === 0 ? (
+                  <p className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">0 datos simulados generados para esta categoría en esta corrida.</p>
+                ) : (
+                  <div className="mt-4 grid gap-3">
+                    {selectedSimulatedRunDataCategory === "reservations" && activeSimulatedReservationClients.slice(0, 3).map((client) => {
+                      const recordTime = formatSimulatedRecordTime(client.createdAt);
+                      return (
+                      <div key={client.id} className="rounded-2xl border border-blue-100 bg-white p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2"><h6 className="font-black text-slate-950">{client.name || "Reserva simulada"}</h6>{recordTime && <span className="text-sm font-bold text-slate-500">{recordTime}</span>}</div>
+                        <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{reservationExecutiveSummary(client)}</p>
+                      </div>
+                    )})}
+                    {selectedSimulatedRunDataCategory === "vapi" && activeSimulatedVapiCallLogs.slice(0, 3).map((log) => {
+                      const recordTime = formatSimulatedRecordTime(log.createdAt);
+                      return (
+                      <div key={log.id} className="rounded-2xl border border-violet-100 bg-white p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2"><h6 className="font-black text-slate-950">{log.clientName || "Llamada simulada"}</h6>{recordTime && <span className="text-sm font-bold text-slate-500">{recordTime}</span>}</div>
+                        <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{vapiExecutiveSummary(log)}</p>
+                      </div>
+                    )})}
+                    {selectedSimulatedRunDataCategory === "sellerReports" && activeSimulatedSellerReports.slice(0, 3).map((report) => {
+                      const recordTime = formatSimulatedRecordTime(report.createdAt);
+                      return (
+                      <div key={report.id} className="rounded-2xl border border-emerald-100 bg-white p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2"><h6 className="font-black text-slate-950">{report.clientName || "Registro comercial"}</h6>{recordTime && <span className="text-sm font-bold text-slate-500">{recordTime}</span>}</div>
+                        <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{sellerReportExecutiveSummary(report)}</p>
+                      </div>
+                    )})}
+                    {selectedSimulatedRunDataCategory === "messages" && activeSimulatedInternalMessages.slice(0, 3).map((message) => {
+                      const recordTime = formatSimulatedRecordTime(message.createdAt);
+                      return (
+                      <div key={message.id} className="rounded-2xl border border-amber-100 bg-white p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2"><h6 className="font-black text-slate-950">{message.relatedClientName || "Mensaje operativo"}</h6>{recordTime && <span className="text-sm font-bold text-slate-500">{recordTime}</span>}</div>
+                        <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{message.messageText}</p>
+                      </div>
+                    )})}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       </div>
 
       <div id="demo-intelligence" ref={(element) => { phaseSectionRefs.current[4] = element; }} className="grid scroll-mt-64 gap-5">
