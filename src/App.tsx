@@ -205,6 +205,12 @@ type LiveExpediente = {
   persisted: false;
 };
 
+type LiveExpedienteCollection = {
+  demoRunId: string;
+  expedientes: LiveExpediente[];
+  selectedReservationId: string | null;
+};
+
 type AdminLiveDemoResetRequest = {
   type: "hoperia.demo.live.reset";
   schemaVersion: "1.0";
@@ -283,8 +289,10 @@ type ReceptionNotice = {
 
 const activeDemoSessionStorageKey = "hoperia.admin.active_demo_session.v1";
 const residualDemoSessionStorageKey = "hoperia.admin.residual_demo_session.v1";
-const liveExpedienteStorageKey = "hoperia.admin.live_expediente.v1";
-const liveExpedienteStorageKeyForRun = (demoRunId: string) => `${liveExpedienteStorageKey}.${encodeURIComponent(demoRunId)}`;
+const legacyLiveExpedienteStorageKey = "hoperia.admin.live_expediente.v1";
+const legacyLiveExpedienteStorageKeyForRun = (demoRunId: string) => `${legacyLiveExpedienteStorageKey}.${encodeURIComponent(demoRunId)}`;
+const liveExpedientesStorageKey = "hoperia.admin.live_expedientes.v2";
+const liveExpedientesStorageKeyForRun = (demoRunId: string) => `${liveExpedientesStorageKey}.${encodeURIComponent(demoRunId)}`;
 
 const readStoredResidualDemoSession = (): ResidualDemoSession | null => {
   if (typeof window === "undefined") return null;
@@ -718,7 +726,8 @@ function AppShell() {
   const [demoSessionNotice, setDemoSessionNotice] = useState<string | null>(() => residualDemoSession?.reason || null);
   const [demoSessionResetToken, setDemoSessionResetToken] = useState(0);
   const [demoParticipantStatuses, setDemoParticipantStatuses] = useState(demoParticipantDefaults);
-  const [liveExpediente, setLiveExpediente] = useState<LiveExpediente | null>(null);
+  const [liveExpedientes, setLiveExpedientes] = useState<LiveExpediente[]>([]);
+  const [selectedLiveExpedienteReservationId, setSelectedLiveExpedienteReservationId] = useState<string | null>(null);
   const [autoSelectReservationId, setAutoSelectReservationId] = useState<string | null>(null);
   const [receptionNotice, setReceptionNotice] = useState<ReceptionNotice | null>(null);
   const [publicReservationWindowNotice, setPublicReservationWindowNotice] = useState<string | null>(null);
@@ -729,7 +738,8 @@ function AppShell() {
   const publicReservationBridgeIdRef = useRef<string | null>(null);
   const publicReservationBridgeSourceRef = useRef<MessageEventSource | null>(null);
   const activeDemoSessionRef = useRef<DemoSession | null>(activeDemoSession);
-  const liveExpedienteRef = useRef<LiveExpediente | null>(null);
+  const liveExpedientesRef = useRef<LiveExpediente[]>([]);
+  const selectedLiveExpedienteReservationIdRef = useRef<string | null>(null);
   const processedEventIds = useRef(new Set<string>());
   const expedienteIdByReservationId = useRef(new Map<string, string>());
   const pendingResetIdRef = useRef<string | null>(null);
@@ -747,6 +757,9 @@ function AppShell() {
   const [reservationReplayStatus, setReservationReplayStatus] = useState<"idle" | "requesting" | "received" | "empty" | "error">("idle");
   const isNonEmptyString = (value: unknown): value is string =>
     typeof value === "string" && value.trim().length > 0;
+  const selectedLiveExpediente = liveExpedientes.find(
+    (expediente) => expediente.reservationId === selectedLiveExpedienteReservationId,
+  ) || null;
 
   useEffect(() => {
     activeDemoSessionRef.current = activeDemoSession;
@@ -795,6 +808,7 @@ function AppShell() {
       data.sourceChannel === "public_web_app" &&
       data.isDemo === true &&
       data.persisted === false &&
+      isNonEmptyString(data.demoRunId) &&
       isNonEmptyString(client?.firstName) &&
       isNonEmptyString(client?.lastName) &&
       isNonEmptyString(client?.email) &&
@@ -804,12 +818,45 @@ function AppShell() {
       isNonEmptyString(selectedUnit?.unitOrLot);
   };
 
-  const storeLiveExpediente = (nextLiveExpediente: LiveExpediente) => {
-    window.localStorage.setItem(liveExpedienteStorageKeyForRun(nextLiveExpediente.demoRunId), JSON.stringify(nextLiveExpediente));
+  const isLiveExpedienteCollection = (value: unknown, demoRunId: string): value is LiveExpedienteCollection => {
+    if (!value || typeof value !== "object") return false;
+    const data = value as Partial<LiveExpedienteCollection>;
+    return data.demoRunId === demoRunId &&
+      Array.isArray(data.expedientes) &&
+      data.expedientes.every((expediente) => isLiveExpediente(expediente) && expediente.demoRunId === demoRunId) &&
+      (data.selectedReservationId === null ||
+        (isNonEmptyString(data.selectedReservationId) && data.expedientes.some((expediente) => expediente.reservationId === data.selectedReservationId)));
   };
 
-  const clearStoredLiveExpediente = (demoRunId?: string) => {
-    if (demoRunId) window.localStorage.removeItem(liveExpedienteStorageKeyForRun(demoRunId));
+  const storeLiveExpedienteCollection = (demoRunId: string, expedientes: LiveExpediente[], selectedReservationId: string | null) => {
+    window.localStorage.setItem(liveExpedientesStorageKeyForRun(demoRunId), JSON.stringify({
+      demoRunId,
+      expedientes,
+      selectedReservationId,
+    }));
+    window.localStorage.removeItem(legacyLiveExpedienteStorageKeyForRun(demoRunId));
+  };
+
+  const updateLiveExpedienteCollection = (expedientes: LiveExpediente[], selectedReservationId: string | null, demoRunId?: string) => {
+    liveExpedientesRef.current = expedientes;
+    selectedLiveExpedienteReservationIdRef.current = selectedReservationId;
+    setLiveExpedientes(expedientes);
+    setSelectedLiveExpedienteReservationId(selectedReservationId);
+    if (demoRunId) storeLiveExpedienteCollection(demoRunId, expedientes, selectedReservationId);
+  };
+
+  const selectLiveExpediente = (reservationId: string) => {
+    const selected = liveExpedientesRef.current.find((expediente) => expediente.reservationId === reservationId);
+    const demoRunId = activeDemoSessionRef.current?.demoRunId;
+    if (!selected || !demoRunId || selected.demoRunId !== demoRunId) return;
+    updateLiveExpedienteCollection(liveExpedientesRef.current, reservationId, demoRunId);
+    setAutoSelectReservationId(reservationId);
+  };
+
+  const clearStoredLiveExpedientes = (demoRunId?: string) => {
+    if (!demoRunId) return;
+    window.localStorage.removeItem(liveExpedientesStorageKeyForRun(demoRunId));
+    window.localStorage.removeItem(legacyLiveExpedienteStorageKeyForRun(demoRunId));
   };
 
   const createReplayRequestId = () => {
@@ -1076,8 +1123,7 @@ function AppShell() {
     pendingResetIdRef.current = null;
     pendingReplayRequestIdRef.current = null;
     pendingReplayAfterBridgeRef.current = null;
-    liveExpedienteRef.current = null;
-    setLiveExpediente(null);
+    updateLiveExpedienteCollection([], null);
     setAutoSelectReservationId(null);
     setReceptionNotice(null);
     setPublicReservationWindowNotice(null);
@@ -1085,7 +1131,7 @@ function AppShell() {
     setReservationReplayStatus("idle");
     processedEventIds.current.clear();
     expedienteIdByReservationId.current.clear();
-    clearStoredLiveExpediente(activeDemoSession?.demoRunId);
+    clearStoredLiveExpedientes(activeDemoSession?.demoRunId);
     setLiveDemoResetToken((current) => current + 1);
     setLiveDemoResetStatus("completed");
     setLiveDemoResetNotice(notice);
@@ -1122,11 +1168,10 @@ function AppShell() {
     publicReservationBridgeIdRef.current = null;
     publicReservationBridgeSourceRef.current = null;
     publicReservationWindowRef.current = null;
-    liveExpedienteRef.current = null;
+    updateLiveExpedienteCollection([], null);
     processedEventIds.current.clear();
     expedienteIdByReservationId.current.clear();
-    clearStoredLiveExpediente(demoRunId);
-    setLiveExpediente(null);
+    clearStoredLiveExpedientes(demoRunId);
     setAutoSelectReservationId(null);
     setReceptionNotice(null);
     setPublicReservationWindowNotice(null);
@@ -1280,7 +1325,7 @@ function AppShell() {
     setDemoSessionStatus("preparing");
     setDemoSessionNotice("Verificando y limpiando el estado efímero de la corrida anterior.");
 
-    if (liveExpedienteRef.current || isResidualRetry) {
+    if (liveExpedientesRef.current.length > 0 || isResidualRetry) {
       requestReservationResetForDemoSession(effectiveIntent, targetDemoRunId);
       return;
     }
@@ -1321,37 +1366,34 @@ function AppShell() {
     try {
       const demoRunId = activeDemoSessionRef.current?.demoRunId;
       if (!demoRunId) return;
-      const raw = window.localStorage.getItem(liveExpedienteStorageKeyForRun(demoRunId));
+      const raw = window.localStorage.getItem(liveExpedientesStorageKeyForRun(demoRunId));
       if (!raw) return;
       const parsed = JSON.parse(raw);
-      if (!isLiveExpediente(parsed)) {
-        clearStoredLiveExpediente(demoRunId);
+      if (!isLiveExpedienteCollection(parsed, demoRunId)) {
+        clearStoredLiveExpedientes(demoRunId);
         return;
       }
-      if (parsed.demoRunId !== demoRunId) {
-        clearStoredLiveExpediente(demoRunId);
-        return;
-      }
-
-      liveExpedienteRef.current = parsed;
-      processedEventIds.current.add(parsed.eventId);
-      expedienteIdByReservationId.current.set(parsed.reservationId, parsed.expedienteId);
-      setLiveExpediente(parsed);
-      setAutoSelectReservationId(parsed.reservationId);
+      parsed.expedientes.forEach((expediente) => {
+        processedEventIds.current.add(expediente.eventId);
+        expedienteIdByReservationId.current.set(expediente.reservationId, expediente.expedienteId);
+      });
+      updateLiveExpedienteCollection(parsed.expedientes, parsed.selectedReservationId);
+      setAutoSelectReservationId(parsed.selectedReservationId);
+      const selected = parsed.expedientes.find((expediente) => expediente.reservationId === parsed.selectedReservationId) || parsed.expedientes[0];
       setReceptionNotice({
         kind: "accepted",
-        title: "Reserva recuperada desde este Centro de Mando",
-        detail: "Expediente Vivo inicial rehidratado · Demo · No persistido",
-        reservationId: parsed.reservationId,
-        expedienteId: parsed.expedienteId,
+        title: "Expedientes Vivos recuperados desde este Centro de Mando",
+        detail: `${parsed.expedientes.length} expediente(s) vivo(s) rehidratado(s) · Demo · No persistido`,
+        reservationId: selected?.reservationId,
+        expedienteId: selected?.expedienteId,
       });
       setReservationReplayStatus("received");
       setReservationReplayNotice({
-        title: "Reserva demo recuperada",
-        detail: `Reservation ID: ${parsed.reservationId}`,
+        title: "Expedientes demo recuperados",
+        detail: `${parsed.expedientes.length} expediente(s) asociado(s) a la corrida activa`,
       });
     } catch {
-      clearStoredLiveExpediente(activeDemoSessionRef.current?.demoRunId);
+      clearStoredLiveExpedientes(activeDemoSessionRef.current?.demoRunId);
     }
   }, []);
 
@@ -1474,15 +1516,12 @@ function AppShell() {
 
       const existingExpedienteId = expedienteIdByReservationId.current.get(reservationEvent.reservationId);
       const expedienteId = existingExpedienteId || buildLiveExpedienteId(reservationEvent.reservationId);
-      const currentLiveExpediente = liveExpedienteRef.current;
       const nextLiveExpediente: LiveExpediente = {
         reservationId: reservationEvent.reservationId,
         expedienteId,
         status: "initial",
         eventId: reservationEvent.eventId,
-        receivedAt: currentLiveExpediente?.reservationId === reservationEvent.reservationId
-          ? currentLiveExpediente.receivedAt
-          : new Date().toISOString(),
+        receivedAt: new Date().toISOString(),
         sourceApplication: reservationEvent.sourceApplication,
         sourceOrigin: reservationEvent.sourceOrigin,
         client: reservationEvent.client,
@@ -1496,10 +1535,15 @@ function AppShell() {
 
       processedEventIds.current.add(reservationEvent.eventId);
       expedienteIdByReservationId.current.set(reservationEvent.reservationId, expedienteId);
-      liveExpedienteRef.current = nextLiveExpediente;
-      storeLiveExpediente(nextLiveExpediente);
-      setLiveExpediente(nextLiveExpediente);
-      setAutoSelectReservationId(reservationEvent.reservationId);
+      const existingExpediente = liveExpedientesRef.current.find(
+        (expediente) => expediente.reservationId === reservationEvent.reservationId,
+      );
+      const nextExpedientes = existingExpediente
+        ? liveExpedientesRef.current
+        : [...liveExpedientesRef.current, nextLiveExpediente];
+      const nextSelectedReservationId = selectedLiveExpedienteReservationIdRef.current || nextLiveExpediente.reservationId;
+      updateLiveExpedienteCollection(nextExpedientes, nextSelectedReservationId, reservationEvent.demoRunId);
+      if (!existingExpediente) setAutoSelectReservationId(nextSelectedReservationId);
       if (pendingReplayRequestIdRef.current !== null) {
         clearReplayTimeout();
         pendingReplayRequestIdRef.current = null;
@@ -1520,7 +1564,9 @@ function AppShell() {
       setReceptionNotice({
         kind: "accepted",
         title: "Reserva recibida desde la App Pública",
-        detail: "Expediente Vivo inicial creado · Demo · No persistido",
+        detail: existingExpediente
+          ? "Expediente Vivo existente conservado · Demo · No persistido"
+          : `Expediente Vivo agregado · ${nextExpedientes.length} en la sesión demo · No persistido`,
         reservationId: reservationEvent.reservationId,
         expedienteId,
       });
@@ -1600,7 +1646,7 @@ function AppShell() {
           </div>
         )}
         <div className="flex flex-wrap gap-3">
-          {(liveExpediente || receptionNotice?.kind === "accepted" || liveDemoResetStatus === "requesting") && (
+          {(liveExpedientes.length > 0 || receptionNotice?.kind === "accepted" || liveDemoResetStatus === "requesting") && (
             <div className="flex flex-wrap items-center gap-3">
               {demoSessionStatus === "blocked" && <span className="text-xs font-black uppercase tracking-[0.16em] text-amber-800">Estado residual · limpieza pendiente</span>}
             <button
@@ -1627,7 +1673,10 @@ function AppShell() {
           demoSessionNotice={demoSessionNotice}
           demoSessionResetToken={demoSessionResetToken}
           demoParticipantStatuses={demoParticipantStatuses}
-          liveExpediente={liveExpediente}
+          liveExpediente={selectedLiveExpediente}
+          liveExpedientes={liveExpedientes}
+          selectedLiveExpedienteReservationId={selectedLiveExpedienteReservationId}
+          onSelectLiveExpediente={selectLiveExpediente}
           autoSelectReservationId={autoSelectReservationId}
           liveDemoResetToken={liveDemoResetToken}
           reservationReplayStatus={reservationReplayStatus}
@@ -2015,7 +2064,7 @@ function ExecutivePage({ demoFindings = [], setActive }) {
   );
 }
 
-function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, setActive }) {
+function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExpedienteReservationId = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, onSelectLiveExpediente, setActive }) {
   const profile = clientOperationalProfile;
   const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="client" />;
   const [clientSearch, setClientSearch] = useState("");
@@ -2044,39 +2093,39 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
       seller: "Ana Guardado · VND-017",
     },
   ];
-  const liveUnit = liveExpediente
-    ? [
-        liveExpediente.selectedUnit.sector,
-        liveExpediente.selectedUnit.towerOrBlock,
-        liveExpediente.selectedUnit.level,
-        liveExpediente.selectedUnit.model,
-        liveExpediente.selectedUnit.unitOrLot,
-      ].filter(Boolean).join(" · ")
-    : "";
-  const liveClient: AdminClient | null = liveExpediente
-    ? {
-        name: `${liveExpediente.client.firstName} ${liveExpediente.client.lastName}`.trim(),
-        reservation_id: liveExpediente.reservationId,
-        expediente_id: liveExpediente.expedienteId,
-        unit: liveUnit || liveExpediente.selectedUnit.unitOrLot,
-        status: "Expediente inicial",
-        seller: "App Pública de Reservas",
-        liveExpediente,
-      }
-    : null;
-  const adminClients: AdminClient[] = liveClient
-    ? [liveClient, ...baseAdminClients.filter((client) => client.reservation_id !== liveClient.reservation_id)]
-    : baseAdminClients;
+  const liveClients: AdminClient[] = liveExpedientes.map((liveExpediente) => {
+    const liveUnit = [
+      liveExpediente.selectedUnit.sector,
+      liveExpediente.selectedUnit.towerOrBlock,
+      liveExpediente.selectedUnit.level,
+      liveExpediente.selectedUnit.model,
+      liveExpediente.selectedUnit.unitOrLot,
+    ].filter(Boolean).join(" · ");
+    return {
+      name: `${liveExpediente.client.firstName} ${liveExpediente.client.lastName}`.trim(),
+      reservation_id: liveExpediente.reservationId,
+      expediente_id: liveExpediente.expedienteId,
+      unit: liveUnit || liveExpediente.selectedUnit.unitOrLot,
+      status: "Expediente inicial",
+      seller: "App Pública de Reservas",
+      liveExpediente,
+    };
+  });
+  const adminClients: AdminClient[] = [
+    ...liveClients,
+    ...baseAdminClients.filter((client) => !liveClients.some((liveClient) => liveClient.reservation_id === client.reservation_id)),
+  ];
   useEffect(() => {
-    if (autoSelectReservationId) setSelectedClientReservationId(autoSelectReservationId);
-  }, [autoSelectReservationId]);
+    const nextSelection = selectedLiveExpedienteReservationId || autoSelectReservationId;
+    if (nextSelection) setSelectedClientReservationId(nextSelection);
+  }, [selectedLiveExpedienteReservationId, autoSelectReservationId]);
   useEffect(() => {
     if (liveDemoResetToken === 0) return;
     setClientSearch("");
     setSelectedClientReservationId(null);
   }, [liveDemoResetToken]);
   const normalizedClientSearch = clientSearch.trim().toLowerCase();
-  const effectiveSelectedClientReservationId = selectedClientReservationId || autoSelectReservationId;
+  const effectiveSelectedClientReservationId = selectedClientReservationId || selectedLiveExpedienteReservationId || autoSelectReservationId;
   const filteredAdminClients = normalizedClientSearch
     ? adminClients.filter((client) =>
         `${client.name} ${client.reservation_id} ${client.unit} ${client.status}`.toLowerCase().includes(normalizedClientSearch),
@@ -2129,7 +2178,34 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
             />
           </div>
         </div>
-        {!selectedAdminClient && !liveExpediente && (
+        {liveClients.length > 0 && (
+          <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-4">
+            <div className="text-sm font-black text-slate-950">Expedientes Vivos de esta sesión demo · {liveClients.length}</div>
+            <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">El caso principal se mantiene hasta que el presentador seleccione otro expediente vivo.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {liveClients.map((client) => {
+                const isPrincipal = client.reservation_id === selectedLiveExpedienteReservationId;
+                return (
+                  <button
+                    key={client.reservation_id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedClientReservationId(client.reservation_id);
+                      onSelectLiveExpediente?.(client.reservation_id);
+                    }}
+                    className={cls(
+                      "rounded-2xl px-4 py-3 text-left text-sm font-black",
+                      isPrincipal ? "bg-slate-950 text-white" : "bg-white text-slate-900",
+                    )}
+                  >
+                    {client.name} · {client.reservation_id}{isPrincipal ? " · Caso principal" : " · Caso secundario"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {!selectedAdminClient && liveExpedientes.length === 0 && (
           <button
             type="button"
             disabled={reservationReplayStatus === "requesting"}
@@ -2152,7 +2228,10 @@ function ClientPage({ demoFindings = [], liveExpediente = null, autoSelectReserv
                     <button
                       key={client.reservation_id}
                       type="button"
-                      onClick={() => setSelectedClientReservationId(client.reservation_id)}
+                      onClick={() => {
+                        setSelectedClientReservationId(client.reservation_id);
+                        if (client.liveExpediente) onSelectLiveExpediente?.(client.reservation_id);
+                      }}
                       className={cls(
                         "rounded-3xl border p-4 text-left transition",
                         selected ? "border-blue-200 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
@@ -3072,6 +3151,8 @@ function DemoPage({
   demoSessionResetToken = 0,
   demoParticipantStatuses = demoParticipantDefaults,
   liveExpediente = null,
+  liveExpedientes = [],
+  selectedLiveExpedienteReservationId = null,
   onStartDemoSession,
   onFinalizeDemoSession,
   onDemoContextInjected,
@@ -3288,7 +3369,8 @@ function DemoPage({
     hidden: "Oculto",
   };
   const progress = Math.round((completedPhases.length / phases.length) * 100);
-  const hasActiveLiveReservation = Boolean(activeDemoSession && liveExpediente);
+  const hasActiveLiveReservation = Boolean(activeDemoSession && liveExpedientes.length > 0);
+  const latestLiveExpediente = liveExpedientes[liveExpedientes.length - 1] || null;
   const sessionHeading = demoSessionStatus === "blocked"
     ? "Sesión bloqueada"
     : demoSessionStatus === "preparing"
@@ -3783,12 +3865,14 @@ function DemoPage({
         </Card>
         <div id="demo-reservation-live" className="scroll-mt-64">
         <Card>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">La reserva realizada en vivo se representa como dato demo para iniciar el ciclo escénico de seguimiento.</p></div><div className="flex flex-wrap gap-2"><Badge tone={demoSessionStatus === "blocked" ? "amber" : hasActiveLiveReservation ? "blue" : "slate"}>{phaseOneStatus}</Badge>{liveExpediente && demoSessionStatus === "blocked" && <Badge tone="amber">Estado residual anterior</Badge>}<Badge tone="amber">Demo · No persistido</Badge></div></div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"><div><h3 className="text-3xl font-black text-slate-950">FASE 01 Reserva en vivo y validación operacional</h3><p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada reserva integrada concluida conserva su Expediente Vivo efímero dentro de la sesión demo activa.</p></div><div className="flex flex-wrap gap-2"><Badge tone={demoSessionStatus === "blocked" ? "amber" : hasActiveLiveReservation ? "blue" : "slate"}>{phaseOneStatus}</Badge>{liveExpediente && demoSessionStatus === "blocked" && <Badge tone="amber">Estado residual anterior</Badge>}<Badge tone="amber">Demo · No persistido</Badge></div></div>
           <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_auto]"><input value={selectedPhone} onChange={(e) => setSelectedPhone(e.target.value)} className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none" placeholder="Buscar por teléfono" /><button disabled={Boolean(liveExpediente)} onClick={validateReservation} className={cls("rounded-2xl px-5 py-4 text-sm font-black", liveExpediente ? "bg-slate-200 text-slate-600" : "bg-emerald-600 text-white")}><Search size={16} className="mr-2 inline" />{liveExpediente ? "Validación demo separada" : "Validar reserva demo"}</button></div>
           <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">El acceso técnico al registro externo queda fuera del recorrido comercial; esta validación solo actualiza el escenario local.</p>
           {liveExpediente && <p className={cls("mt-3 rounded-2xl border px-4 py-3 text-sm font-black leading-6", demoSessionStatus === "blocked" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-blue-200 bg-blue-50 text-blue-900")}>{demoSessionStatus === "blocked" ? "Esta reserva pertenece a una corrida anterior pendiente de limpieza segura. No representa evidencia de una nueva sesión." : "La reserva viva recibida desde la App Pública es la autoridad del caso. La validación demo local permanece separada y no crea ni duplica el Expediente Vivo."}</p>}
           <p className="mt-3 text-sm font-black uppercase tracking-[0.18em] text-slate-600">Última actualización: hace 12 segundos</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
+            <InfoCard title="Reservas integradas concluidas" value={String(liveExpedientes.length)} />
+            <InfoCard title="Caso principal actual" value={liveExpediente ? `${liveClientName} · ${liveExpediente.reservationId}` : "Pendiente"} detail={latestLiveExpediente && latestLiveExpediente.reservationId !== liveExpediente?.reservationId ? `Última reserva recibida: ${latestLiveExpediente.reservationId}` : undefined} />
             <InfoCard title="Nombre del cliente" value={liveClientName || "Sin registro"} />
             <InfoCard title="Teléfono" value={liveSnapshot?.client.phone || selectedVolunteer.whatsapp || selectedPhone} />
             <InfoCard title="Email" value={liveSnapshot?.client.email || selectedVolunteer.email || "Pendiente"} />
