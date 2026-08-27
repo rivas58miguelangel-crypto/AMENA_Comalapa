@@ -127,6 +127,12 @@ type DemoSession = {
   startedAt: string;
 };
 
+type ResidualDemoSession = {
+  demoRunId: string;
+  reason: string;
+  blockedAt: string;
+};
+
 type DemoSessionStatus = "idle" | "preparing" | "active" | "blocked";
 type DemoSessionIntent = "start" | "finalize";
 type DemoParticipantStatus = "available" | "open" | "connecting" | "connected" | "not_integrated" | "future";
@@ -206,6 +212,7 @@ type AdminLiveDemoResetRequest = {
   requestedAt: string;
   sourceApplication: "hoperia_admin_demo";
   demoRunId: string;
+  bridgeId: string;
 };
 
 type ReservationReplayRequest = {
@@ -245,6 +252,7 @@ type PublicLiveDemoResetAck = {
   acknowledgedAt: string;
   sourceApplication: ReservationCompletedEvent["sourceApplication"];
   demoRunId: string;
+  bridgeId: string;
   status: "reset_complete";
 };
 
@@ -274,8 +282,25 @@ type ReceptionNotice = {
 };
 
 const activeDemoSessionStorageKey = "hoperia.admin.active_demo_session.v1";
+const residualDemoSessionStorageKey = "hoperia.admin.residual_demo_session.v1";
 const liveExpedienteStorageKey = "hoperia.admin.live_expediente.v1";
 const liveExpedienteStorageKeyForRun = (demoRunId: string) => `${liveExpedienteStorageKey}.${encodeURIComponent(demoRunId)}`;
+
+const readStoredResidualDemoSession = (): ResidualDemoSession | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(residualDemoSessionStorageKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<ResidualDemoSession>;
+    return typeof parsed.demoRunId === "string" && parsed.demoRunId.trim() &&
+      typeof parsed.reason === "string" && parsed.reason.trim() &&
+      typeof parsed.blockedAt === "string" && parsed.blockedAt.trim()
+      ? { demoRunId: parsed.demoRunId, reason: parsed.reason, blockedAt: parsed.blockedAt }
+      : null;
+  } catch {
+    return null;
+  }
+};
 
 type ClientCommunicationMessage = {
   from: string;
@@ -674,7 +699,12 @@ function AppShell() {
   const [demoFindings, setDemoFindings] = useState([]);
   const [demoContext, setDemoContext] = useState(null);
   const [demoCommandEvidenceState, setDemoCommandEvidenceState] = useState(null);
+  const [residualDemoSession, setResidualDemoSession] = useState<ResidualDemoSession | null>(() => readStoredResidualDemoSession());
   const [activeDemoSession, setActiveDemoSession] = useState<DemoSession | null>(() => {
+    if (residualDemoSession) {
+      window.localStorage.removeItem(activeDemoSessionStorageKey);
+      return null;
+    }
     try {
       const raw = window.localStorage.getItem(activeDemoSessionStorageKey);
       if (!raw) return null;
@@ -684,8 +714,8 @@ function AppShell() {
         : null;
     } catch { return null; }
   });
-  const [demoSessionStatus, setDemoSessionStatus] = useState<DemoSessionStatus>("idle");
-  const [demoSessionNotice, setDemoSessionNotice] = useState<string | null>(null);
+  const [demoSessionStatus, setDemoSessionStatus] = useState<DemoSessionStatus>(() => residualDemoSession ? "blocked" : "idle");
+  const [demoSessionNotice, setDemoSessionNotice] = useState<string | null>(() => residualDemoSession?.reason || null);
   const [demoSessionResetToken, setDemoSessionResetToken] = useState(0);
   const [demoParticipantStatuses, setDemoParticipantStatuses] = useState(demoParticipantDefaults);
   const [liveExpediente, setLiveExpediente] = useState<LiveExpediente | null>(null);
@@ -1121,7 +1151,16 @@ function AppShell() {
     pendingDemoSessionIntentRef.current = null;
     pendingReplayAfterBridgeRef.current = null;
     pendingReservationResetAfterBridgeRef.current = null;
+    const residualDemoRunId = activeDemoSessionRef.current?.demoRunId || pendingDemoRunIdRef.current;
+    if (residualDemoRunId) {
+      const nextResidualDemoSession = { demoRunId: residualDemoRunId, reason: detail, blockedAt: new Date().toISOString() };
+      window.localStorage.setItem(residualDemoSessionStorageKey, JSON.stringify(nextResidualDemoSession));
+      setResidualDemoSession(nextResidualDemoSession);
+    }
+    publicReservationBridgeIdRef.current = null;
+    publicReservationBridgeSourceRef.current = null;
     setActiveDemoSession(null);
+    window.localStorage.removeItem(activeDemoSessionStorageKey);
     setDemoSessionStatus("blocked");
     setDemoSessionNotice(detail);
   };
@@ -1167,6 +1206,8 @@ function AppShell() {
 
   const completeDemoSessionPreparation = (intent: DemoSessionIntent, demoRunId: string) => {
     clearDemoSessionLocalState(demoRunId);
+    setResidualDemoSession(null);
+    window.localStorage.removeItem(residualDemoSessionStorageKey);
     pendingDemoSessionIntentRef.current = null;
     setActive("demo");
 
@@ -1197,6 +1238,7 @@ function AppShell() {
       return;
     }
 
+    const bridgeId = publicReservationBridgeIdRef.current;
     const resetId = createLiveDemoResetId();
     const resetRequest: AdminLiveDemoResetRequest = {
       type: "hoperia.demo.live.reset",
@@ -1205,6 +1247,7 @@ function AppShell() {
       requestedAt: new Date().toISOString(),
       sourceApplication: "hoperia_admin_demo",
       demoRunId,
+      bridgeId,
     };
 
     pendingResetIdRef.current = resetId;
@@ -1223,8 +1266,12 @@ function AppShell() {
 
   const prepareDemoSession = (intent: DemoSessionIntent) => {
     if (demoSessionStatus === "preparing") return;
-    pendingDemoSessionIntentRef.current = intent;
-    const targetDemoRunId = intent === "finalize" ? activeDemoSession?.demoRunId : createDemoSessionId();
+    const isResidualRetry = demoSessionStatus === "blocked" && residualDemoSession;
+    const effectiveIntent: DemoSessionIntent = isResidualRetry ? "finalize" : intent;
+    pendingDemoSessionIntentRef.current = effectiveIntent;
+    const targetDemoRunId = isResidualRetry
+      ? residualDemoSession.demoRunId
+      : effectiveIntent === "finalize" ? activeDemoSession?.demoRunId : createDemoSessionId();
     if (!targetDemoRunId) {
       blockDemoSessionPreparation("No existe una corrida activa para finalizar.");
       return;
@@ -1233,12 +1280,12 @@ function AppShell() {
     setDemoSessionStatus("preparing");
     setDemoSessionNotice("Verificando y limpiando el estado efímero de la corrida anterior.");
 
-    if (liveExpedienteRef.current) {
-      requestReservationResetForDemoSession(intent, targetDemoRunId);
+    if (liveExpedienteRef.current || isResidualRetry) {
+      requestReservationResetForDemoSession(effectiveIntent, targetDemoRunId);
       return;
     }
 
-    completeDemoSessionPreparation(intent, targetDemoRunId);
+    completeDemoSessionPreparation(effectiveIntent, targetDemoRunId);
   };
 
   const requestLiveDemoReset = () => {
@@ -1318,6 +1365,7 @@ function AppShell() {
         isNonEmptyString(data.resetId) &&
         isNonEmptyString(data.acknowledgedAt) &&
         ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "") &&
+        isNonEmptyString(data.bridgeId) &&
         data.status === "reset_complete";
     };
 
@@ -1378,6 +1426,7 @@ function AppShell() {
         if (!isPublicLiveDemoResetAck(event.data)) return;
         if (event.data.resetId !== pendingResetIdRef.current) return;
         if (event.data.demoRunId !== pendingDemoRunIdRef.current) return;
+        if (event.data.bridgeId !== publicReservationBridgeIdRef.current) return;
 
         const intent = pendingDemoSessionIntentRef.current;
         if (intent) {
@@ -1573,6 +1622,7 @@ function AppShell() {
           demoFindings={demoFindings}
           demoCommandEvidenceState={demoCommandEvidenceState}
           activeDemoSession={activeDemoSession}
+          residualDemoSession={residualDemoSession}
           demoSessionStatus={demoSessionStatus}
           demoSessionNotice={demoSessionNotice}
           demoSessionResetToken={demoSessionResetToken}
@@ -3016,6 +3066,7 @@ function DemoPage({
   demoFindings = [],
   demoCommandEvidenceState = null,
   activeDemoSession = null,
+  residualDemoSession = null,
   demoSessionStatus = "idle",
   demoSessionNotice = null,
   demoSessionResetToken = 0,
@@ -3718,7 +3769,7 @@ function DemoPage({
           <div>
             <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Sesión demo</div>
             <h3 className="mt-2 text-2xl font-black text-slate-950">{sessionHeading}</h3>
-            {activeDemoSession && <p className="mt-2 text-sm font-semibold text-slate-700">demoRunId: {activeDemoSession.demoRunId}</p>}
+            {(activeDemoSession || residualDemoSession) && <p className="mt-2 text-sm font-semibold text-slate-700">demoRunId: {(activeDemoSession || residualDemoSession).demoRunId}</p>}
             {demoSessionNotice && <p className="mt-2 text-sm font-semibold text-slate-700">{demoSessionNotice}</p>}
           </div>
           <div className="flex flex-wrap gap-3">
