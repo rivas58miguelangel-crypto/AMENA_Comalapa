@@ -129,7 +129,7 @@ type DemoSession = {
 
 type DemoSessionStatus = "idle" | "preparing" | "active" | "blocked";
 type DemoSessionIntent = "start" | "finalize";
-type DemoParticipantStatus = "available" | "open" | "connected" | "not_integrated" | "future";
+type DemoParticipantStatus = "available" | "open" | "connecting" | "connected" | "not_integrated" | "future";
 
 const demoParticipantDefaults: Record<string, DemoParticipantStatus> = {
   reservations: "available",
@@ -205,6 +205,7 @@ type AdminLiveDemoResetRequest = {
   resetId: string;
   requestedAt: string;
   sourceApplication: "hoperia_admin_demo";
+  demoRunId: string;
 };
 
 type ReservationReplayRequest = {
@@ -708,6 +709,7 @@ function AppShell() {
   const pendingDemoSessionIntentRef = useRef<DemoSessionIntent | null>(null);
   const pendingReservationResetAfterBridgeRef = useRef<DemoSessionIntent | null>(null);
   const pendingDemoRunIdRef = useRef<string | null>(null);
+  const pendingReplayAfterBridgeRef = useRef<{ reservationWindow: Window; detail: string } | null>(null);
   const bridgeTimeoutRef = useRef<number | null>(null);
   const bridgeRetryIntervalRef = useRef<number | null>(null);
   const bridgeRetryTimeoutsRef = useRef<number[]>([]);
@@ -801,6 +803,8 @@ function AppShell() {
       data.schemaVersion === "1.0" &&
       isNonEmptyString(data.bridgeId) &&
       isNonEmptyString(data.acknowledgedAt) &&
+      data.mode === "integrated" &&
+      isNonEmptyString(data.demoRunId) &&
       ALLOWED_RESERVATION_SOURCE_APPLICATIONS.has(data.sourceApplication || "");
   };
 
@@ -819,22 +823,44 @@ function AppShell() {
   };
 
   const preparePublicReservationBridge = (reservationWindow: Window, demoRunId: string) => {
+    clearBridgeTimeout();
+    clearBridgeRetryInterval();
     clearBridgeRetryTimeouts();
     const bridgeId = createBridgeId();
     publicReservationBridgeIdRef.current = bridgeId;
     publicReservationBridgeSourceRef.current = null;
+    setDemoParticipantStatuses((current) => ({ ...current, reservations: "connecting" }));
     sendPublicReservationBridge(reservationWindow, bridgeId, demoRunId);
-    bridgeRetryTimeoutsRef.current = [500, 1500].map((delay) => (
-      window.setTimeout(() => {
-        if (
-          publicReservationBridgeIdRef.current === bridgeId &&
-          publicReservationWindowRef.current === reservationWindow &&
-          !reservationWindow.closed
-        ) {
-          sendPublicReservationBridge(reservationWindow, bridgeId, demoRunId);
-        }
-      }, delay)
-    ));
+    bridgeRetryIntervalRef.current = window.setInterval(() => {
+      if (
+        publicReservationBridgeIdRef.current !== bridgeId ||
+        publicReservationWindowRef.current !== reservationWindow ||
+        publicReservationBridgeSourceRef.current ||
+        reservationWindow.closed
+      ) {
+        clearBridgeRetryInterval();
+        return;
+      }
+      sendPublicReservationBridge(reservationWindow, bridgeId, demoRunId);
+    }, 600);
+    bridgeTimeoutRef.current = window.setTimeout(() => {
+      if (
+        publicReservationBridgeIdRef.current !== bridgeId ||
+        publicReservationBridgeSourceRef.current
+      ) return;
+      clearBridgeRetryInterval();
+      bridgeTimeoutRef.current = null;
+      setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
+      const pendingReplay = pendingReplayAfterBridgeRef.current;
+      pendingReplayAfterBridgeRef.current = null;
+      if (pendingReplay) {
+        pendingReplayRequestIdRef.current = null;
+        setReservationReplayStatus("error");
+        setReservationReplayNotice({ title: "No fue posible conectar Ruta 2", detail: "El replay no se envió porque la sesión integrada no confirmó el bridge." });
+      } else {
+        setPublicReservationWindowNotice("Ruta 2 está abierta, pero no confirmó el bridge integrado. La reserva permanece standalone hasta completar la conexión.");
+      }
+    }, 10000);
   };
 
   const isExpectedReservationSource = (event: MessageEvent<unknown>, bridgeId?: string) => (
@@ -884,7 +910,6 @@ function AppShell() {
     if (publicReservationWindowRef.current && !publicReservationWindowRef.current.closed) {
       preparePublicReservationBridge(publicReservationWindowRef.current, demoRunId);
       publicReservationWindowRef.current.focus();
-      setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
       setPublicReservationWindowNotice("App Pública Ruta 2 enfocada. Completa y confirma la reserva para transmitirla.");
       return;
     }
@@ -898,7 +923,7 @@ function AppShell() {
 
     publicReservationWindowRef.current = reservationWindow;
     preparePublicReservationBridge(reservationWindow, demoRunId);
-    setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
+    setDemoParticipantStatuses((current) => ({ ...current, reservations: "connecting" }));
     reservationWindow.focus();
     setPublicReservationWindowNotice("App Pública Ruta 2 abierta en una ventana separada. Completa y confirma la reserva para transmitirla.");
   };
@@ -936,27 +961,11 @@ function AppShell() {
     bridgeRetryTimeoutsRef.current = [];
   };
 
-  const sendReservationReplayRequest = (detail = "Solicitando a Ruta 2 la última reserva demo disponible.") => {
-    const reservationWindow = publicReservationWindowRef.current && !publicReservationWindowRef.current.closed
-      ? publicReservationWindowRef.current
-      : window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
-
-    if (!reservationWindow || !activeDemoSession) {
-      setReservationReplayStatus("error");
-      setReservationReplayNotice({
-        title: "No fue posible solicitar replay",
-        detail: "La ventana de Ruta 2 no está disponible o fue bloqueada por el navegador.",
-      });
-      return;
-    }
-
-    publicReservationWindowRef.current = reservationWindow;
-    if (!publicReservationBridgeIdRef.current || !publicReservationBridgeSourceRef.current) {
-      preparePublicReservationBridge(reservationWindow, activeDemoSession.demoRunId);
-    }
+  const postReservationReplayRequest = (reservationWindow: Window, detail: string) => {
+    const demoRunId = activeDemoSessionRef.current?.demoRunId;
+    if (!demoRunId || !publicReservationBridgeIdRef.current || !publicReservationBridgeSourceRef.current) return;
     reservationWindow.focus();
     clearReplayTimeout();
-
     const requestId = createReplayRequestId();
     const replayRequest: ReservationReplayRequest = {
       type: "hoperia.reservation.replay.request",
@@ -964,16 +973,13 @@ function AppShell() {
       requestId,
       requestedAt: new Date().toISOString(),
       sourceApplication: "hoperia_admin_demo",
-      demoRunId: activeDemoSession.demoRunId,
+      demoRunId,
       ...(publicReservationBridgeIdRef.current ? { bridgeId: publicReservationBridgeIdRef.current } : {}),
     };
 
     pendingReplayRequestIdRef.current = requestId;
     setReservationReplayStatus("requesting");
-    setReservationReplayNotice({
-      title: "Recuperación solicitada",
-      detail,
-    });
+    setReservationReplayNotice({ title: "Recuperación solicitada", detail });
 
     const postReplayRequest = () => {
       reservationWindow.postMessage(replayRequest, configuredPublicReservationOrigin);
@@ -1008,11 +1014,38 @@ function AppShell() {
     }, 5000);
   };
 
+  const sendReservationReplayRequest = (detail = "Solicitando a Ruta 2 la última reserva demo disponible.") => {
+    const reservationWindow = publicReservationWindowRef.current && !publicReservationWindowRef.current.closed
+      ? publicReservationWindowRef.current
+      : window.open(PUBLIC_RESERVATION_APP_URL, "hoperia-public-reservation");
+
+    if (!reservationWindow || !activeDemoSession) {
+      setReservationReplayStatus("error");
+      setReservationReplayNotice({
+        title: "No fue posible solicitar replay",
+        detail: "La ventana de Ruta 2 no está disponible o fue bloqueada por el navegador.",
+      });
+      return;
+    }
+
+    publicReservationWindowRef.current = reservationWindow;
+    if (publicReservationBridgeIdRef.current && publicReservationBridgeSourceRef.current) {
+      postReservationReplayRequest(reservationWindow, detail);
+      return;
+    }
+
+    pendingReplayAfterBridgeRef.current = { reservationWindow, detail };
+    setReservationReplayStatus("requesting");
+    setReservationReplayNotice({ title: "Conectando Ruta 2", detail: "El replay se enviará después de confirmar el bridge integrado." });
+    preparePublicReservationBridge(reservationWindow, activeDemoSession.demoRunId);
+  };
+
   const clearAdminLiveDemoState = (notice: LiveDemoResetNotice) => {
     clearResetTimeout();
     clearReplayTimeout();
     pendingResetIdRef.current = null;
     pendingReplayRequestIdRef.current = null;
+    pendingReplayAfterBridgeRef.current = null;
     liveExpedienteRef.current = null;
     setLiveExpediente(null);
     setAutoSelectReservationId(null);
@@ -1086,6 +1119,7 @@ function AppShell() {
     clearBridgeRetryTimeouts();
     pendingResetIdRef.current = null;
     pendingDemoSessionIntentRef.current = null;
+    pendingReplayAfterBridgeRef.current = null;
     pendingReservationResetAfterBridgeRef.current = null;
     setActiveDemoSession(null);
     setDemoSessionStatus("blocked");
@@ -1105,7 +1139,7 @@ function AppShell() {
     publicReservationWindowRef.current = reservationWindow;
     publicReservationBridgeSourceRef.current = null;
     pendingReservationResetAfterBridgeRef.current = intent;
-    setDemoParticipantStatuses((current) => ({ ...current, reservations: "open" }));
+    setDemoParticipantStatuses((current) => ({ ...current, reservations: "connecting" }));
     setDemoSessionNotice("Reconectando Ruta 2 para limpiar de forma segura la corrida anterior.");
     preparePublicReservationBridge(reservationWindow, demoRunId);
     const bridgeId = publicReservationBridgeIdRef.current;
@@ -1123,7 +1157,7 @@ function AppShell() {
         clearBridgeRetryInterval();
         return;
       }
-      sendPublicReservationBridge(reservationWindow, bridgeId);
+      sendPublicReservationBridge(reservationWindow, bridgeId, demoRunId);
     }, 600);
     bridgeTimeoutRef.current = window.setTimeout(() => {
       if (pendingReservationResetAfterBridgeRef.current !== intent) return;
@@ -1310,8 +1344,15 @@ function AppShell() {
           if (event.source !== publicReservationWindowRef.current) return;
 
           publicReservationBridgeSourceRef.current = event.source;
+          clearBridgeTimeout();
           setDemoParticipantStatuses((current) => ({ ...current, reservations: "connected" }));
+          clearBridgeRetryInterval();
           clearBridgeRetryTimeouts();
+          const pendingReplay = pendingReplayAfterBridgeRef.current;
+          pendingReplayAfterBridgeRef.current = null;
+          if (pendingReplay && !pendingReservationResetAfterBridgeRef.current) {
+            postReservationReplayRequest(pendingReplay.reservationWindow, pendingReplay.detail);
+          }
           const intent = pendingReservationResetAfterBridgeRef.current;
           if (intent) {
             clearBridgeTimeout();
@@ -3688,8 +3729,8 @@ function DemoPage({
         {demoSessionStatus === "blocked" && <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black text-amber-900">No fue posible preparar una nueva demostración porque existe estado pendiente de la corrida anterior.</div>}
         {activeDemoSession && <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">{demoParticipants.map((participant) => {
           const status = demoParticipantStatuses[participant.id] || participant.status;
-          const label = status === "connected" ? "Conectada" : status === "open" ? "Abierta" : status === "available" ? "Disponible" : status === "future" ? "Prevista" : "No integrada";
-          const tone = status === "connected" ? "green" : status === "open" || status === "available" ? "blue" : status === "future" ? "violet" : "slate";
+          const label = status === "connected" ? "Conectada" : status === "connecting" ? "Conectando" : status === "open" ? "Abierta" : status === "available" ? "Disponible" : status === "future" ? "Prevista" : "No integrada";
+          const tone = status === "connected" ? "green" : status === "connecting" || status === "open" || status === "available" ? "blue" : status === "future" ? "violet" : "slate";
           return <div key={participant.id} className="rounded-2xl border border-blue-100 bg-white p-4"><div className="text-sm font-black text-slate-950">{participant.name}</div><div className="mt-1 text-xs font-semibold leading-5 text-slate-600">{participant.detail}</div><div className="mt-3"><Badge tone={tone}>{label}</Badge></div></div>;
         })}</div>}
       </Card>
