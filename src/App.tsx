@@ -4,7 +4,7 @@ import DemoScenarioRoute from "./components/demo/DemoScenarioRoute";
 import {
   getFindingsForAdminPage,
 } from "./demo/bridge/demoFindingsBridge";
-import { createDemoInjectedFindings } from "./demo/fixtures/demoFindingsFixtures";
+import { deriveDemoFindings } from "./demo/derivation/deriveDemoFindings";
 import {
   Activity,
   AlertTriangle,
@@ -3188,120 +3188,6 @@ function DemoPage({
       createdAt: index < 10 ? `Hoy 5:${String(25 + index).padStart(2, "0")} PM` : `Manana 8:${String(20 + index - 10).padStart(2, "0")} AM`,
     }));
   };
-  const createSimulatedIntelligenceSignals = (demoRunId, clients, messages, reports, vapiLogs, whatsappFollowups) => [
-    {
-      id: "sim-finding-01",
-      demoRunId,
-      number: 1,
-      adminPage: "Centro Ejecutivo",
-      adminTarget: "executive",
-      section: "Prioridades de dirección",
-      finding: "La operación posterior a la reserva concentra riesgos comerciales, financieros y de servicio que requieren revisión ejecutiva antes de la siguiente junta.",
-      source: "Mensajería Operacional del Equipo",
-      adminLink: "Centro Ejecutivo -> Prioridades de dirección",
-      externalVerification: null,
-      supabaseTable: "demo_executive_priorities",
-      status: "Pendiente de verificación",
-      priorityReason: "Impacto transversal sobre decisiones directivas y seguimiento interáreas.",
-      priority: "Alta",
-    },
-    {
-      id: "sim-finding-02",
-      demoRunId,
-      number: 2,
-      adminPage: "Expediente Vivo",
-      adminTarget: "client",
-      section: "Timeline del cliente",
-      finding: `${clients[0]?.name || "Cliente prioritario"} acumula señales de intención, dudas financieras y seguimiento humano que deben quedar visibles en un solo expediente.`,
-      source: "Web Widget",
-      adminLink: "Expediente Vivo -> Timeline del cliente",
-      externalVerification: "Supabase",
-      supabaseTable: "demo_customer_profiles",
-      status: "Pendiente de verificación",
-      priorityReason: "Evita pérdida de contexto entre reserva, conversación y seguimiento comercial.",
-      priority: "Alta",
-    },
-    {
-      id: "sim-finding-03",
-      demoRunId,
-      number: 3,
-      adminPage: "Inventario / Construcción",
-      adminTarget: "construction",
-      section: "Unidades con presión comercial",
-      finding: "La preferencia por modelos familiares debe cruzarse con disponibilidad y avance de construcción antes de prometer fechas o alternativas.",
-      source: "Seguimiento Comercial de Vendedoras",
-      adminLink: "Inventario / Construcción -> Unidades con presión comercial",
-      externalVerification: "Supabase",
-      supabaseTable: "demo_inventory_units",
-      status: "Pendiente de verificación",
-      priorityReason: "Reduce riesgo de prometer inventario o fechas sin evidencia operacional.",
-      priority: "Alta",
-    },
-    {
-      id: "sim-finding-04",
-      demoRunId,
-      number: 4,
-      adminPage: "Documentos",
-      adminTarget: "documents",
-      section: "Checklist documental crítico",
-      finding: "Hay expedientes con documentación parcial que pueden bloquear formalización si no se solicita el faltante correcto en la próxima interacción.",
-      source: "Documentos",
-      adminLink: "Documentos -> Checklist documental crítico",
-      externalVerification: "Supabase",
-      supabaseTable: "demo_document_checklists",
-      status: "Pendiente de verificación",
-      priorityReason: "Afecta directamente velocidad de formalización y calidad del expediente.",
-      priority: "Alta",
-    },
-    {
-      id: "sim-finding-05",
-      demoRunId,
-      number: 5,
-      adminPage: "Finanzas / Pagos",
-      adminTarget: "payments",
-      section: "Compromisos de pago sensibles",
-      finding: `${reports.filter((item) => item.objection === "Monto de prima").length || "Varios"} casos mencionan prima, cuota o claridad financiera como bloqueo para avanzar.`,
-      source: "Seguimiento Comercial de Vendedoras",
-      adminLink: "Finanzas / Pagos -> Compromisos de pago sensibles",
-      externalVerification: "Supabase",
-      supabaseTable: "demo_payment_commitments",
-      status: "Pendiente de verificación",
-      priorityReason: "Riesgo directo sobre ingresos, atrasos y confianza del cliente.",
-      priority: "Alta",
-    },
-    {
-      id: "sim-finding-06",
-      demoRunId,
-      number: 6,
-      adminPage: "Servicio Cliente",
-      adminTarget: "service",
-      section: "Alertas críticas del cliente",
-      finding: "Carlos Armando Domínguez manifestó intención de presentar una demanda judicial por inconsistencias entre la información comercial recibida y el contrato firmado.",
-      source: "Seguimiento Comercial de Vendedoras",
-      adminLink: "Servicio Cliente -> Alertas críticas",
-      externalVerification: "Supabase",
-      supabaseTable: "demo_customer_service_cases",
-      status: "Pendiente de verificación",
-      priorityReason: "Riesgo legal y reputacional.",
-      priority: "Alta",
-    },
-    {
-      id: "sim-finding-07",
-      demoRunId,
-      number: 7,
-      adminPage: "Ventas / Vendedoras",
-      adminTarget: "sellers",
-      section: "Seguimientos que requieren intervención humana",
-      finding: `${whatsappFollowups.filter((item) => item.status === "Requiere respuesta humana").length || "Algunos"} seguimientos conversacionales requieren que una vendedora revise tono, prioridad y siguiente paso antes de responder.`,
-      source: "Marta Voz / VAPI",
-      adminLink: "Ventas / Vendedoras -> Seguimientos prioritarios",
-      externalVerification: "VAPI Logs",
-      supabaseTable: "demo_seller_followups",
-      status: "Pendiente de verificación",
-      priorityReason: "Evita respuestas automáticas en casos donde debe decidir una persona.",
-      priority: "Alta",
-    },
-  ];
   const createSimulatedOperationalEvidence = (demoRunId, clients, messages, reports, signals, vapiLogs, whatsappFollowups) => [
     { id: "sim-evidence-01", demoRunId, page: "Aplicacion de Reservas", section: "Clientes/reservas", summary: `${clients.length} registros de reserva simulados`, status: "Visible" },
     { id: "sim-evidence-02", demoRunId, page: "Mensajería Operacional del Equipo", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: "Visible" },
@@ -3429,7 +3315,7 @@ function DemoPage({
     ? simulatedIntelligenceSignals
     : demoFindings;
   const phaseFiveHasFindings = phaseFiveFindings.length > 0;
-  const phaseFiveDemoActive = simulatedDataInjected || phaseFiveHasFindings;
+  const phaseFiveDemoActive = phaseFiveHasFindings;
   const demoRunIdShort = effectiveDemoContext ? effectiveDemoContext.demoRunId.replace("demo-", "").slice(0, 8) : "Sin demo activa";
   const demoStatusBefore = activeDemoContext ? "Sin demo activa" : "Pendiente";
   const demoStatusAfter = activeDemoContext?.status || "Pendiente";
@@ -3668,16 +3554,24 @@ function DemoPage({
     const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, baseReservationClients).slice(0, quantities.sellerReports);
     const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, baseReservationClients).slice(0, quantities.vapiLogs);
     const nextMartaWhatsAppFollowups = [];
-    const nextIntelligenceSignals = createDemoInjectedFindings(nextDemoRunId);
-    const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
+    const generatedAt = new Date().toISOString();
     const nextDemoContext = {
       demoRunId: nextDemoRunId,
       prospectCompanyName: quantities.prospectCompanyName || selectedVolunteer.company || volunteerForm.company || "Empresa Demo",
       projectName: quantities.projectName || "Proyecto de Empresa Demo",
       scenarioName: quantities.scenarioName || "Lanzamiento comercial de proyecto habitacional",
       status: "injected",
-      injectedAt: new Date().toLocaleString("es-SV", { dateStyle: "short", timeStyle: "short" }),
+      injectedAt: new Date(generatedAt).toLocaleString("es-SV", { dateStyle: "short", timeStyle: "short" }),
     };
+    const nextIntelligenceSignals = deriveDemoFindings({
+      demoRunId: nextDemoRunId,
+      generatedAt,
+      reservationClients: nextReservationClients,
+      internalMessages: nextInternalMessages,
+      sellerReports: nextSellerReports,
+      vapiCallLogs: nextVapiCallLogs,
+    });
+    const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
     setSimulatedReservationClients(nextReservationClients);
     setSimulatedInternalMessages(nextInternalMessages);
     setSimulatedSellerReports(nextSellerReports);
@@ -4062,7 +3956,7 @@ function DemoPage({
             <div>
               <h3 className="text-3xl font-black text-slate-950">FASE 05 H - OperIA Intelligence</h3>
               <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Índice escénico de hallazgos prioritarios que H - OperIA Intelligence interpreta después de la Empresa Demo y ubica dentro de páginas internas del Admin.</p>
-              <p className="mt-2 max-w-4xl text-sm font-black leading-6 text-violet-800">Escenario demo / corrida simulada / no persistida. Los hallazgos actuales son fixtures trazables a la corrida, no inferencia real contra Supabase.</p>
+              <p className="mt-2 max-w-4xl text-sm font-black leading-6 text-violet-800">Escenario demo / corrida simulada / no persistida. Los hallazgos actuales se derivan localmente de la evidencia cargada para esta corrida; no consultan Supabase.</p>
             </div>
             <div className="flex flex-wrap gap-2"><Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveDemoActive ? "Demo activa" : "Sin demo activa"}</Badge><Badge tone="violet">Datos simulados</Badge><Badge tone="amber">No persistido</Badge></div>
           </div>
