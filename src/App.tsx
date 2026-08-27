@@ -3185,6 +3185,41 @@ function DemoPage({
       createdAt: index < 10 ? `Hoy 3:${String(10 + index).padStart(2, "0")} PM` : `Hoy 4:${String(index - 10).padStart(2, "0")} PM`,
     }));
   };
+  const createEvidenceClients = (demoRunId) => {
+    const scopedLiveExpedientes = liveExpedientes.filter((expediente) => expediente.demoRunId === demoRunId);
+    const principal = scopedLiveExpedientes.find(
+      (expediente) => expediente.reservationId === selectedLiveExpedienteReservationId,
+    );
+    const orderedLiveExpedientes = principal
+      ? [principal, ...scopedLiveExpedientes.filter((expediente) => expediente.reservationId !== principal.reservationId)]
+      : scopedLiveExpedientes;
+    const liveEvidenceClients = orderedLiveExpedientes.map((expediente) => ({
+      id: expediente.reservationId,
+      demoRunId,
+      reservationId: expediente.reservationId,
+      expedienteId: expediente.expedienteId,
+      name: `${expediente.client.firstName} ${expediente.client.lastName}`.trim(),
+      phone: expediente.client.phone,
+      email: expediente.client.email,
+      unit: [
+        expediente.selectedUnit.sector,
+        expediente.selectedUnit.towerOrBlock,
+        expediente.selectedUnit.level,
+        expediente.selectedUnit.model,
+        expediente.selectedUnit.unitOrLot,
+      ].filter(Boolean).join(" · "),
+      propertyType: expediente.selectedUnit.propertyType,
+      sector: expediente.selectedUnit.sector,
+      towerOrBlock: expediente.selectedUnit.towerOrBlock,
+      level: expediente.selectedUnit.level,
+      model: expediente.selectedUnit.model,
+      source: `${expediente.sourceApplication} · ${expediente.sourceChannel}`,
+      reservationStatus: "Completada",
+      createdAt: expediente.receivedAt,
+    }));
+    const fixtureClients = createSimulatedReservationClients(demoRunId);
+    return [...liveEvidenceClients, ...fixtureClients];
+  };
   const createSimulatedInternalMessages = (demoRunId, clients) => {
     const topics = ["Coordinacion con vendedora", "Alerta de documentos", "Consulta de pagos", "Seguimiento de cita", "Prioridad comercial"];
     const fromRoles = ["Marta", "Coordinacion comercial", "Financiera", "Documentos", "Gerencia comercial"];
@@ -3270,13 +3305,13 @@ function DemoPage({
     }));
   };
   const createSimulatedOperationalEvidence = (demoRunId, clients, messages, reports, signals, vapiLogs, whatsappFollowups) => [
-    { id: "sim-evidence-01", demoRunId, page: "Aplicacion de Reservas", section: "Clientes/reservas", summary: `${clients.length} registros de reserva simulados`, status: "Visible" },
-    { id: "sim-evidence-02", demoRunId, page: "Mensajería Operacional del Equipo", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: "Visible" },
-    { id: "sim-evidence-03", demoRunId, page: "Seguimiento Comercial de Vendedoras", section: "Reportes humanos", summary: `${reports.length} reportes de interacciones posteriores`, status: "Visible" },
-    { id: "sim-evidence-04", demoRunId, page: "Marta Voz / Vapi", section: "Logs de llamadas", summary: `${vapiLogs.length} logs de voz simulados con salida estructurada`, status: "Visible" },
-    { id: "sim-evidence-05", demoRunId, page: "Marta WhatsApp Texto", section: "Seguimientos conversacionales", summary: `${whatsappFollowups.length} seguimientos de texto simulados`, status: "Visible" },
-    { id: "sim-evidence-06", demoRunId, page: "H - OperIA Intelligence", section: "Senales derivadas", summary: `${signals.length} senales ejecutivas generadas`, status: "Generado" },
-  ];
+    { id: "sim-evidence-01", demoRunId, page: "Aplicacion de Reservas", section: "Clientes/reservas", summary: `${clients.length} registros de reserva simulados`, status: clients.length ? "Visible" : "Sin registros" },
+    { id: "sim-evidence-02", demoRunId, page: "Mensajería Operacional del Equipo", section: "Coordinacion interna", summary: `${messages.length} mensajes internos asociados a clientes`, status: messages.length ? "Visible" : "Sin registros" },
+    { id: "sim-evidence-03", demoRunId, page: "Seguimiento Comercial de Vendedoras", section: "Reportes humanos", summary: `${reports.length} reportes de interacciones posteriores`, status: reports.length ? "Visible" : "Sin registros" },
+    { id: "sim-evidence-04", demoRunId, page: "Marta Voz / Vapi", section: "Logs de llamadas", summary: `${vapiLogs.length} logs de voz simulados con salida estructurada`, status: vapiLogs.length ? "Visible" : "Sin registros" },
+    { id: "sim-evidence-05", demoRunId, page: "Marta WhatsApp Texto", section: "Seguimientos conversacionales", summary: `${whatsappFollowups.length} seguimientos de texto simulados`, status: whatsappFollowups.length ? "Visible" : "Sin registros" },
+    { id: "sim-evidence-06", demoRunId, page: "H - OperIA Intelligence", section: "Senales derivadas", summary: `${signals.length} senales ejecutivas generadas`, status: signals.length ? "Generado" : "Sin hallazgos" },
+  ].filter((item) => item.status !== "Sin registros" && item.status !== "Sin hallazgos");
   const [activePhase, setActivePhase] = useState(0);
   const [completedPhases, setCompletedPhases] = useState([]);
   const [volunteerForm, setVolunteerForm] = useState(emptyVolunteer);
@@ -3391,7 +3426,13 @@ function DemoPage({
   const liveSelectedUnit = liveSnapshot?.selectedUnit || null;
   const liveClientName = liveSnapshot ? `${liveSnapshot.client.firstName} ${liveSnapshot.client.lastName}`.trim() : selectedVolunteer.name;
   const liveLevelAndModel = liveSelectedUnit ? [liveSelectedUnit.level, liveSelectedUnit.model].filter(Boolean).join(" · ") : "";
-  const simulatedDataInjected = activeDemoContext?.status === "injected" && simulatedReservationClients.length > 0 && simulatedInternalMessages.length > 0 && simulatedSellerReports.length > 0 && simulatedVapiCallLogs.length > 0;
+  const simulatedDataInjected = activeDemoContext?.status === "injected";
+  const hasSimulatedReservations = simulatedDataInjected && simulatedReservationClients.length > 0;
+  const hasSimulatedInternalMessages = simulatedDataInjected && simulatedInternalMessages.length > 0;
+  const hasSimulatedSellerReports = simulatedDataInjected && simulatedSellerReports.length > 0;
+  const hasSimulatedVapiCallLogs = simulatedDataInjected && simulatedVapiCallLogs.length > 0;
+  const hasSimulatedMartaWhatsAppFollowups = simulatedDataInjected && simulatedMartaWhatsAppFollowups.length > 0;
+  const hasAnySimulatedEvidence = hasSimulatedReservations || hasSimulatedInternalMessages || hasSimulatedSellerReports || hasSimulatedVapiCallLogs || hasSimulatedMartaWhatsAppFollowups;
   const effectiveDemoContext = activeDemoContext || demoContext;
   const phaseFiveFindings = simulatedIntelligenceSignals.length
     ? simulatedIntelligenceSignals
@@ -3630,11 +3671,11 @@ function DemoPage({
   } = { reservations: 20, messages: 20, sellerReports: 20, vapiLogs: 20 }) => {
     if (!activeDemoSession) return;
     const nextDemoRunId = activeDemoSession.demoRunId;
-    const baseReservationClients = createSimulatedReservationClients(nextDemoRunId);
-    const nextReservationClients = baseReservationClients.slice(0, quantities.reservations);
-    const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, baseReservationClients).slice(0, quantities.messages);
-    const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, baseReservationClients).slice(0, quantities.sellerReports);
-    const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, baseReservationClients).slice(0, quantities.vapiLogs);
+    const evidenceClients = createEvidenceClients(nextDemoRunId);
+    const nextReservationClients = evidenceClients.slice(0, quantities.reservations);
+    const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, evidenceClients).slice(0, quantities.messages);
+    const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, evidenceClients).slice(0, quantities.sellerReports);
+    const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, evidenceClients).slice(0, quantities.vapiLogs);
     const nextMartaWhatsAppFollowups = [];
     const generatedAt = new Date().toISOString();
     const nextDemoContext = {
@@ -3667,30 +3708,30 @@ function DemoPage({
     setReservationStatus({ reservation: "Validada", whatsapp: "Confirmado", email: "Confirmado", evidence: "Generada" });
     completePhase(4);
   };
-  const commercialRows = simulatedDataInjected
+  const commercialRows = hasSimulatedSellerReports
     ? simulatedSellerReports.slice(0, 5).map((report) => [report.clientName, report.sellerName, report.interactionType, `${report.summary} Necesidad: ${report.detectedNeed}. Objecion: ${report.objection}.`, report.priority, report.nextStep, report.createdAt, "Activo"])
-    : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
-  const internalMessageRows = simulatedDataInjected
+    : simulatedDataInjected ? [] : [["Andrea López", "María Fernanda", "Validación inicial", "Reserva creada desde app pública", "Media", "Confirmar recepción", "Hoy 3:00 PM", "Activo"]];
+  const internalMessageRows = hasSimulatedInternalMessages
     ? simulatedInternalMessages.slice(0, 5).map((message) => [message.fromRole, message.toRole, message.topic, message.messageText, message.priority, message.createdAt])
-    : [["Coordinación comercial", "Vendedora responsable", "Coordinación con vendedora", "Revisar reserva creada y dejar evidencia del siguiente movimiento.", "Media", "Hoy 3:08 PM"]];
-  const latestSellerReport = simulatedDataInjected && simulatedSellerReports.length
+    : simulatedDataInjected ? [] : [["Coordinación comercial", "Vendedora responsable", "Coordinación con vendedora", "Revisar reserva creada y dejar evidencia del siguiente movimiento.", "Media", "Hoy 3:08 PM"]];
+  const latestSellerReport = hasSimulatedSellerReports
     ? simulatedSellerReports[simulatedSellerReports.length - 1]
-    : {
+    : simulatedDataInjected ? null : {
         sellerName: "María Fernanda",
         clientName: "Andrea López",
         summary: "Validación inicial registrada desde seguimiento comercial.",
         detectedNeed: "Confirmar recepción",
         interactionType: "Validación inicial",
       };
-  const latestTeamMessage = simulatedDataInjected && simulatedInternalMessages.length
+  const latestTeamMessage = hasSimulatedInternalMessages
     ? simulatedInternalMessages[simulatedInternalMessages.length - 1]
-    : {
+    : simulatedDataInjected ? null : {
         fromRole: "Coordinación comercial",
         toRole: "Vendedora responsable",
         topic: "Coordinación con vendedora",
         messageText: "Revisar reserva creada y dejar evidencia del siguiente movimiento.",
       };
-  const recentActivityTime = simulatedDataInjected ? "Hace un momento" : "Recientemente";
+  const recentActivityTime = hasAnySimulatedEvidence ? "Hace un momento" : simulatedDataInjected ? "Sin registros" : "Recientemente";
   const adminEvidence = simulatedDataInjected
     ? simulatedOperationalEvidence.map((item) => [item.page, item.section, item.summary, `Evidencia simulada asociada al demoRunId ${demoRunIdShort}.`, item.status, "Abrir página"])
     : [
@@ -3699,12 +3740,12 @@ function DemoPage({
         ["Mensajería Operacional del Equipo", "Coordinación interna", "Mensaje operativo registrado", "El equipo puede verificar coordinación posterior a la reserva.", "Pendiente", "Abrir página"],
       ];
   const derivedChanges = [
-    { phase: "Fase 01", source: "Reservas", page: "Reserva pública", section: "Cliente, unidad, fuente y estado", change: `${simulatedReservationClients.length} reservas disponibles para seguimiento`, observation: "Clientes operacionales y unidades que originan el ciclo.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-reservation-live" },
-    { phase: "Fase 02", source: "Marta Voz / Vapi", page: "Marta Multicanal", section: "Voz, llamadas y structured output", change: `${simulatedVapiCallLogs.length} logs de llamadas disponibles`, observation: "Intenciones, bloqueos, urgencia y casos que requieren intervención humana.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-vapi-voice" },
-    { phase: "Fase 02", source: "Marta WhatsApp", page: "Marta Multicanal", section: "WhatsApp / Texto", change: `${simulatedMartaWhatsAppFollowups.length} seguimientos conversacionales`, observation: "Respuestas, intención detectada y siguiente acción por texto.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-marta-whatsapp" },
-    { phase: "Fase 03", source: "Seguimiento Comercial de Vendedoras", page: "Coordinación y Seguimiento Operacional", section: "Capa 1 · Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-commercial-operations" },
-    { phase: "Fase 03", source: "Mensajería Operacional del Equipo", page: "Coordinación y Seguimiento Operacional", section: "Capa 2 · Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: simulatedDataInjected ? "Generado" : "Pendiente", targetId: "demo-operational-messaging" },
-    { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias de la corrida demo local`, observation: "Datos simulados configurados, auditados, regenerados cuando corresponde y cargados sin persistencia.", status: simulatedDataInjected ? "Verificado" : "Pendiente", targetId: "demo-command-evidence" },
+    { phase: "Fase 01", source: "Reservas", page: "Reserva pública", section: "Cliente, unidad, fuente y estado", change: `${simulatedReservationClients.length} reservas disponibles para seguimiento`, observation: "Clientes operacionales y unidades que originan el ciclo.", status: hasSimulatedReservations ? "Verificado" : simulatedDataInjected ? "Sin registros" : "Pendiente", targetId: "demo-reservation-live" },
+    { phase: "Fase 02", source: "Marta Voz / Vapi", page: "Marta Multicanal", section: "Voz, llamadas y structured output", change: `${simulatedVapiCallLogs.length} logs de llamadas disponibles`, observation: "Intenciones, bloqueos, urgencia y casos que requieren intervención humana.", status: hasSimulatedVapiCallLogs ? "Generado" : simulatedDataInjected ? "Sin registros" : "Pendiente", targetId: "demo-marta-vapi-voice" },
+    { phase: "Fase 02", source: "Marta WhatsApp", page: "Marta Multicanal", section: "WhatsApp / Texto", change: `${simulatedMartaWhatsAppFollowups.length} seguimientos conversacionales`, observation: "Respuestas, intención detectada y siguiente acción por texto.", status: hasSimulatedMartaWhatsAppFollowups ? "Generado" : simulatedDataInjected ? "Sin registros" : "Pendiente", targetId: "demo-marta-whatsapp" },
+    { phase: "Fase 03", source: "Seguimiento Comercial de Vendedoras", page: "Coordinación y Seguimiento Operacional", section: "Capa 1 · Reportes humanos posteriores", change: `${simulatedSellerReports.length} reportes con objeciones, prioridades y próximos pasos`, observation: "Seguimiento humano nacido desde clientes reservados.", status: hasSimulatedSellerReports ? "Verificado" : simulatedDataInjected ? "Sin registros" : "Pendiente", targetId: "demo-commercial-operations" },
+    { phase: "Fase 03", source: "Mensajería Operacional del Equipo", page: "Coordinación y Seguimiento Operacional", section: "Capa 2 · Coordinación interna", change: `${simulatedInternalMessages.length} mensajes operacionales generados`, observation: "Responsables, prioridades y coordinación posterior a la reserva.", status: hasSimulatedInternalMessages ? "Generado" : simulatedDataInjected ? "Sin registros" : "Pendiente", targetId: "demo-operational-messaging" },
+    { phase: "Fase 04", source: "Todas las fuentes", page: "Centro de Mando y Evidencia", section: "Trazabilidad administrativa", change: `${simulatedOperationalEvidence.length} evidencias de la corrida demo local`, observation: "Datos simulados configurados, auditados, regenerados cuando corresponde y cargados sin persistencia.", status: simulatedDataInjected ? "Cargado" : "Pendiente", targetId: "demo-command-evidence" },
     { phase: "Fase 05", source: "H - OperIA Intelligence", page: "Inteligencia Operativa", section: "Hallazgos prioritarios cargados", change: `${phaseFiveFindings.length} hallazgos priorizados dentro del Admin`, observation: "La actividad operacional se interpreta como hallazgos verificables en páginas internas.", status: phaseFiveDemoActive ? "Generado" : "Pendiente", targetId: "demo-intelligence" },
     { phase: "Fase 06", source: "Síntesis ejecutiva", page: "Cierre Ejecutivo", section: "Referencia conceptual", change: `${phaseFiveFindings.length} señales de referencia conceptual`, observation: "No consulta fuentes reales, no genera decisiones operativas y no persiste resultados.", status: phaseFiveDemoActive ? "Referencia futura / no operativa" : "Futura / no operativa", targetId: "demo-executive-close" },
     { phase: "Auxiliar", source: "Información pública", page: "Inventario Demo", section: "Sección auxiliar técnica", change: "8 categorías de inventario previstas", observation: "Soporte reutilizable fuera de la ruta escénica principal.", status: "Visible", targetId: "demo-technical-inventory" },
@@ -3888,7 +3929,9 @@ function DemoPage({
           </div>
           {simulatedDataInjected && (
             <div className="mt-5">
-              <SimpleTable columns={["Cliente", "Fuente", "Unidad", "Estado reserva", "Creado"]} rows={simulatedReservationClients.slice(0, 5).map((client) => [client.name, client.source, client.unit, client.reservationStatus, client.createdAt])} />
+              {hasSimulatedReservations
+                ? <SimpleTable columns={["Cliente", "Fuente", "Unidad", "Estado reserva", "Creado"]} rows={simulatedReservationClients.slice(0, 5).map((client) => [client.name, client.source, client.unit, client.reservationStatus, client.createdAt])} />
+                : <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">0 reservas simuladas configuradas para esta corrida.</p>}
             </div>
           )}
         </Card>
@@ -3915,7 +3958,7 @@ function DemoPage({
           <div className="mt-5 space-y-4">
             <div id="demo-marta-vapi-voice" className="scroll-mt-64">
               <h4 className="mb-3 text-xl font-black text-slate-950">Marta Voz / Vapi</h4>
-              <div className="grid gap-3 xl:grid-cols-2">
+              {hasSimulatedVapiCallLogs ? <div className="grid gap-3 xl:grid-cols-2">
               {simulatedVapiCallLogs.slice(0, 2).map((log) => (
                 <div key={log.id} className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -3939,7 +3982,7 @@ function DemoPage({
                   <div className="mt-3 flex flex-wrap gap-2"><Badge tone={statusTone[log.structuredOutput.urgencyLevel] || "violet"}>{log.riskSignal}</Badge><Badge tone="blue">{log.nextStep}</Badge></div>
                 </div>
               ))}
-              </div>
+              </div> : <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">0 logs Vapi simulados configurados para esta corrida.</p>}
             </div>
             <div id="demo-marta-whatsapp" className="scroll-mt-64">
               <h4 className="mb-3 text-xl font-black text-slate-950">Marta WhatsApp / Texto</h4>
@@ -3981,15 +4024,15 @@ function DemoPage({
             )}
           </div>
           <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{hasSessionEvidence ? "Actividad reciente" : "Datos de referencia · sin evidencia de sesión"}</div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{hasSimulatedSellerReports ? "Actividad reciente" : simulatedDataInjected ? "Sin registros simulados en esta categoría" : hasSessionEvidence ? "Actividad reciente" : "Datos de referencia · sin evidencia de sesión"}</div>
             <div className="mt-3 grid gap-3 text-sm font-semibold text-slate-700 md:grid-cols-4">
-              <div><span className="font-black text-slate-950">Asesora:</span> {latestSellerReport.sellerName}</div>
-              <div><span className="font-black text-slate-950">Cliente:</span> {latestSellerReport.clientName}</div>
-              <div><span className="font-black text-slate-950">Última gestión:</span> {latestSellerReport.interactionType || latestSellerReport.summary}</div>
+              <div><span className="font-black text-slate-950">Asesora:</span> {latestSellerReport?.sellerName || "Sin registros"}</div>
+              <div><span className="font-black text-slate-950">Cliente:</span> {latestSellerReport?.clientName || "Sin registros"}</div>
+              <div><span className="font-black text-slate-950">Última gestión:</span> {latestSellerReport?.interactionType || latestSellerReport?.summary || "Sin registros"}</div>
               <div><span className="font-black text-slate-950">Actualizado:</span> {recentActivityTime}</div>
             </div>
           </div>
-          <div className="mt-5"><SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /></div>
+          <div className="mt-5">{hasSimulatedSellerReports || !simulatedDataInjected ? <SimpleTable columns={["Cliente", "Vendedora", "Interacción", "Resumen", "Prioridad", "Próximo paso", "Fecha/hora", "Estado"]} rows={commercialRows} /> : <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">0 reportes comerciales simulados configurados para esta corrida.</p>}</div>
         </Card>
         </div>
         <div id="demo-operational-messaging" className="mt-5 scroll-mt-64">
@@ -4001,15 +4044,15 @@ function DemoPage({
             </div>
           </div>
           <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{hasSessionEvidence ? "Actividad reciente" : "Datos de referencia · sin evidencia de sesión"}</div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">{hasSimulatedInternalMessages ? "Actividad reciente" : simulatedDataInjected ? "Sin registros simulados en esta categoría" : hasSessionEvidence ? "Actividad reciente" : "Datos de referencia · sin evidencia de sesión"}</div>
             <div className="mt-3 grid gap-3 text-sm font-semibold text-slate-700 md:grid-cols-4">
-              <div><span className="font-black text-slate-950">Remitente:</span> {latestTeamMessage.fromRole}</div>
-              <div><span className="font-black text-slate-950">Destinatario:</span> {latestTeamMessage.toRole}</div>
-              <div><span className="font-black text-slate-950">Último asunto:</span> {latestTeamMessage.topic || latestTeamMessage.messageText}</div>
+              <div><span className="font-black text-slate-950">Remitente:</span> {latestTeamMessage?.fromRole || "Sin registros"}</div>
+              <div><span className="font-black text-slate-950">Destinatario:</span> {latestTeamMessage?.toRole || "Sin registros"}</div>
+              <div><span className="font-black text-slate-950">Último asunto:</span> {latestTeamMessage?.topic || latestTeamMessage?.messageText || "Sin registros"}</div>
               <div><span className="font-black text-slate-950">Actualizado:</span> {recentActivityTime}</div>
             </div>
           </div>
-          <div className="mt-5"><SimpleTable columns={["Origen", "Destino", "Tema", "Mensaje", "Prioridad", "Fecha/hora"]} rows={internalMessageRows} /></div>
+          <div className="mt-5">{hasSimulatedInternalMessages || !simulatedDataInjected ? <SimpleTable columns={["Origen", "Destino", "Tema", "Mensaje", "Prioridad", "Fecha/hora"]} rows={internalMessageRows} /> : <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">0 mensajes internos simulados configurados para esta corrida.</p>}</div>
         </Card>
         </div>
       </div>
