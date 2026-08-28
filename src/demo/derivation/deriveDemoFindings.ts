@@ -1,5 +1,6 @@
 import type {
   DemoFindingSource,
+  DemoFindingEvidence,
   DemoInjectedFinding,
 } from "../domain/demoFindings";
 
@@ -11,6 +12,7 @@ type ReservationEvidence = {
   source: string;
   reservationStatus: string;
   createdAt: string;
+  expedienteId?: string;
 };
 
 type TeamMessageEvidence = {
@@ -23,6 +25,7 @@ type TeamMessageEvidence = {
   topic: string;
   priority: string;
   createdAt: string;
+  expedienteId?: string;
 };
 
 type SellerReportEvidence = {
@@ -37,6 +40,7 @@ type SellerReportEvidence = {
   nextStep: string;
   priority: string;
   createdAt: string;
+  expedienteId?: string;
 };
 
 type VapiEvidence = {
@@ -49,6 +53,7 @@ type VapiEvidence = {
   nextStep: string;
   riskSignal: string;
   createdAt: string;
+  expedienteId?: string;
   structuredOutput?: {
     wantsFinancing?: boolean;
     documentsPending?: boolean;
@@ -68,21 +73,37 @@ type DeriveDemoFindingsInput = {
 
 const evidence = (
   findingId: string,
+  demoRunId: string,
+  sourceEntityId: string | undefined,
+  expedienteId: string | undefined,
+  sourceCreatedAt: string | undefined,
   label: string,
   summary: string,
   source: DemoFindingSource,
   adminTargetPage: DemoInjectedFinding["adminTargetPage"],
   adminTargetSection: string,
-): DemoInjectedFinding["associatedEvidence"][number] => ({
-  id: `${findingId}-evidence`,
+): DemoFindingEvidence => ({
+  id: sourceEntityId || `${findingId}-evidence`,
   label,
   summary,
   source,
+  demoRunId,
+  sourceType: source,
+  sourceEntityId,
+  expedienteId,
+  sourceCreatedAt,
+  provenance: `FASE 04 · ${source}`,
   adminTargetPage,
   adminTargetSection,
   adminTargetDetail: label,
   adminTargetAnchor: `${findingId}-${adminTargetPage}`,
 });
+
+const validSourceTimestamp = (value: string | undefined): string | undefined => {
+  if (!value || !/^\d{4}-\d{2}-\d{2}T/.test(value)) return undefined;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? undefined : value;
+};
 
 const forRun = <T extends { demoRunId: string }>(records: T[], demoRunId: string) =>
   records.filter((record) => record.demoRunId === demoRunId);
@@ -120,8 +141,17 @@ export function deriveDemoFindings({
       recommendedAction: "La vendedora asignada debe revisar el contexto de reserva y registrar el siguiente paso en el Expediente Vivo.",
       responsibleRole: "Vendedora asignada",
       responsibleArea: "Coordinación Comercial",
+      evidenceIds: [reservation.id],
+      sourceTimestamp: validSourceTimestamp(reservation.createdAt),
+      sourceEntityId: reservation.id,
+      expedienteId: reservation.expedienteId,
+      generatedAt,
       associatedEvidence: [evidence(
         findingId,
+        demoRunId,
+        reservation.id,
+        reservation.expedienteId,
+        reservation.createdAt,
         `${reservation.name} · ${reservation.unit}`,
         `Reserva ${reservation.id} · ${reservation.reservationStatus} · ${reservation.createdAt}`,
         "reservations",
@@ -149,8 +179,17 @@ export function deriveDemoFindings({
       recommendedAction: `${message.toRole} debe revisar el mensaje y dejar evidencia del siguiente movimiento para ${message.relatedClientName}.`,
       responsibleRole: message.toRole,
       responsibleArea: "Coordinación Operacional",
+      evidenceIds: [message.id],
+      sourceTimestamp: validSourceTimestamp(message.createdAt),
+      sourceEntityId: message.id,
+      expedienteId: message.expedienteId,
+      generatedAt,
       associatedEvidence: [evidence(
         findingId,
+        demoRunId,
+        message.id,
+        message.expedienteId,
+        message.createdAt,
         `${message.relatedClientName} · ${message.topic}`,
         `Mensaje ${message.id} · ${message.priority} · ${message.messageText}`,
         "team_messages",
@@ -178,8 +217,17 @@ export function deriveDemoFindings({
       recommendedAction: `${report.sellerName} debe ejecutar “${report.nextStep}” y documentar el resultado del seguimiento.`,
       responsibleRole: report.sellerName,
       responsibleArea: "Ventas / Vendedoras",
+      evidenceIds: [report.id],
+      sourceTimestamp: validSourceTimestamp(report.createdAt),
+      sourceEntityId: report.id,
+      expedienteId: report.expedienteId,
+      generatedAt,
       associatedEvidence: [evidence(
         findingId,
+        demoRunId,
+        report.id,
+        report.expedienteId,
+        report.createdAt,
         `${report.clientName} · ${report.interactionType}`,
         `Reporte ${report.id} · necesidad: ${report.detectedNeed} · objeción: ${report.objection} · siguiente paso: ${report.nextStep}`,
         "commercial_follow_up",
@@ -217,8 +265,17 @@ export function deriveDemoFindings({
       recommendedAction: `La vendedora asignada debe revisar la llamada y ejecutar “${vapiLog.nextStep}”.`,
       responsibleRole: "Vendedora asignada",
       responsibleArea: "Ventas / Vendedoras",
+      evidenceIds: [vapiLog.id],
+      sourceTimestamp: validSourceTimestamp(vapiLog.createdAt),
+      sourceEntityId: vapiLog.id,
+      expedienteId: vapiLog.expedienteId,
+      generatedAt,
       associatedEvidence: [evidence(
         findingId,
+        demoRunId,
+        vapiLog.id,
+        vapiLog.expedienteId,
+        vapiLog.createdAt,
         `${vapiLog.clientName} · ${vapiLog.detectedIntent}`,
         `Llamada ${vapiLog.callId} · ${vapiLog.transcriptSummary}`,
         "marta_voice_vapi",

@@ -25,6 +25,29 @@ export type DemoAdminTargetPage =
   | "funnels"
   | "dashboards";
 
+export interface DemoFindingEvidence {
+  id: string;
+  label: string;
+  summary: string;
+  source: DemoFindingSource;
+  demoRunId?: string;
+  sourceType?: string;
+  sourceEntityId?: string;
+  expedienteId?: string;
+  sourceCreatedAt?: string;
+  occurredAt?: string;
+  recordedAt?: string;
+  subject?: string;
+  actors?: string[];
+  facts?: string[];
+  context?: string;
+  provenance?: string;
+  adminTargetPage?: DemoAdminTargetPage;
+  adminTargetSection?: string;
+  adminTargetDetail?: string;
+  adminTargetAnchor?: string;
+}
+
 export interface DemoInjectedFinding {
   id: string;
   demoRunId: string;
@@ -39,16 +62,14 @@ export interface DemoInjectedFinding {
   responsibleRole: string;
   responsibleArea?: string;
   responsiblePerson?: string;
-  associatedEvidence: Array<{
-    id: string;
-    label: string;
-    summary: string;
-    source: DemoFindingSource;
-    adminTargetPage?: DemoAdminTargetPage;
-    adminTargetSection?: string;
-    adminTargetDetail?: string;
-    adminTargetAnchor?: string;
-  }>;
+  /** Source evidence references; optional for compatibility with legacy fixtures. */
+  evidenceIds?: string[];
+  sourceTimestamp?: string;
+  sourceEntityId?: string;
+  expedienteId?: string;
+  /** When Intelligence generated this finding; distinct from sourceTimestamp. */
+  generatedAt?: string;
+  associatedEvidence: DemoFindingEvidence[];
   visibleStatus: "pending" | "visible" | "acknowledged" | "hidden";
   timestamp: string;
 }
