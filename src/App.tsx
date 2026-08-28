@@ -6,6 +6,15 @@ import {
 } from "./demo/bridge/demoFindingsBridge";
 import { deriveDemoFindings } from "./demo/derivation/deriveDemoFindings";
 import {
+  buildOperationalCaseFromFinding,
+  createMessagingBridgeId,
+  isMessagingBridgeReady,
+  isOperationalCaseAck,
+  MESSAGING_BRIDGE_ACK,
+  MESSAGING_OPERATIONAL_CASE_OPEN,
+  OPERATIONAL_CASE_MESSAGING_SCHEMA_VERSION,
+} from "./demo/bridge/operationalCaseMessagingBridge";
+import {
   Activity,
   AlertTriangle,
   BarChart3,
@@ -44,11 +53,14 @@ import {
 const REPORT_DATE = "Corte: 15 mayo 2026";
 const LOCAL_PUBLIC_RESERVATION_APP_URL = "http://localhost:3001/";
 const LOCAL_DEMO_BACKEND_URL = "http://localhost:4000";
+const LOCAL_OPERATIONAL_MESSAGING_URL = "http://localhost:3002/";
 const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env || {};
 const PUBLIC_RESERVATION_APP_URL =
   viteEnv.VITE_PUBLIC_RESERVATION_APP_URL?.trim() || LOCAL_PUBLIC_RESERVATION_APP_URL;
 const DEMO_BACKEND_URL =
   viteEnv.VITE_DEMO_BACKEND_URL?.trim() || LOCAL_DEMO_BACKEND_URL;
+const OPERATIONAL_MESSAGING_URL =
+  viteEnv.VITE_OPERATIONAL_MESSAGING_URL?.trim() || LOCAL_OPERATIONAL_MESSAGING_URL;
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1"]);
 const isConfiguredFromEnv = (key) => Boolean(viteEnv[key]?.trim());
 const parseUrlSafely = (value) => {
@@ -117,6 +129,10 @@ const configuredPublicReservationOrigin =
   viteEnv.VITE_PUBLIC_RESERVATION_ORIGIN?.trim().replace(/\/$/, "") ||
   parseUrlSafely(PUBLIC_RESERVATION_APP_URL)?.origin ||
   "http://localhost:3001";
+const configuredOperationalMessagingOrigin =
+  viteEnv.VITE_OPERATIONAL_MESSAGING_ORIGIN?.trim().replace(/\/$/, "") ||
+  parseUrlSafely(OPERATIONAL_MESSAGING_URL)?.origin ||
+  "http://localhost:3002";
 const ALLOWED_RESERVATION_SOURCE_APPLICATIONS = new Set([
   "hoperia_public_reservation_app",
   "amena_public_reservation_app",
@@ -735,6 +751,9 @@ function AppShell() {
   const [liveDemoResetNotice, setLiveDemoResetNotice] = useState<LiveDemoResetNotice | null>(null);
   const [liveDemoResetToken, setLiveDemoResetToken] = useState(0);
   const publicReservationWindowRef = useRef<Window | null>(null);
+  const operationalMessagingWindowRef = useRef<Window | null>(null);
+  const operationalMessagingBridgeRef = useRef<{ bridgeId: string; demoRunId: string; operationalCase: ReturnType<typeof buildOperationalCaseFromFinding> } | null>(null);
+  const [operationalMessagingNotice, setOperationalMessagingNotice] = useState<string | null>(null);
   const publicReservationBridgeIdRef = useRef<string | null>(null);
   const publicReservationBridgeSourceRef = useRef<MessageEventSource | null>(null);
   const activeDemoSessionRef = useRef<DemoSession | null>(activeDemoSession);
@@ -764,6 +783,76 @@ function AppShell() {
   useEffect(() => {
     activeDemoSessionRef.current = activeDemoSession;
   }, [activeDemoSession]);
+
+  const openOperationalCaseInMessaging = (finding) => {
+    const activeSession = activeDemoSessionRef.current;
+    if (!activeSession || !finding?.demoRunId || finding.demoRunId !== activeSession.demoRunId) {
+      setOperationalMessagingNotice("El hallazgo no pertenece a una corrida demo integrada activa.");
+      return;
+    }
+    const operationalCase = buildOperationalCaseFromFinding(finding, new Date().toISOString());
+    const existingBridge = operationalMessagingBridgeRef.current;
+    const existingMessagingWindow = operationalMessagingWindowRef.current;
+    if (
+      existingBridge &&
+      existingMessagingWindow &&
+      !existingMessagingWindow.closed &&
+      existingBridge.demoRunId === activeSession.demoRunId &&
+      existingBridge.operationalCase.operationalCaseId === operationalCase.operationalCaseId
+    ) {
+      existingMessagingWindow.focus();
+      setOperationalMessagingNotice("El caso operacional ya está abierto en Mensajería.");
+      return;
+    }
+    const bridgeId = createMessagingBridgeId();
+    const messagingUrl = parseUrlSafely(OPERATIONAL_MESSAGING_URL);
+    if (!messagingUrl) {
+      setOperationalMessagingNotice("La URL de Mensajería Operacional no es válida.");
+      return;
+    }
+    messagingUrl.searchParams.set("hoperiaMessagingBridgeId", bridgeId);
+    messagingUrl.searchParams.set("hoperiaDemoRunId", activeSession.demoRunId);
+    const messagingWindow = window.open(messagingUrl.toString(), "hoperia-operational-messaging");
+    if (!messagingWindow) {
+      setOperationalMessagingNotice("El navegador bloqueó la apertura de Mensajería Operacional.");
+      return;
+    }
+    operationalMessagingWindowRef.current = messagingWindow;
+    operationalMessagingBridgeRef.current = { bridgeId, demoRunId: activeSession.demoRunId, operationalCase };
+    messagingWindow.focus();
+    setOperationalMessagingNotice("Conectando el caso operacional con Mensajería.");
+  };
+
+  useEffect(() => {
+    const handleOperationalMessagingMessage = (event: MessageEvent<unknown>) => {
+      if (event.origin !== configuredOperationalMessagingOrigin || event.source !== operationalMessagingWindowRef.current) return;
+      const bridge = operationalMessagingBridgeRef.current;
+      if (!bridge) return;
+      if (isMessagingBridgeReady(event.data)) {
+        if (event.data.bridgeId !== bridge.bridgeId || event.data.demoRunId !== bridge.demoRunId) return;
+        (event.source as Window).postMessage({
+          type: MESSAGING_BRIDGE_ACK,
+          schemaVersion: OPERATIONAL_CASE_MESSAGING_SCHEMA_VERSION,
+          demoRunId: bridge.demoRunId,
+          bridgeId: bridge.bridgeId,
+          accepted: true,
+        }, configuredOperationalMessagingOrigin);
+        (event.source as Window).postMessage({
+          type: MESSAGING_OPERATIONAL_CASE_OPEN,
+          schemaVersion: OPERATIONAL_CASE_MESSAGING_SCHEMA_VERSION,
+          demoRunId: bridge.demoRunId,
+          bridgeId: bridge.bridgeId,
+          payload: bridge.operationalCase,
+        }, configuredOperationalMessagingOrigin);
+        return;
+      }
+      if (!isOperationalCaseAck(event.data)) return;
+      if (event.data.bridgeId !== bridge.bridgeId || event.data.demoRunId !== bridge.demoRunId || event.data.operationalCaseId !== bridge.operationalCase.operationalCaseId || event.data.findingId !== bridge.operationalCase.findingId) return;
+      setOperationalMessagingNotice(event.data.accepted ? "Caso operacional abierto en Mensajería · demo integrada no persistida." : `Mensajería rechazó el caso: ${event.data.reason || "contrato inválido"}.`);
+    };
+    window.addEventListener("message", handleOperationalMessagingMessage);
+    return () => window.removeEventListener("message", handleOperationalMessagingMessage);
+  }, [configuredOperationalMessagingOrigin]);
 
   const isReservationCompletedEvent = (value: unknown): value is ReservationCompletedEvent => {
     if (!value || typeof value !== "object") return false;
@@ -1685,6 +1774,7 @@ function AppShell() {
           onDemoFindingsInjected={setDemoFindings}
           onDemoCommandEvidenceStateChange={setDemoCommandEvidenceState}
           onOpenPublicReservation={openPublicReservation}
+          onOpenOperationalCase={openOperationalCaseInMessaging}
           onStartDemoSession={() => prepareDemoSession("start")}
           onFinalizeDemoSession={() => prepareDemoSession("finalize")}
           setActive={setActive}
@@ -3159,6 +3249,7 @@ function DemoPage({
   onDemoFindingsInjected,
   onDemoCommandEvidenceStateChange,
   onOpenPublicReservation,
+  onOpenOperationalCase,
   setActive,
 }) {
   const phases = [
@@ -4271,6 +4362,7 @@ function DemoPage({
                     <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{signal.operationalRecommendation}</p>
                     <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-violet-700">Acción sugerida por H - OperIA Intelligence</div>
                     <p className={`mt-2 text-sm leading-6 ${intelligenceActionTextClass}`}>{signal.recommendedAction}</p>
+                    <button type="button" onClick={() => onOpenOperationalCase?.(signal)} className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Abrir caso operacional</button>
                   </div>
                   <div className="rounded-2xl bg-white p-4">
                     <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Fuente del dato</div>
