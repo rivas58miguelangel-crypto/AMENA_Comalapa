@@ -10,7 +10,10 @@ export type DemoFindingSource =
   | "payments"
   | "customer_service"
   | "h_operia_intelligence"
+  | "operational_messaging"
   | "manual_demo";
+
+export type OperationalContributionType = "comment" | "observation" | "recommendation" | "action";
 
 export type DemoAdminTargetPage =
   | "executive"
@@ -33,6 +36,8 @@ export interface DemoFindingEvidence {
   demoRunId?: string;
   sourceType?: string;
   sourceEntityId?: string;
+  operationalCaseId?: string;
+  findingId?: string;
   expedienteId?: string;
   sourceCreatedAt?: string;
   occurredAt?: string;
@@ -73,9 +78,29 @@ export interface DemoInjectedFinding {
   expedienteId?: string;
   /** When Intelligence generated this finding; distinct from sourceTimestamp. */
   generatedAt?: string;
+  operationalState?: "updated";
+  updatedAt?: string;
   associatedEvidence: DemoFindingEvidence[];
   visibleStatus: "pending" | "visible" | "acknowledged" | "hidden";
   timestamp: string;
+}
+
+export interface OperationalContribution {
+  contributionId: string;
+  demoPurpose: "operational-scenario";
+  demoRunId: string;
+  reservationId: string;
+  expedienteId: string;
+  findingId: string;
+  operationalCaseId: string;
+  bridgeId: string;
+  authorParticipantId: string;
+  authorLabel: string;
+  authorRole?: string;
+  contributionType: OperationalContributionType;
+  text: string;
+  createdAt: string;
+  status: "submitted" | "accepted" | "rejected";
 }
 
 export interface DemoRunPresentationState {

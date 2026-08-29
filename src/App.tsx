@@ -5,14 +5,18 @@ import {
   getFindingsForAdminPage,
 } from "./demo/bridge/demoFindingsBridge";
 import { deriveDemoFindings } from "./demo/derivation/deriveDemoFindings";
+import { applyOperationalContributionToFinding } from "./demo/derivation/applyOperationalContributionToFinding";
 import { auditScenarioClients, repairScenarioClients, type ScenarioAuditResult } from "./demo/derivation/auditScenarioClients";
 import {
   buildOperationalCaseFromFinding,
   createMessagingBridgeId,
+  isContributionForOperationalCase,
   isMessagingBridgeReady,
+  isOperationalCaseContribution,
   isOperationalCaseAck,
   MESSAGING_BRIDGE_ACK,
   MESSAGING_OPERATIONAL_CASE_OPEN,
+  MESSAGING_OPERATIONAL_CASE_CONTRIBUTION_ACK,
   OPERATIONAL_CASE_MESSAGING_SCHEMA_VERSION,
 } from "./demo/bridge/operationalCaseMessagingBridge";
 import {
@@ -686,6 +690,9 @@ function AiObservation({ title = "Observaciones estratégicas de H - OperIA Inte
 
 const intelligenceActionTextClass = "font-black text-violet-800";
 
+const humanSeverityLabels: Record<string, string> = { high: "Alta", medium: "Media", low: "Baja", critical: "Crítica" };
+const humanContributionTypeLabels: Record<string, string> = { comment: "Comentario", observation: "Observación", recommendation: "Recomendación", action: "Acción" };
+
 const formatDemoFindingResponsible = (finding) =>
   [
     finding?.responsiblePerson,
@@ -790,7 +797,9 @@ function AppShell() {
 
   const openOperationalCaseInMessaging = (finding) => {
     const activeSession = activeDemoSessionRef.current;
-    if (!activeSession || !finding?.demoRunId || finding.demoRunId !== activeSession.demoRunId) {
+    if (!activeSession || finding?.demoPurpose !== "operational-scenario" || !finding?.demoRunId ||
+        finding.demoRunId !== activeSession.demoRunId || !finding.reservationId || !finding.expedienteId ||
+        !finding.sourceEntityId) {
       setOperationalMessagingNotice("El hallazgo no pertenece a una corrida demo integrada activa.");
       return;
     }
@@ -847,6 +856,27 @@ function AppShell() {
           demoRunId: bridge.demoRunId,
           bridgeId: bridge.bridgeId,
           payload: bridge.operationalCase,
+        }, configuredOperationalMessagingOrigin);
+        return;
+      }
+      if (isOperationalCaseContribution(event.data)) {
+        const contribution = event.data.contribution;
+        const participant = bridge.operationalCase.participants.find((item) => item.id === contribution.authorParticipantId);
+        const accepted = isContributionForOperationalCase(event.data, bridge.operationalCase, bridge.bridgeId) && participant?.label === contribution.authorLabel;
+        if (accepted) setDemoFindings((current) => current.map((finding) => applyOperationalContributionToFinding(finding, { ...contribution, status: "accepted" })));
+        (event.source as Window).postMessage({
+          type: MESSAGING_OPERATIONAL_CASE_CONTRIBUTION_ACK,
+          schemaVersion: OPERATIONAL_CASE_MESSAGING_SCHEMA_VERSION,
+          bridgeId: bridge.bridgeId,
+          demoPurpose: "operational-scenario",
+          demoRunId: bridge.demoRunId,
+          reservationId: bridge.operationalCase.reservationId,
+          expedienteId: bridge.operationalCase.expedienteId,
+          operationalCaseId: bridge.operationalCase.operationalCaseId,
+          findingId: bridge.operationalCase.findingId,
+          contributionId: contribution.contributionId,
+          accepted,
+          ...(accepted ? {} : { reason: "contribution inválida o fuera de contexto" }),
         }, configuredOperationalMessagingOrigin);
         return;
       }
@@ -2198,7 +2228,7 @@ function ExecutivePage({ demoFindings = [], setActive }) {
   );
 }
 
-function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExpedienteReservationId = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, onSelectLiveExpediente, onDeleteDemoLiveExpediente, setActive }) {
+function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExpedienteReservationId = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, onSelectLiveExpediente, onDeleteDemoLiveExpediente, onOpenOperationalCase, setActive }) {
   const profile = clientOperationalProfile;
   const [clientSearch, setClientSearch] = useState("");
   const [selectedClientReservationId, setSelectedClientReservationId] = useState(null);
@@ -2393,7 +2423,7 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
           <Card className="border-violet-200 bg-violet-50">
             <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">H - OperIA Intelligence</div>
             <h2 className="mt-2 text-2xl font-black text-slate-950">Hallazgos y acciones de este expediente</h2>
-            {demoFindings.filter((finding) => finding.demoPurpose === "operational-scenario" && finding.expedienteId === selectedAdminClient.expediente_id).length === 0 ? <p className="mt-3 text-sm font-semibold text-slate-700">No existen hallazgos activos de H - OperIA Intelligence para este expediente.</p> : <div className="mt-4 grid gap-4">{[...demoFindings.filter((finding) => finding.demoPurpose === "operational-scenario" && finding.expedienteId === selectedAdminClient.expediente_id)].sort((left, right) => ({ critical: 4, high: 3, medium: 2, low: 1 }[right.severity] - { critical: 4, high: 3, medium: 2, low: 1 }[left.severity])).map((finding) => <div key={finding.id} className="rounded-3xl border border-violet-100 bg-white p-5"><div className="flex items-center justify-between gap-3"><div className="font-black text-slate-950">{finding.title}</div><Badge tone="violet">Prioridad {finding.severity}</Badge></div><div className="mt-4 grid gap-4 md:grid-cols-2"><div><div className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">Hallazgo detectado</div><p className="mt-2 text-sm font-semibold text-slate-700">{finding.summary}</p><div className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-violet-700">Por qué importa</div><p className="mt-2 text-sm font-semibold text-slate-700">{finding.operationalRecommendation}</p></div><div><div className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">Acción sugerida por H - OperIA Intelligence</div><p className="mt-2 text-sm font-black text-violet-900">{finding.recommendedAction}</p><p className="mt-3 text-sm font-semibold text-slate-700">Responsable: {formatDemoFindingResponsible(finding)}</p>{finding.sourceTimestamp && <p className="mt-2 text-sm font-semibold text-slate-700">Evidencia registrada: {formatDemoDateTime(finding.sourceTimestamp)}</p>}<p className="mt-2 text-sm font-semibold text-slate-700">Analizado por H - OperIA Intelligence: {formatDemoDateTime(finding.generatedAt)}</p></div></div></div>)}</div>}
+            {demoFindings.filter((finding) => finding.demoPurpose === "operational-scenario" && finding.expedienteId === selectedAdminClient.expediente_id).length === 0 ? <p className="mt-3 text-sm font-semibold text-slate-700">No existen hallazgos activos de H - OperIA Intelligence para este expediente.</p> : <div className="mt-4 grid gap-4">{[...demoFindings.filter((finding) => finding.demoPurpose === "operational-scenario" && finding.expedienteId === selectedAdminClient.expediente_id)].sort((left, right) => ({ critical: 4, high: 3, medium: 2, low: 1 }[right.severity] - { critical: 4, high: 3, medium: 2, low: 1 }[left.severity])).map((finding) => <div key={finding.id} className="rounded-3xl border border-violet-100 bg-white p-5"><div className="flex items-center justify-between gap-3"><div className="font-black text-slate-950">{finding.title}</div><div className="flex flex-wrap gap-2"><Badge tone="violet">Prioridad {humanSeverityLabels[finding.severity] || finding.severity}</Badge>{finding.operationalState === "updated" && <Badge tone="green">Actualizado</Badge>}</div></div><div className="mt-4 grid gap-4 md:grid-cols-2"><div><div className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">Hallazgo detectado</div><p className="mt-2 text-sm font-semibold text-slate-700">{finding.summary}</p><div className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-violet-700">Por qué importa</div><p className="mt-2 text-sm font-semibold text-slate-700">{finding.operationalRecommendation}</p></div><div><div className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">Acción sugerida por H - OperIA Intelligence</div><p className="mt-2 text-sm font-black text-violet-900">{finding.recommendedAction}</p><p className="mt-3 text-sm font-semibold text-slate-700">Responsable: {formatDemoFindingResponsible(finding)}</p>{finding.sourceTimestamp && <p className="mt-2 text-sm font-semibold text-slate-700">Evidencia registrada: {formatDemoDateTime(finding.sourceTimestamp)}</p>}<p className="mt-2 text-sm font-semibold text-slate-700">Analizado por H - OperIA Intelligence: {formatDemoDateTime(finding.generatedAt)}</p></div></div><button type="button" onClick={() => onOpenOperationalCase?.(finding)} className="mt-4 rounded-2xl bg-violet-700 px-4 py-3 text-sm font-black text-white">ABRIR GRUPO Y PARTICIPAR</button>{finding.associatedEvidence.some((evidence) => evidence.sourceType === "operational_messaging") && <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-4"><div className="text-xs font-black uppercase tracking-[0.18em] text-emerald-800">Aportes del equipo</div>{finding.associatedEvidence.filter((evidence) => evidence.sourceType === "operational_messaging").map((evidence) => <div key={evidence.id} className="mt-3 border-t border-emerald-100 pt-3 text-sm text-slate-800"><strong>{evidence.actors?.[0] || "Equipo"}</strong> · {humanContributionTypeLabels[evidence.facts?.[0]?.replace("Tipo de aporte: ", "")] || "Aporte humano"}<p className="mt-1">{evidence.summary}</p><span className="text-xs font-semibold text-slate-600">{formatDemoDateTime(evidence.sourceCreatedAt)}</span></div>)}</div>}</div>)}</div>}
           </Card>
           <Card>
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -2474,7 +2504,7 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
                   <div><span className="font-black text-slate-950">Expediente ID:</span> {selectedLiveExpediente.expedienteId}</div>
                   <div><span className="font-black text-slate-950">Fecha y hora:</span> {formatDemoDateTime(selectedLiveExpediente.receivedAt)}</div>
                   <div><span className="font-black text-slate-950">Origen:</span> {isOperationalScenarioExpediente ? "Generador escénico H - OperIA" : selectedLiveExpediente.sourceApplication}</div>
-                  <div><span className="font-black text-slate-950">Canal:</span> {selectedLiveExpediente.sourceChannel}</div>
+                  <div><span className="font-black text-slate-950">Canal:</span> {isOperationalScenarioExpediente ? "Escenario operacional simulado" : selectedLiveExpediente.sourceChannel}</div>
                   <div><span className="font-black text-slate-950">Tipo:</span> {selectedLiveExpediente.selectedUnit.propertyType}</div>
                   <div><span className="font-black text-slate-950">Sector:</span> {selectedLiveExpediente.selectedUnit.sector || "No informado"}</div>
                   <div><span className="font-black text-slate-950">Torre o manzana:</span> {selectedLiveExpediente.selectedUnit.towerOrBlock || "No informado"}</div>
