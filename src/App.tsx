@@ -5,6 +5,7 @@ import {
   getFindingsForAdminPage,
 } from "./demo/bridge/demoFindingsBridge";
 import { deriveDemoFindings } from "./demo/derivation/deriveDemoFindings";
+import { auditScenarioClients, repairScenarioClients, type ScenarioAuditResult } from "./demo/derivation/auditScenarioClients";
 import {
   buildOperationalCaseFromFinding,
   createMessagingBridgeId,
@@ -200,6 +201,7 @@ type ReservationCompletedEvent = {
   sourceChannel: "public_web_app";
   reservationStatus: "completed";
   isDemo: true;
+  demoPurpose: "volunteer-experience" | "operational-scenario";
   demoRunId?: string;
   bridgeId?: string;
 };
@@ -217,6 +219,7 @@ type LiveExpediente = {
   selectedUnit: ReservationCompletedEvent["selectedUnit"];
   sourceChannel: "public_web_app";
   isDemo: true;
+  demoPurpose: ReservationCompletedEvent["demoPurpose"];
   demoRunId: string;
   persisted: false;
 };
@@ -746,6 +749,7 @@ function AppShell() {
   const [selectedLiveExpedienteReservationId, setSelectedLiveExpedienteReservationId] = useState<string | null>(null);
   const [autoSelectReservationId, setAutoSelectReservationId] = useState<string | null>(null);
   const [receptionNotice, setReceptionNotice] = useState<ReceptionNotice | null>(null);
+  const [volunteerExperiences, setVolunteerExperiences] = useState<ReservationCompletedEvent[]>([]);
   const [publicReservationWindowNotice, setPublicReservationWindowNotice] = useState<string | null>(null);
   const [liveDemoResetStatus, setLiveDemoResetStatus] = useState<LiveDemoResetStatus>("idle");
   const [liveDemoResetNotice, setLiveDemoResetNotice] = useState<LiveDemoResetNotice | null>(null);
@@ -867,6 +871,7 @@ function AppShell() {
       isNonEmptyString(data.sourceOrigin) &&
       data.reservationStatus === "completed" &&
       data.isDemo === true &&
+      (data.demoPurpose === "volunteer-experience" || data.demoPurpose === "operational-scenario") &&
       data.sourceChannel === "public_web_app" &&
       isNonEmptyString(data.eventId) &&
       isNonEmptyString(data.reservationId) &&
@@ -896,6 +901,7 @@ function AppShell() {
       isNonEmptyString(data.sourceOrigin) &&
       data.sourceChannel === "public_web_app" &&
       data.isDemo === true &&
+      (data.demoPurpose === "volunteer-experience" || data.demoPurpose === "operational-scenario") &&
       data.persisted === false &&
       isNonEmptyString(data.demoRunId) &&
       isNonEmptyString(client?.firstName) &&
@@ -940,6 +946,35 @@ function AppShell() {
     if (!selected || !demoRunId || selected.demoRunId !== demoRunId) return;
     updateLiveExpedienteCollection(liveExpedientesRef.current, reservationId, demoRunId);
     setAutoSelectReservationId(reservationId);
+  };
+  const deleteDemoLiveExpediente = (reservationId: string) => {
+    const demoRunId = activeDemoSessionRef.current?.demoRunId;
+    const target = liveExpedientesRef.current.find((item) => item.reservationId === reservationId);
+    if (!demoRunId || !target || target.demoRunId !== demoRunId || !target.isDemo || target.persisted) return;
+    if (!window.confirm("¿Eliminar este expediente demo?\nEsta acción eliminará únicamente información simulada de la demostración.")) return;
+    const wasSelected = selectedLiveExpedienteReservationIdRef.current === reservationId;
+    const next = liveExpedientesRef.current.filter((item) => item.reservationId !== reservationId);
+    updateLiveExpedienteCollection(next, wasSelected ? null : selectedLiveExpedienteReservationIdRef.current, demoRunId);
+    if (wasSelected) setAutoSelectReservationId(null);
+  };
+  const syncSimulatedLiveExpedientes = (reservations: Array<{ id: string; reservationId?: string; expedienteId?: string; name: string; phone: string; unit: string; source: string }>) => {
+    const demoRunId = activeDemoSessionRef.current?.demoRunId;
+    if (!demoRunId) return;
+    const receivedAt = new Date().toISOString();
+    const simulated = reservations.map((reservation, index) => ({
+      reservationId: reservation.reservationId || `DEMO-RES-${demoRunId}-${reservation.id}`,
+      expedienteId: reservation.expedienteId || `DEMO-EXP-${demoRunId}-${reservation.id}`,
+      status: "initial", eventId: `demo-reservation-${demoRunId}-${reservation.id}`, receivedAt,
+      sourceApplication: "hoperia_public_reservation_app", sourceOrigin: "demo_simulation",
+      client: { firstName: reservation.name.split(" ")[0] || "Cliente", lastName: reservation.name.split(" ").slice(1).join(" "), phone: reservation.phone, email: "" },
+      project: { projectId: "demo-project", projectName: "Proyecto de Empresa Demo", name: "Proyecto de Empresa Demo" },
+      selectedUnit: { propertyType: "Apartamento", sector: `Sector ${(index % 3) + 1}`, towerOrBlock: `Torre ${(index % 3) + 1}`, level: `Nivel ${(index % 8) + 1}`, model: "Demo", unitOrLot: reservation.unit },
+      sourceChannel: "public_web_app", isDemo: true, demoRunId, persisted: false,
+      demoPurpose: "operational-scenario" as const,
+    })) as LiveExpediente[];
+    const current = liveExpedientesRef.current.filter((item) => !(item.demoRunId === demoRunId && item.eventId.startsWith("demo-reservation-")));
+    const next = [...current, ...simulated];
+    updateLiveExpedienteCollection(next, selectedLiveExpedienteReservationIdRef.current || simulated[0]?.reservationId || null, demoRunId);
   };
 
   const clearStoredLiveExpedientes = (demoRunId?: string) => {
@@ -1586,6 +1621,12 @@ function AppShell() {
         rejectReservation("Evento rechazado: no pertenece a la sesión integrada activa.");
         return;
       }
+      if (reservationEvent.demoPurpose === "volunteer-experience") {
+        setVolunteerExperiences((current) => current.some((item) => item.eventId === reservationEvent.eventId)
+          ? current
+          : [...current, reservationEvent]);
+        return;
+      }
       if (processedEventIds.current.has(reservationEvent.eventId)) {
         if (pendingReplayRequestIdRef.current !== null) {
           clearReplayTimeout();
@@ -1618,6 +1659,7 @@ function AppShell() {
         selectedUnit: reservationEvent.selectedUnit,
         sourceChannel: reservationEvent.sourceChannel,
         isDemo: reservationEvent.isDemo,
+        demoPurpose: reservationEvent.demoPurpose,
         demoRunId: reservationEvent.demoRunId,
         persisted: false,
       };
@@ -1766,6 +1808,7 @@ function AppShell() {
           liveExpedientes={liveExpedientes}
           selectedLiveExpedienteReservationId={selectedLiveExpedienteReservationId}
           onSelectLiveExpediente={selectLiveExpediente}
+          onDeleteDemoLiveExpediente={deleteDemoLiveExpediente}
           autoSelectReservationId={autoSelectReservationId}
           liveDemoResetToken={liveDemoResetToken}
           reservationReplayStatus={reservationReplayStatus}
@@ -1775,6 +1818,7 @@ function AppShell() {
           onDemoCommandEvidenceStateChange={setDemoCommandEvidenceState}
           onOpenPublicReservation={openPublicReservation}
           onOpenOperationalCase={openOperationalCaseInMessaging}
+          onSimulatedReservationsLoaded={syncSimulatedLiveExpedientes}
           onStartDemoSession={() => prepareDemoSession("start")}
           onFinalizeDemoSession={() => prepareDemoSession("finalize")}
           setActive={setActive}
@@ -2087,7 +2131,7 @@ function ExecutivePage({ demoFindings = [], setActive }) {
         <Metric title="Acciones hoy" value="43" note="Sugeridas para revisión directiva" tone="blue" icon={Target} />
       </div>
       <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="executive" />
-      <Card>
+      <Card className="border-2 border-blue-300 bg-blue-50 shadow-md">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h3 className="text-3xl font-black text-slate-950">Consulta ejecutiva asistida</h3>
@@ -2154,9 +2198,8 @@ function ExecutivePage({ demoFindings = [], setActive }) {
   );
 }
 
-function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExpedienteReservationId = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, onSelectLiveExpediente, setActive }) {
+function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExpedienteReservationId = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, onSelectLiveExpediente, onDeleteDemoLiveExpediente, setActive }) {
   const profile = clientOperationalProfile;
-  const demoEvidenceMirror = <AdminOperationalEvidenceAnchors demoFindings={demoFindings} targetPage="client" />;
   const [clientSearch, setClientSearch] = useState("");
   const [selectedClientReservationId, setSelectedClientReservationId] = useState(null);
   const baseAdminClients: AdminClient[] = [
@@ -2183,7 +2226,8 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
       seller: "Ana Guardado · VND-017",
     },
   ];
-  const liveClients: AdminClient[] = liveExpedientes.map((liveExpediente) => {
+  void baseAdminClients;
+  const liveClients: AdminClient[] = liveExpedientes.filter((liveExpediente) => liveExpediente.demoPurpose === "operational-scenario").map((liveExpediente) => {
     const liveUnit = [
       liveExpediente.selectedUnit.sector,
       liveExpediente.selectedUnit.towerOrBlock,
@@ -2197,30 +2241,35 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
       expediente_id: liveExpediente.expedienteId,
       unit: liveUnit || liveExpediente.selectedUnit.unitOrLot,
       status: "Expediente inicial",
-      seller: "App Pública de Reservas",
+      seller: liveExpediente.demoPurpose === "operational-scenario" ? "Generador escénico H - OperIA" : "App Pública de Reservas",
       liveExpediente,
     };
   });
-  const adminClients: AdminClient[] = [
-    ...liveClients,
-    ...baseAdminClients.filter((client) => !liveClients.some((liveClient) => liveClient.reservation_id === client.reservation_id)),
-  ];
-  useEffect(() => {
-    const nextSelection = selectedLiveExpedienteReservationId || autoSelectReservationId;
-    if (nextSelection) setSelectedClientReservationId(nextSelection);
-  }, [selectedLiveExpedienteReservationId, autoSelectReservationId]);
+  const adminClients: AdminClient[] = liveClients;
   useEffect(() => {
     if (liveDemoResetToken === 0) return;
     setClientSearch("");
     setSelectedClientReservationId(null);
   }, [liveDemoResetToken]);
+  useEffect(() => {
+    const target = window.sessionStorage.getItem("hoperia.admin.open_operational_expediente");
+    if (!target) return;
+    const match = liveClients.find((client) => client.expediente_id === target || client.reservation_id === target);
+    if (!match) return;
+    setSelectedClientReservationId(match.reservation_id);
+    window.sessionStorage.removeItem("hoperia.admin.open_operational_expediente");
+  }, [liveClients]);
   const normalizedClientSearch = clientSearch.trim().toLowerCase();
-  const effectiveSelectedClientReservationId = selectedClientReservationId || selectedLiveExpedienteReservationId || autoSelectReservationId;
+  const effectiveSelectedClientReservationId = selectedClientReservationId;
   const filteredAdminClients = normalizedClientSearch
     ? adminClients.filter((client) =>
         `${client.name} ${client.reservation_id} ${client.unit} ${client.status}`.toLowerCase().includes(normalizedClientSearch),
       )
     : [];
+  const visibleLiveClients = [...liveClients].sort((a, b) => (b.liveExpediente?.receivedAt || "").localeCompare(a.liveExpediente?.receivedAt || ""));
+  const generalLiveClients = normalizedClientSearch
+    ? visibleLiveClients.filter((client) => `${client.name} ${client.reservation_id}`.toLowerCase().includes(normalizedClientSearch))
+    : visibleLiveClients.slice(0, 10);
   const selectedAdminClient = adminClients.find((client) => client.reservation_id === effectiveSelectedClientReservationId) || null;
   const selectedClientInitials = selectedAdminClient?.name
     .split(" ")
@@ -2230,6 +2279,7 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
     .toUpperCase() || "EV";
   const selectedLiveExpediente = selectedAdminClient?.liveExpediente || null;
   const hasInitialLiveExpediente = selectedLiveExpediente?.status === "initial";
+  const isOperationalScenarioExpediente = selectedLiveExpediente?.demoPurpose === "operational-scenario";
   const hasDetailedDemoFile = !hasInitialLiveExpediente && selectedAdminClient?.reservation_id === "HOP-RES-000784";
   const clientPageBadges = selectedAdminClient
     ? [
@@ -2249,47 +2299,31 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
         badges={clientPageBadges}
         syncNote="Este porcentaje indica qué tan conectado está el expediente post-reserva: Marta acompaña dudas y conversaciones; H - OperIA Intelligence interpreta señales; la vendedora revisa y ejecuta el siguiente paso."
       />
-      {demoEvidenceMirror}
-
       <Card>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <h2 className="text-2xl font-black text-slate-950">Buscar expediente</h2>
+            <h2 className="text-3xl font-black text-slate-950"><Search size={26} className="mr-2 inline" />Buscar por nombre o Reservation ID</h2>
             <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-700">
               Escribe un nombre o reservation_id para abrir un expediente demo. La vista inferior permanece en blanco hasta seleccionar un cliente.
             </p>
           </div>
           <div className="w-full xl:max-w-2xl">
-            <input
+            <div className="flex gap-2"><input
               value={clientSearch}
               onChange={(event) => setClientSearch(event.target.value)}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base font-semibold text-slate-900 outline-none"
-              placeholder="Buscar por nombre o reservation_id"
-            />
+              placeholder="Buscar por nombre o Reservation ID"
+            /><button type="button" className="rounded-2xl bg-blue-700 px-5 py-4 text-sm font-black text-white">Buscar</button>{clientSearch && <button type="button" onClick={() => setClientSearch("")} className="rounded-2xl bg-slate-200 px-5 py-4 text-sm font-black text-slate-900">Limpiar</button>}</div>
           </div>
         </div>
         {liveClients.length > 0 && (
           <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-4">
-            <div className="text-sm font-black text-slate-950">Expedientes Vivos de esta sesión demo · {liveClients.length}</div>
-            <p className="mt-1 text-sm font-semibold leading-6 text-slate-700">El caso principal se mantiene hasta que el presentador seleccione otro expediente vivo.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {liveClients.map((client) => {
-                const isPrincipal = client.reservation_id === selectedLiveExpedienteReservationId;
+            <div className="text-sm font-black text-slate-950">{normalizedClientSearch ? "Resultados de Expedientes Vivos" : "Últimos Expedientes Vivos"} · {generalLiveClients.length}{!normalizedClientSearch && liveClients.length > 10 ? " de 10" : ""}</div>
+            <div className="mt-3 grid gap-2">
+              {generalLiveClients.map((client) => {
+                const expediente = client.liveExpediente;
                 return (
-                  <button
-                    key={client.reservation_id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedClientReservationId(client.reservation_id);
-                      onSelectLiveExpediente?.(client.reservation_id);
-                    }}
-                    className={cls(
-                      "rounded-2xl px-4 py-3 text-left text-sm font-black",
-                      isPrincipal ? "bg-slate-950 text-white" : "bg-white text-slate-900",
-                    )}
-                  >
-                    {client.name} · {client.reservation_id}{isPrincipal ? " · Caso principal" : " · Caso secundario"}
-                  </button>
+                  <div key={client.reservation_id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-sm"><div><strong>{client.name}</strong><div>{client.reservation_id} · {client.unit}</div><div>{expediente?.receivedAt ? new Intl.DateTimeFormat("es-SV", { dateStyle: "short", timeStyle: "short" }).format(new Date(expediente.receivedAt)) : "Sin fecha"}</div></div><div className="flex gap-2"><button type="button" onClick={() => { setSelectedClientReservationId(client.reservation_id); onSelectLiveExpediente?.(client.reservation_id); }} className="rounded-xl bg-slate-950 px-3 py-2 font-black text-white">Abrir</button>{expediente?.isDemo && !expediente.persisted && <button type="button" onClick={() => onDeleteDemoLiveExpediente?.(client.reservation_id)} className="rounded-xl bg-red-100 px-3 py-2 font-black text-red-800">Eliminar expediente demo</button>}</div></div>
                 );
               })}
             </div>
@@ -2353,20 +2387,30 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
 
       {selectedAdminClient && (
         <>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 p-4 sm:p-8" role="dialog" aria-modal="true">
+          <div className="mx-auto max-w-7xl space-y-5 rounded-3xl bg-slate-50 p-4 shadow-2xl sm:p-6">
+            <div className="flex justify-end"><button type="button" onClick={() => setSelectedClientReservationId(null)} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white">Cerrar expediente</button></div>
+          <Card className="border-violet-200 bg-violet-50">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">H - OperIA Intelligence</div>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">Hallazgos y acciones de este expediente</h2>
+            {demoFindings.filter((finding) => finding.demoPurpose === "operational-scenario" && finding.expedienteId === selectedAdminClient.expediente_id).length === 0 ? <p className="mt-3 text-sm font-semibold text-slate-700">No existen hallazgos activos de H - OperIA Intelligence para este expediente.</p> : <div className="mt-4 grid gap-4">{[...demoFindings.filter((finding) => finding.demoPurpose === "operational-scenario" && finding.expedienteId === selectedAdminClient.expediente_id)].sort((left, right) => ({ critical: 4, high: 3, medium: 2, low: 1 }[right.severity] - { critical: 4, high: 3, medium: 2, low: 1 }[left.severity])).map((finding) => <div key={finding.id} className="rounded-3xl border border-violet-100 bg-white p-5"><div className="flex items-center justify-between gap-3"><div className="font-black text-slate-950">{finding.title}</div><Badge tone="violet">Prioridad {finding.severity}</Badge></div><div className="mt-4 grid gap-4 md:grid-cols-2"><div><div className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">Hallazgo detectado</div><p className="mt-2 text-sm font-semibold text-slate-700">{finding.summary}</p><div className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-violet-700">Por qué importa</div><p className="mt-2 text-sm font-semibold text-slate-700">{finding.operationalRecommendation}</p></div><div><div className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">Acción sugerida por H - OperIA Intelligence</div><p className="mt-2 text-sm font-black text-violet-900">{finding.recommendedAction}</p><p className="mt-3 text-sm font-semibold text-slate-700">Responsable: {formatDemoFindingResponsible(finding)}</p>{finding.sourceTimestamp && <p className="mt-2 text-sm font-semibold text-slate-700">Evidencia registrada: {formatDemoDateTime(finding.sourceTimestamp)}</p>}<p className="mt-2 text-sm font-semibold text-slate-700">Analizado por H - OperIA Intelligence: {formatDemoDateTime(finding.generatedAt)}</p></div></div></div>)}</div>}
+          </Card>
           <Card>
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
               <div className="flex gap-5">
                 <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-slate-950 text-3xl font-black text-white">{selectedClientInitials}</div>
                 <div>
                   <div className="flex flex-wrap gap-2">
-                    <Badge tone={hasInitialLiveExpediente ? "blue" : "green"}>{hasInitialLiveExpediente ? "Reserva recibida" : "Expediente seleccionado"}</Badge>
-                    <Badge tone={hasInitialLiveExpediente ? "amber" : "amber"}>{hasInitialLiveExpediente ? "Demo · No persistido" : "Fixture/local demo"}</Badge>
+                    <Badge tone={hasInitialLiveExpediente ? "blue" : "green"}>{isOperationalScenarioExpediente ? "Reserva simulada operacional" : hasInitialLiveExpediente ? "Reserva recibida" : "Expediente seleccionado"}</Badge>
+                    <Badge tone="amber">{isOperationalScenarioExpediente ? "Corrida demostrativa" : hasInitialLiveExpediente ? "Demo · No persistido" : "Fixture/local demo"}</Badge>
                     <Badge tone={hasInitialLiveExpediente ? "slate" : "violet"}>{hasInitialLiveExpediente ? "Marta pendiente / opcional" : "Validación humana requerida"}</Badge>
                   </div>
                   <h2 className="mt-3 text-3xl font-black text-slate-950">Expediente seleccionado</h2>
                   <div className="mt-2 text-base font-black text-slate-800">Titular del expediente: {selectedAdminClient.name}</div>
                   <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
-                    {hasInitialLiveExpediente
+                    {isOperationalScenarioExpediente
+                      ? "Expediente Vivo generado desde una reserva simulada operacional. Basada en el contrato de Reserva Pública y aislada de la experiencia de voluntarios."
+                      : hasInitialLiveExpediente
                       ? "Expediente Vivo inicial recibido desde la App Pública. El snapshot queda disponible para enriquecimiento posterior, sin movimientos posteriores todavía."
                       : "Expediente demo abierto desde una búsqueda explícita. Los datos siguientes son simulados y crecen hacia abajo dentro del expediente del cliente seleccionado."}
                   </p>
@@ -2390,10 +2434,10 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
             <Card className="border-blue-200 bg-blue-50">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div>
-                  <Badge tone="blue">Expediente Vivo inicial</Badge>
-                  <h2 className="mt-3 text-2xl font-black text-slate-950">Reserva completada</h2>
+                  <Badge tone="blue">{isOperationalScenarioExpediente ? "Reserva simulada operacional" : "Expediente Vivo inicial"}</Badge>
+                  <h2 className="mt-3 text-2xl font-black text-slate-950">{isOperationalScenarioExpediente ? "Reserva simulada · Corrida demostrativa" : "Reserva completada"}</h2>
                   <p className="mt-2 max-w-4xl text-base font-semibold leading-7 text-slate-700">
-                    Snapshot recibido desde la App Pública. Marta permanece pendiente y opcional como enriquecimiento posterior.
+                    {isOperationalScenarioExpediente ? "Generado por el motor escénico H - OperIA. No representa una reserva realizada por un voluntario en la App Pública." : "Snapshot recibido desde la App Pública. Marta permanece pendiente y opcional como enriquecimiento posterior."}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-blue-200 bg-white/80 px-4 py-3 text-sm font-bold leading-6 text-slate-700">
@@ -2419,7 +2463,7 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
                 <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <InfoCard title="Titular" value={selectedLiveExpediente.client.firstName + " " + selectedLiveExpediente.client.lastName} detail={`${selectedLiveExpediente.client.email} · ${selectedLiveExpediente.client.phone}`} />
                   <InfoCard title="Unidad" value={selectedAdminClient.unit} detail={selectedLiveExpediente.project.name} />
-                  <InfoCard title="Estado" value="Reserva completada" detail="Sin movimientos posteriores" />
+                  <InfoCard title="Estado" value={isOperationalScenarioExpediente ? "Reserva simulada operacional" : "Reserva completada"} detail="Sin movimientos posteriores" />
                   <InfoCard title="Siguiente paso" value="Marta pendiente / opcional" detail="Enriquecimiento posterior del expediente." />
                 </div>
               </div>
@@ -2429,7 +2473,7 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
                   <div><span className="font-black text-slate-950">Reservation ID:</span> {selectedLiveExpediente.reservationId}</div>
                   <div><span className="font-black text-slate-950">Expediente ID:</span> {selectedLiveExpediente.expedienteId}</div>
                   <div><span className="font-black text-slate-950">Fecha y hora:</span> {formatDemoDateTime(selectedLiveExpediente.receivedAt)}</div>
-                  <div><span className="font-black text-slate-950">Origen:</span> {selectedLiveExpediente.sourceApplication}</div>
+                  <div><span className="font-black text-slate-950">Origen:</span> {isOperationalScenarioExpediente ? "Generador escénico H - OperIA" : selectedLiveExpediente.sourceApplication}</div>
                   <div><span className="font-black text-slate-950">Canal:</span> {selectedLiveExpediente.sourceChannel}</div>
                   <div><span className="font-black text-slate-950">Tipo:</span> {selectedLiveExpediente.selectedUnit.propertyType}</div>
                   <div><span className="font-black text-slate-950">Sector:</span> {selectedLiveExpediente.selectedUnit.sector || "No informado"}</div>
@@ -2508,6 +2552,8 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
       <TrackingBlock tracking={profile.seguimientoOperacional} />
             </>
           )}
+          </div>
+        </div>
         </>
       )}
     </div>
@@ -3250,6 +3296,7 @@ function DemoPage({
   onDemoCommandEvidenceStateChange,
   onOpenPublicReservation,
   onOpenOperationalCase,
+  onSimulatedReservationsLoaded,
   setActive,
 }) {
   const phases = [
@@ -3265,51 +3312,26 @@ function DemoPage({
   const createSimulatedReservationClients = (demoRunId) => {
     const names = ["Carlos Mendez", "Andrea Lopez", "Sofia Rivera", "Mario Hernandez", "Lucia Alvarez", "Roberto Castillo", "Paola Garcia", "Jorge Morales", "Elena Torres", "Diego Ramirez", "Natalia Flores", "Victor Pineda", "Claudia Reyes", "Fernando Ortiz", "Gabriela Cruz", "Ricardo Salazar", "Monica Aguilar", "Hector Vasquez", "Daniela Mejia", "Oscar Campos"];
     const channels = ["App Reservas", "Landing publica", "Referido", "Campana digital"];
-    return names.map((name, index) => ({
+    const hashedOffset = demoRunId.split("").reduce((total, character) => (total * 31 + character.charCodeAt(0)) % names.length, 0);
+    const offset = previousOperationalCohortOffsetRef.current === hashedOffset ? (hashedOffset + 4) % names.length : hashedOffset;
+    previousOperationalCohortOffsetRef.current = offset;
+    return names.map((_, index) => {
+      const name = names[(offset + index) % names.length];
+      return ({
       id: `sim-res-${String(index + 1).padStart(2, "0")}`,
       demoRunId,
       name,
       phone: `+503 7${String(1000000 + index * 317).slice(0, 7)}`,
       unit: `Torre ${index % 3 + 1} · Nivel ${index % 8 + 1} · A${String(701 + index).padStart(3, "0")}`,
       source: channels[index % channels.length],
+      demoPurpose: "operational-scenario" as const,
       reservationStatus: index % 5 === 0 ? "Avanzada" : index % 3 === 0 ? "Completada" : "En progreso",
       createdAt: index < 10 ? `Hoy 3:${String(10 + index).padStart(2, "0")} PM` : `Hoy 4:${String(index - 10).padStart(2, "0")} PM`,
-    }));
+      });
+    });
   };
   const createEvidenceClients = (demoRunId) => {
-    const scopedLiveExpedientes = liveExpedientes.filter((expediente) => expediente.demoRunId === demoRunId);
-    const principal = scopedLiveExpedientes.find(
-      (expediente) => expediente.reservationId === selectedLiveExpedienteReservationId,
-    );
-    const orderedLiveExpedientes = principal
-      ? [principal, ...scopedLiveExpedientes.filter((expediente) => expediente.reservationId !== principal.reservationId)]
-      : scopedLiveExpedientes;
-    const liveEvidenceClients = orderedLiveExpedientes.map((expediente) => ({
-      id: expediente.reservationId,
-      demoRunId,
-      reservationId: expediente.reservationId,
-      expedienteId: expediente.expedienteId,
-      name: `${expediente.client.firstName} ${expediente.client.lastName}`.trim(),
-      phone: expediente.client.phone,
-      email: expediente.client.email,
-      unit: [
-        expediente.selectedUnit.sector,
-        expediente.selectedUnit.towerOrBlock,
-        expediente.selectedUnit.level,
-        expediente.selectedUnit.model,
-        expediente.selectedUnit.unitOrLot,
-      ].filter(Boolean).join(" · "),
-      propertyType: expediente.selectedUnit.propertyType,
-      sector: expediente.selectedUnit.sector,
-      towerOrBlock: expediente.selectedUnit.towerOrBlock,
-      level: expediente.selectedUnit.level,
-      model: expediente.selectedUnit.model,
-      source: `${expediente.sourceApplication} · ${expediente.sourceChannel}`,
-      reservationStatus: "Completada",
-      createdAt: expediente.receivedAt,
-    }));
-    const fixtureClients = createSimulatedReservationClients(demoRunId);
-    return [...liveEvidenceClients, ...fixtureClients];
+    return createSimulatedReservationClients(demoRunId);
   };
   const createSimulatedInternalMessages = (demoRunId, clients) => {
     const topics = ["Coordinacion con vendedora", "Alerta de documentos", "Consulta de pagos", "Seguimiento de cita", "Prioridad comercial"];
@@ -3318,6 +3340,9 @@ function DemoPage({
     return clients.map((client, index) => ({
       id: `sim-msg-${String(index + 1).padStart(2, "0")}`,
       demoRunId,
+      demoPurpose: "operational-scenario" as const,
+      reservationId: client.reservationId,
+      expedienteId: client.expedienteId,
       relatedClientName: client.name,
       fromRole: fromRoles[index % fromRoles.length],
       toRole: toRoles[index % toRoles.length],
@@ -3335,6 +3360,9 @@ function DemoPage({
     return clients.map((client, index) => ({
       id: `sim-seller-${String(index + 1).padStart(2, "0")}`,
       demoRunId,
+      demoPurpose: "operational-scenario" as const,
+      reservationId: client.reservationId,
+      expedienteId: client.expedienteId,
       clientName: client.name,
       sellerName: sellers[index % sellers.length],
       interactionType: interactionTypes[index % interactionTypes.length],
@@ -3361,8 +3389,11 @@ function DemoPage({
         urgencyLevel: index % 5 === 0 ? "Alta" : index % 2 === 0 ? "Media" : "Baja",
       };
       return {
-        id: `sim-vapi-${String(index + 1).padStart(2, "0")}`,
-        demoRunId,
+      id: `sim-vapi-${String(index + 1).padStart(2, "0")}`,
+      demoRunId,
+      demoPurpose: "operational-scenario" as const,
+      reservationId: client.reservationId,
+      expedienteId: client.expedienteId,
         clientName: client.name,
         callId: `call_${demoRunId.replace("demo-", "").slice(0, 8)}_${String(index + 1).padStart(2, "0")}`,
         assistantName: "Marta",
@@ -3415,6 +3446,11 @@ function DemoPage({
   const [vapiStatus, setVapiStatus] = useState("Pendiente");
   const [activeDemoContext, setActiveDemoContext] = useState(null as null | { demoRunId: string; prospectCompanyName: string; projectName: string; scenarioName: string; status: string; injectedAt: string });
   const [simulatedReservationClients, setSimulatedReservationClients] = useState<any[]>([]);
+  const [scenarioClients, setScenarioClients] = useState<any[]>([]);
+  const [preparedScenario, setPreparedScenario] = useState<any>(null);
+  const [auditResult, setAuditResult] = useState<ScenarioAuditResult | null>(null);
+  const [auditStatus, setAuditStatus] = useState<"not-audited" | "audited" | "approved">("not-audited");
+  const [approved, setApproved] = useState(false);
   const [simulatedInternalMessages, setSimulatedInternalMessages] = useState<any[]>([]);
   const [simulatedSellerReports, setSimulatedSellerReports] = useState<any[]>([]);
   const [simulatedVapiCallLogs, setSimulatedVapiCallLogs] = useState<any[]>([]);
@@ -3429,6 +3465,7 @@ function DemoPage({
   const [selectedBreakdowns, setSelectedBreakdowns] = useState(["Ingresos netos por canal y campaña", "Riesgos financieros, documentales y de escrituración"]);
   const [executiveResponseReady, setExecutiveResponseReady] = useState(false);
   const phaseSectionRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const previousOperationalCohortOffsetRef = useRef<number | null>(null);
   const publicReservationUrl = parseUrlSafely(PUBLIC_RESERVATION_APP_URL);
   const currentAdminUrl = typeof window !== "undefined" ? new URL(window.location.href) : null;
   const localHosts = ["localhost", "127.0.0.1"];
@@ -3587,6 +3624,16 @@ function DemoPage({
   const phaseFiveFindings = simulatedIntelligenceSignals.length
     ? simulatedIntelligenceSignals
     : demoFindings;
+  const phaseFiveClientSummaries = Object.values(phaseFiveFindings.reduce((groups, finding) => {
+    if (finding.demoPurpose !== "operational-scenario" || !finding.expedienteId) return groups;
+    const key = `${finding.demoRunId}:${finding.expedienteId}`;
+    (groups[key] ||= []).push(finding);
+    return groups;
+  }, {} as Record<string, any[]>)).map((findings: any[]) => {
+    const ranked = [...findings].sort((left, right) => ({ critical: 4, high: 3, medium: 2, low: 1 }[right.severity] - { critical: 4, high: 3, medium: 2, low: 1 }[left.severity]));
+    const primary = ranked[0];
+    return { ...primary, id: `${primary.expedienteId}-summary`, findingCount: findings.length, summary: ranked.slice(0, 2).map((finding) => finding.summary).join(" "), recommendedAction: primary.recommendedAction, generatedAt: primary.generatedAt };
+  });
   const phaseFiveHasFindings = phaseFiveFindings.length > 0;
   const phaseFiveDemoActive = phaseFiveHasFindings;
   const demoRunIdShort = effectiveDemoContext ? effectiveDemoContext.demoRunId.replace("demo-", "").slice(0, 8) : "Sin demo activa";
@@ -3618,6 +3665,11 @@ function DemoPage({
     setVapiStatus("Pendiente");
     setActiveDemoContext(null);
     setSimulatedReservationClients([]);
+    setScenarioClients([]);
+    setPreparedScenario(null);
+    setAuditResult(null);
+    setAuditStatus("not-audited");
+    setApproved(false);
     setSimulatedInternalMessages([]);
     setSimulatedSellerReports([]);
     setSimulatedVapiCallLogs([]);
@@ -3660,6 +3712,7 @@ function DemoPage({
       finding?.adminTarget ||
       adminTargetsByPage[finding?.adminPage];
     if (!menu.some((item) => item.id === target)) return;
+    if (target === "client" && (finding?.expedienteId || finding?.reservationId)) window.sessionStorage.setItem("hoperia.admin.open_operational_expediente", finding.expedienteId || finding.reservationId);
     setActive(target);
     if (finding?.adminTargetAnchor) {
       window.setTimeout(() => {
@@ -3814,7 +3867,7 @@ function DemoPage({
     setMartaStatus("Conversación analizada");
     setVapiStatus("Abierto");
   };
-  const injectSimulatedData = (quantities: {
+  const generateSimulatedScenario = (quantities: {
     reservations: number;
     messages: number;
     sellerReports: number;
@@ -3826,10 +3879,12 @@ function DemoPage({
     if (!activeDemoSession) return;
     const nextDemoRunId = activeDemoSession.demoRunId;
     const evidenceClients = createEvidenceClients(nextDemoRunId);
-    const nextReservationClients = evidenceClients.slice(0, quantities.reservations);
-    const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, evidenceClients).slice(0, quantities.messages);
-    const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, evidenceClients).slice(0, quantities.sellerReports);
-    const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, evidenceClients).slice(0, quantities.vapiLogs);
+    const nextReservationClients = (evidenceClients as any[]).slice(0, quantities.reservations).map((client) => ({ ...client, demoPurpose: "operational-scenario" as const, reservationId: client.reservationId || `DEMO-RES-${nextDemoRunId}-${client.id}`, expedienteId: client.expedienteId || `DEMO-EXP-${nextDemoRunId}-${client.id}`, createdAt: new Date().toISOString() }));
+    const distributeRoundRobin = (count: number) => nextReservationClients.length === 0 ? [] : Array.from({ length: count }, (_, index) => nextReservationClients[index % nextReservationClients.length]);
+    const nextInternalMessages = createSimulatedInternalMessages(nextDemoRunId, distributeRoundRobin(quantities.messages)).map((record) => ({ ...record, sourceEntityId: record.id }));
+    const nextSellerReports = createSimulatedSellerReports(nextDemoRunId, distributeRoundRobin(quantities.sellerReports)).map((record) => ({ ...record, sourceEntityId: record.id }));
+    const nextVapiCallLogs = createSimulatedVapiCallLogs(nextDemoRunId, distributeRoundRobin(quantities.vapiLogs)).map((record) => ({ ...record, sourceEntityId: record.id }));
+    const nextScenarioClients = nextReservationClients.map((reservation) => ({ demoRunId: nextDemoRunId, demoPurpose: "operational-scenario" as const, reservationId: reservation.reservationId, expedienteId: reservation.expedienteId, client: reservation, reservation, martaSignals: nextVapiCallLogs.filter((record) => record.reservationId === reservation.reservationId), commercialFollowUps: nextSellerReports.filter((record) => record.reservationId === reservation.reservationId), internalMessages: nextInternalMessages.filter((record) => record.reservationId === reservation.reservationId), evidence: [] }));
     const nextMartaWhatsAppFollowups = [];
     const generatedAt = new Date().toISOString();
     const nextDemoContext = {
@@ -3840,25 +3895,76 @@ function DemoPage({
       status: "injected",
       injectedAt: new Date(generatedAt).toLocaleString("es-SV", { dateStyle: "short", timeStyle: "short" }),
     };
+    const operationalReservationClients = nextReservationClients.filter((record) => record.demoPurpose === "operational-scenario");
+    const operationalInternalMessages = nextInternalMessages.filter((record) => record.demoPurpose === "operational-scenario");
+    const operationalSellerReports = nextSellerReports.filter((record) => record.demoPurpose === "operational-scenario");
+    const operationalVapiCallLogs = nextVapiCallLogs.filter((record) => record.demoPurpose === "operational-scenario");
     const nextIntelligenceSignals = deriveDemoFindings({
       demoRunId: nextDemoRunId,
       generatedAt,
-      reservationClients: nextReservationClients,
-      internalMessages: nextInternalMessages,
-      sellerReports: nextSellerReports,
-      vapiCallLogs: nextVapiCallLogs,
+      reservationClients: operationalReservationClients,
+      internalMessages: operationalInternalMessages,
+      sellerReports: operationalSellerReports,
+      vapiCallLogs: operationalVapiCallLogs,
     });
     const nextOperationalEvidence = createSimulatedOperationalEvidence(nextDemoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, nextMartaWhatsAppFollowups);
     setSimulatedReservationClients(nextReservationClients);
+    setScenarioClients(nextScenarioClients);
+    onSimulatedReservationsLoaded?.(nextReservationClients);
     setSimulatedInternalMessages(nextInternalMessages);
     setSimulatedSellerReports(nextSellerReports);
     setSimulatedVapiCallLogs(nextVapiCallLogs);
     setSimulatedMartaWhatsAppFollowups(nextMartaWhatsAppFollowups);
-    setSimulatedIntelligenceSignals(nextIntelligenceSignals);
-    onDemoContextInjected?.(nextDemoContext);
-    onDemoFindingsInjected?.(nextIntelligenceSignals);
-    setSimulatedOperationalEvidence(nextOperationalEvidence);
-    setActiveDemoContext(nextDemoContext);
+    setPreparedScenario({ context: nextDemoContext, requestedCounts: { reservations: quantities.reservations, vapiLogs: quantities.vapiLogs, sellerReports: quantities.sellerReports, messages: quantities.messages }, reservationClients: nextReservationClients, internalMessages: nextInternalMessages, sellerReports: nextSellerReports, vapiCallLogs: nextVapiCallLogs, martaWhatsAppFollowups: nextMartaWhatsAppFollowups, intelligenceSignals: nextIntelligenceSignals, operationalEvidence: nextOperationalEvidence });
+    setAuditResult(null);
+    setAuditStatus("not-audited");
+    setApproved(false);
+  };
+  const runScenarioAudit = () => {
+    const demoRunId = activeDemoSession?.demoRunId;
+    if (!preparedScenario || !demoRunId) return;
+    const result = auditScenarioClients(scenarioClients, liveExpedientes, demoRunId, preparedScenario.requestedCounts);
+    setAuditResult(result);
+    setAuditStatus("audited");
+    setApproved(false);
+  };
+  const regenerateRejected = () => {
+    const demoRunId = activeDemoSession?.demoRunId;
+    const repairableIssues = auditResult?.issues.filter((item) => item.severity === "repairable") || [];
+    if (!preparedScenario || !demoRunId || repairableIssues.length === 0) return;
+    const { scenarios: nextScenarioClients } = repairScenarioClients(scenarioClients, repairableIssues, demoRunId);
+    const nextVapiCallLogs = nextScenarioClients.flatMap((scenario) => scenario.martaSignals || []);
+    const nextSellerReports = nextScenarioClients.flatMap((scenario) => scenario.commercialFollowUps || []);
+    const nextInternalMessages = nextScenarioClients.flatMap((scenario) => scenario.internalMessages || []);
+    const nextReservationClients = nextScenarioClients.map((scenario) => scenario.reservation);
+    const nextIntelligenceSignals = deriveDemoFindings({ demoRunId, generatedAt: new Date().toISOString(), reservationClients: nextReservationClients.filter((record) => record.demoPurpose === "operational-scenario"), internalMessages: nextInternalMessages.filter((record) => record.demoPurpose === "operational-scenario"), sellerReports: nextSellerReports.filter((record) => record.demoPurpose === "operational-scenario"), vapiCallLogs: nextVapiCallLogs.filter((record) => record.demoPurpose === "operational-scenario") });
+    const nextOperationalEvidence = createSimulatedOperationalEvidence(demoRunId, nextReservationClients, nextInternalMessages, nextSellerReports, nextIntelligenceSignals, nextVapiCallLogs, preparedScenario.martaWhatsAppFollowups || []);
+    const nextAuditResult = auditScenarioClients(nextScenarioClients, liveExpedientes, demoRunId, preparedScenario.requestedCounts);
+    setScenarioClients(nextScenarioClients);
+    setSimulatedReservationClients(nextReservationClients);
+    setSimulatedVapiCallLogs(nextVapiCallLogs);
+    setSimulatedSellerReports(nextSellerReports);
+    setSimulatedInternalMessages(nextInternalMessages);
+    setPreparedScenario({ ...preparedScenario, reservationClients: nextReservationClients, internalMessages: nextInternalMessages, sellerReports: nextSellerReports, vapiCallLogs: nextVapiCallLogs, intelligenceSignals: nextIntelligenceSignals, operationalEvidence: nextOperationalEvidence });
+    setApproved(false);
+    setAuditResult(nextAuditResult);
+    setAuditStatus("audited");
+  };
+  const hasBlockingAuditIssues = Boolean(auditResult && (auditResult.critical > 0 || auditResult.repairable > 0));
+  const canApprove = Boolean(preparedScenario && auditResult && auditStatus === "audited" && !hasBlockingAuditIssues);
+  const canInject = Boolean(preparedScenario && auditResult && auditStatus === "approved" && approved && !hasBlockingAuditIssues && activeDemoSession && !simulatedDataInjected);
+  const approveScenario = () => {
+    if (!canApprove) return;
+    setApproved(true);
+    setAuditStatus("approved");
+  };
+  const injectSimulatedData = () => {
+    if (!canInject || !preparedScenario) return;
+    setSimulatedIntelligenceSignals(preparedScenario.intelligenceSignals);
+    onDemoContextInjected?.(preparedScenario.context);
+    onDemoFindingsInjected?.(preparedScenario.intelligenceSignals);
+    setSimulatedOperationalEvidence(preparedScenario.operationalEvidence);
+    setActiveDemoContext(preparedScenario.context);
     setReservationStatus({ reservation: "Validada", whatsapp: "Confirmado", email: "Confirmado", evidence: "Generada" });
     completePhase(4);
   };
@@ -4224,10 +4330,18 @@ function DemoPage({
           whatsappFollowups: simulatedMartaWhatsAppFollowups.length,
           evidence: simulatedOperationalEvidence.length,
         }}
-        onInjectSimulatedData={injectSimulatedData}
+        hasScenario={Boolean(preparedScenario)}
+        auditResult={auditResult}
+        auditStatus={auditStatus}
+        approved={approved}
+        canApprove={canApprove}
+        canInject={canInject}
+        onGenerate={generateSimulatedScenario}
+        onAudit={runScenarioAudit}
+        onRegenerateRejected={regenerateRejected}
+        onApprove={approveScenario}
+        onInject={injectSimulatedData}
         resetToken={demoSessionResetToken}
-        persistedState={demoCommandEvidenceState}
-        onPersistState={onDemoCommandEvidenceStateChange}
       />
       {simulatedDataInjected && (
         <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -4329,107 +4443,36 @@ function DemoPage({
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             <InfoCard title="Empresa demo activa" value={effectiveDemoContext?.prospectCompanyName || "Sin demo activa"} detail="Contexto escénico posterior a FASE 04." />
             <InfoCard title="Proyecto demo activo" value={effectiveDemoContext?.projectName || "Proyecto de Empresa Demo"} detail="Base operativa interpretada por H - OperIA Intelligence." />
-            <InfoCard title="Estado de hallazgos" value={phaseFiveDemoActive ? "Pendiente de verificación" : "Pendiente de corrida"} detail="Los enlaces son simulados y no activan rutas reales." />
+            <InfoCard title="Estado de hallazgos" value={phaseFiveDemoActive ? "Pendiente de verificación" : "Pendiente de corrida"} detail="Los hallazgos permiten abrir directamente el Expediente Vivo correspondiente dentro de esta demostración." />
           </div>
         </Card>
         <Card>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h3 className="text-3xl font-black text-slate-950">Hallazgos prioritarios cargados en Admin</h3>
-              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Cada hallazgo muestra qué detectó Intelligence, por qué importa, quién debe actuar, qué acción ejecutar y dónde abrir la evidencia operacional.</p>
+              <h3 className="text-3xl font-black text-slate-950">Clientes que requieren atención</h3>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-700">Índice ejecutivo por cliente. El detalle de cada hallazgo y su evidencia se consulta dentro del Expediente Vivo.</p>
             </div>
-            <Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveFindings.length} hallazgos</Badge>
+            <Badge tone={phaseFiveDemoActive ? "green" : "amber"}>{phaseFiveClientSummaries.length} clientes con atención</Badge>
           </div>
           <div className="mt-5 grid gap-4">
-            {phaseFiveFindings.map((signal, index) => (
+            {phaseFiveClientSummaries.map((signal: any) => (
               <div key={signal.id} className="rounded-3xl border border-violet-100 bg-violet-50 p-5">
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge tone="dark">Hallazgo {index + 1}</Badge>
-                      <Badge tone="blue">{demoAdminPageLabels[signal.adminTargetPage] || signal.adminTargetPage}</Badge>
+                      <Badge tone="dark">{signal.findingCount} hallazgos</Badge>
                       <Badge tone={demoFindingSeverityTone[signal.severity] || "violet"}>{demoFindingSeverityLabels[signal.severity] || signal.severity}</Badge>
                     </div>
-                    <h4 className="mt-3 text-xl font-black text-slate-950">{signal.title || signal.adminTargetSection}</h4>
+                    <h4 className="mt-3 text-xl font-black text-slate-950">{signal.clientName || "Cliente operacional"}</h4>
                   </div>
                   <Badge tone="amber">{demoVisibleStatusLabels[signal.visibleStatus] || signal.visibleStatus}</Badge>
                 </div>
-                <div className="mt-4 grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
-                  <div className="rounded-2xl bg-white p-4">
-                    <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Hallazgo detectado</div>
-                    <p className="mt-2 text-base font-semibold leading-7 text-slate-800">{signal.summary}</p>
-                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Por qué importa</div>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{signal.operationalRecommendation}</p>
-                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-violet-700">Acción sugerida por H - OperIA Intelligence</div>
-                    <p className={`mt-2 text-sm leading-6 ${intelligenceActionTextClass}`}>{signal.recommendedAction}</p>
-                    <button type="button" onClick={() => onOpenOperationalCase?.(signal)} className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">Abrir caso operacional</button>
-                  </div>
-                  <div className="rounded-2xl bg-white p-4">
-                    <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Fuente del dato</div>
-                    <p className="mt-2 text-base font-black text-slate-950">{demoFindingSourceLabels[signal.source] || signal.source}</p>
-                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Responsable</div>
-                    <p className="mt-2 text-base font-black text-slate-950">{formatDemoFindingResponsible(signal)}</p>
-                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Corrida demo</div>
-                    <p className="mt-2 text-sm font-bold text-slate-700">{signal.demoRunId ? signal.demoRunId.replace("demo-", "").slice(0, 8) : demoRunIdShort} · simulada · no persistida</p>
-                    <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-600">Ver evidencias en Admin</div>
-                    <div className="mt-2 grid gap-2">
-                      {(signal.associatedEvidence.length ? signal.associatedEvidence : [{
-                        id: `${signal.id}-admin-target`,
-                        label: signal.adminTargetSection,
-                        summary: signal.title || signal.adminTargetSection,
-                        source: signal.source,
-                        adminTargetPage: signal.adminTargetPage,
-                        adminTargetSection: signal.adminTargetSection,
-                      }]).map((evidence, evidenceIndex) => {
-                        const evidenceTarget = {
-                          ...signal,
-                          adminTargetPage: evidence.adminTargetPage || signal.adminTargetPage,
-                          adminTargetAnchor: evidence.adminTargetAnchor,
-                        };
-                        const targetPageLabel = demoAdminPageLabels[evidence.adminTargetPage || signal.adminTargetPage] || evidence.adminTargetPage || signal.adminTargetPage;
-                        const targetSectionLabel = evidence.adminTargetSection || signal.adminTargetSection;
-                        const targetDetailLabel = evidence.adminTargetDetail || evidence.summary;
-                        return (
-                          <button key={evidence.id} type="button" onClick={() => openAdminFinding(evidenceTarget)} className="flex items-start gap-3 rounded-2xl bg-slate-950 px-4 py-3 text-left text-sm font-black leading-6 text-white">
-                            <span className="shrink-0 text-white/70">{evidenceIndex + 1}.</span>
-                            <span className="min-w-0">
-                              <ExternalLink size={16} className="mr-2 inline" />{targetPageLabel} -&gt; {targetSectionLabel}{targetDetailLabel ? ` -> ${targetDetailLabel}` : ""}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {signal.associatedEvidence.length > 0 && (
-                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                        <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Evidencia asociada</div>
-                        {signal.associatedEvidence.map((evidence) => (
-                          <div key={evidence.id} className="mt-2 rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
-                            <Database size={15} className="mr-2 inline" />{evidence.label}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {(signal.externalVerification || signal.supabaseTable) && (
-                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                        {signal.externalVerification && (
-                          <>
-                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Verificación externa prevista</div>
-                            <button type="button" onClick={(event) => event.preventDefault()} className="mt-2 inline-flex items-center rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
-                              <ExternalLink size={15} className="mr-2" />{signal.externalVerification === "Supabase" ? "Validación externa futura" : signal.externalVerification}
-                            </button>
-                          </>
-                        )}
-                        {signal.supabaseTable && (
-                          <div className="mt-3">
-                            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Referencia técnica prevista</div>
-                            <div className="mt-2 inline-flex items-center rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm">
-                              <Database size={15} className="mr-2" />{signal.supabaseTable}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <div className="mt-4 rounded-2xl bg-white p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Situación principal</div>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{signal.summary}</p>
+                  <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-violet-700">Siguiente acción</div>
+                  <p className={`mt-2 text-sm leading-6 ${intelligenceActionTextClass}`}>{signal.recommendedAction}</p>
+                  <button type="button" onClick={() => openAdminFinding({ ...signal, adminTargetPage: "client" })} className="mt-4 rounded-2xl bg-violet-700 px-4 py-3 text-sm font-black text-white">Ver detalles y acciones en el Expediente Vivo de {signal.clientName || "este cliente"}</button>
                 </div>
               </div>
             ))}

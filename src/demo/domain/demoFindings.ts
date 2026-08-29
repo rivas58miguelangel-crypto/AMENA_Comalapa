@@ -51,10 +51,14 @@ export interface DemoFindingEvidence {
 export interface DemoInjectedFinding {
   id: string;
   demoRunId: string;
+  demoPurpose?: "operational-scenario" | "volunteer-experience";
+  reservationId?: string;
+  clientName?: string;
   title: string;
   summary: string;
   severity: DemoFindingSeverity;
   source: DemoFindingSource;
+  sourceType?: string;
   adminTargetPage: DemoAdminTargetPage;
   adminTargetSection: string;
   operationalRecommendation: string;
