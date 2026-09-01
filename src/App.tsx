@@ -2228,7 +2228,7 @@ function ExecutivePage({ demoFindings = [], setActive }) {
   );
 }
 
-function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExpedienteReservationId = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, onSelectLiveExpediente, onDeleteDemoLiveExpediente, onOpenOperationalCase, setActive }) {
+function ClientPage({ demoFindings = [], activeDemoSession = null, liveExpedientes = [], selectedLiveExpedienteReservationId = null, autoSelectReservationId = null, liveDemoResetToken = 0, reservationReplayStatus = "idle", onRequestReservationReplay, onSelectLiveExpediente, onDeleteDemoLiveExpediente, onOpenOperationalCase, setActive }) {
   const profile = clientOperationalProfile;
   const [clientSearch, setClientSearch] = useState("");
   const [selectedClientReservationId, setSelectedClientReservationId] = useState(null);
@@ -2257,7 +2257,17 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
     },
   ];
   void baseAdminClients;
-  const liveClients: AdminClient[] = liveExpedientes.filter((liveExpediente) => liveExpediente.demoPurpose === "operational-scenario").map((liveExpediente) => {
+  const activeDemoRunId = activeDemoSession?.demoRunId || null;
+  const activeFindingExpedienteIds = new Set(
+    demoFindings
+      .filter((finding) => finding.demoPurpose === "operational-scenario" && finding.demoRunId === activeDemoRunId && finding.expedienteId)
+      .map((finding) => finding.expedienteId),
+  );
+  const liveClients: AdminClient[] = liveExpedientes.filter((liveExpediente) =>
+    liveExpediente.demoPurpose === "operational-scenario" &&
+    liveExpediente.demoRunId === activeDemoRunId &&
+    activeFindingExpedienteIds.has(liveExpediente.expedienteId),
+  ).map((liveExpediente) => {
     const liveUnit = [
       liveExpediente.selectedUnit.sector,
       liveExpediente.selectedUnit.towerOrBlock,
@@ -2281,14 +2291,6 @@ function ClientPage({ demoFindings = [], liveExpedientes = [], selectedLiveExped
     setClientSearch("");
     setSelectedClientReservationId(null);
   }, [liveDemoResetToken]);
-  useEffect(() => {
-    const target = window.sessionStorage.getItem("hoperia.admin.open_operational_expediente");
-    if (!target) return;
-    const match = liveClients.find((client) => client.expediente_id === target || client.reservation_id === target);
-    if (!match) return;
-    setSelectedClientReservationId(match.reservation_id);
-    window.sessionStorage.removeItem("hoperia.admin.open_operational_expediente");
-  }, [liveClients]);
   const normalizedClientSearch = clientSearch.trim().toLowerCase();
   const effectiveSelectedClientReservationId = selectedClientReservationId;
   const filteredAdminClients = normalizedClientSearch
@@ -3661,7 +3663,7 @@ function DemoPage({
     return groups;
   }, {} as Record<string, any[]>)).map((findings: any[]) => {
     const ranked = [...findings].sort((left, right) => ({ critical: 4, high: 3, medium: 2, low: 1 }[right.severity] - { critical: 4, high: 3, medium: 2, low: 1 }[left.severity]));
-    const primary = ranked[0];
+    const primary = { ...ranked[0], findingBriefs: ranked.map((finding) => ({ id: finding.id, title: finding.title, summary: finding.summary, severity: finding.severity })) };
     return { ...primary, id: `${primary.expedienteId}-summary`, findingCount: findings.length, summary: ranked.slice(0, 2).map((finding) => finding.summary).join(" "), recommendedAction: primary.recommendedAction, generatedAt: primary.generatedAt };
   });
   const phaseFiveHasFindings = phaseFiveFindings.length > 0;
@@ -3742,7 +3744,6 @@ function DemoPage({
       finding?.adminTarget ||
       adminTargetsByPage[finding?.adminPage];
     if (!menu.some((item) => item.id === target)) return;
-    if (target === "client" && (finding?.expedienteId || finding?.reservationId)) window.sessionStorage.setItem("hoperia.admin.open_operational_expediente", finding.expedienteId || finding.reservationId);
     setActive(target);
     if (finding?.adminTargetAnchor) {
       window.setTimeout(() => {
@@ -4498,11 +4499,15 @@ function DemoPage({
                   <Badge tone="amber">{demoVisibleStatusLabels[signal.visibleStatus] || signal.visibleStatus}</Badge>
                 </div>
                 <div className="mt-4 rounded-2xl bg-white p-4">
-                  <div className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Situación principal</div>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{signal.summary}</p>
-                  <div className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-violet-700">Siguiente acción</div>
-                  <p className={`mt-2 text-sm leading-6 ${intelligenceActionTextClass}`}>{signal.recommendedAction}</p>
-                  <button type="button" onClick={() => openAdminFinding({ ...signal, adminTargetPage: "client" })} className="mt-4 rounded-2xl bg-violet-700 px-4 py-3 text-sm font-black text-white">Ver detalles y acciones en el Expediente Vivo de {signal.clientName || "este cliente"}</button>
+                  {signal.reservationId && <p className="text-xs font-bold text-slate-600">Reservation ID: {signal.reservationId}</p>}
+                  <div className="mt-3 space-y-2">
+                    {signal.findingBriefs.map((finding) => (
+                      <div key={finding.id} className="border-l-2 border-violet-200 pl-3 text-sm leading-6 text-slate-800">
+                        <span className="font-black text-slate-950">{finding.title}:</span> {finding.summary}
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => openAdminFinding({ ...signal, adminTargetPage: "client" })} className="mt-4 rounded-2xl bg-violet-700 px-4 py-3 text-sm font-black text-white">Abrir Expediente Vivo</button>
                 </div>
               </div>
             ))}
