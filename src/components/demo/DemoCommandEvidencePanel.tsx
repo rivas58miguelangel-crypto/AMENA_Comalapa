@@ -31,6 +31,8 @@ type DemoCommandEvidencePanelProps = {
   simulatedDataInjected: boolean;
   counts: DemoEvidenceCounts;
   onInjectSimulatedData: (quantities: DemoInjectionQuantities) => void;
+  hasActiveDemoSession: boolean;
+  resetToken?: number;
   persistedState?: DemoCommandEvidencePanelState | null;
   onPersistState?: (state: DemoCommandEvidencePanelState | null) => void;
 };
@@ -130,9 +132,16 @@ export default function DemoCommandEvidencePanel({
   simulatedDataInjected,
   counts,
   onInjectSimulatedData,
+  hasActiveDemoSession,
+  resetToken = 0,
   persistedState = null,
   onPersistState,
 }: DemoCommandEvidencePanelProps) {
+  const previousResetTokenRef = useRef(resetToken);
+  const shouldResetRunState = resetToken !== previousResetTokenRef.current;
+  if (shouldResetRunState) {
+    previousResetTokenRef.current = resetToken;
+  }
   const [auditStatus, setAuditStatus] = useState(persistedState?.auditStatus || "Pendiente de auditoría");
   const [flowStatus, setFlowStatus] = useState<ScenicFlowStatus>(persistedState?.flowStatus || "idle");
   const [rejectedRegenerated, setRejectedRegenerated] = useState(persistedState?.rejectedRegenerated || false);
@@ -152,6 +161,20 @@ export default function DemoCommandEvidencePanel({
   );
   const [loadedCounts, setLoadedCounts] = useState<DemoEvidenceCounts | null>(persistedState?.loadedCounts || null);
   const [loadedAt, setLoadedAt] = useState(persistedState?.loadedAt || "");
+  useEffect(() => {
+    if (resetToken === 0) return;
+
+    setAuditStatus("Pendiente de auditoría");
+    setFlowStatus("idle");
+    setRejectedRegenerated(false);
+    setQuantities(defaultQuantities);
+    setProspectCompanyName("Empresa Demo");
+    setProjectName("Proyecto de Empresa Demo");
+    setScenarioName("Lanzamiento comercial de proyecto habitacional");
+    setLoadedCounts(null);
+    setLoadedAt("");
+    onPersistState?.(null);
+  }, [resetToken, onPersistState]);
   const updateQuantity = (
     key: keyof DemoInjectionQuantities,
     value: string,
@@ -179,6 +202,7 @@ export default function DemoCommandEvidencePanel({
   };
   useEffect(() => {
     if (!onPersistState) return;
+    if (shouldResetRunState) return;
     const hasMeaningfulState = flowStatus !== "idle" || loadedCounts !== null;
     if (!hasMeaningfulState) return;
 
@@ -286,7 +310,8 @@ export default function DemoCommandEvidencePanel({
   const canApproveData = (hasAuditedData || hasRegeneratedRejectedRows) && !hasRejectedRows;
   const canInjectDemo =
     (flowStatus === "approved" || flowStatus === "injected") &&
-    !hasRejectedRows;
+    !hasRejectedRows &&
+    hasActiveDemoSession;
   const flowLabel =
     flowStatus === "idle"
       ? "Pendiente de generación"
@@ -538,7 +563,9 @@ export default function DemoCommandEvidencePanel({
         <div className="mt-5 flex flex-col gap-3 rounded-3xl border border-amber-100 bg-white p-5 xl:flex-row xl:items-center xl:justify-between">
           <p className="text-sm font-semibold leading-6 text-slate-700">
             H - OperIA Intelligence no genera datos simulados en esta fase; su
-            interpretación comienza en la FASE 05. La carga queda en memoria local de la demo.
+            interpretación comienza en la FASE 05. {hasActiveDemoSession
+              ? "La carga quedará en memoria local de esta sesión demo activa."
+              : "Inicia una sesión demo para habilitar la carga local."}
           </p>
           <button
             disabled={!canInjectDemo}
