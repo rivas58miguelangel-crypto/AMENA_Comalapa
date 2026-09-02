@@ -136,3 +136,29 @@ La presentación breve preparada el 31-08-2026 es material inicial y deberá act
 Solo se creó este documento de transición. No se modificó código de aplicación ni documentación fundacional. El cambio único fue publicado en `centro-mando-admin10`; los archivos relacionados, incluido `C:\Amena\Codex\AMENA_Reservas_Publica_Ruta2\src\App.tsx`, no fueron incluidos.
 
 La continuidad AMENA 94 queda autorizada desde el punto exacto indicado en la sección 8, sujeto a nueva certificación operativa cuando se intervenga cualquier repositorio o se prepare el VPS.
+
+## 11. ADENDA — CERTIFICACIÓN FUNCIONAL DEL CICLO DE RETORNO
+
+**Fecha:** 2 de septiembre de 2026 (America/Guatemala)
+**Alcance:** certificación funcional puntual del ciclo `Expediente Vivo → Mensajería Operacional → aporte humano → ACK → actualización del mismo hallazgo → evidencia incorporada`.
+
+### Hechos certificados
+
+1. Los expedientes y hallazgos utilizados provenían de una corrida simulada previamente generada y ya verificada.
+2. Desde esa corrida existente se abrió el Expediente Vivo de **Andrea Lopez**.
+3. Desde un hallazgo de ese expediente se abrió correctamente Mensajería Operacional mediante **ABRIR GRUPO Y PARTICIPAR**.
+4. Mensajería recibió el caso integrado correcto.
+5. Se registró un aporte humano.
+6. El aporte fue aceptado mediante ACK.
+7. Mensajería mostró **Aporte incorporado al Expediente Vivo**.
+8. Al regresar al Centro Demo sin recargar, el mismo hallazgo apareció como **Actualizado** y mostró **Aportes del equipo**, preservando autor, tipo, texto y fecha, sin duplicación visible.
+
+### Precisión de alcance
+
+Durante esta comprobación **no** se volvió a ejecutar FASE 04, ni se regeneraron, auditaron, aprobaron o cargaron datos simulados. La generación, auditoría, aprobación y carga de FASE 04, así como la creación de clientes y hallazgos de FASE 05, pertenecían a una corrida previa ya verificada. No hubo cambios de código posteriores conocidos en ese tramo durante esta certificación puntual.
+
+### Dictamen
+
+**SEMÁFORO VERDE** para el ciclo pendiente certificado. La integración preserva identidad de caso, confirma el aporte mediante ACK y reincorpora la evidencia al mismo hallazgo dentro del Expediente Vivo.
+
+No se modificó código, configuración, despliegue ni ningún repositorio operativo durante esta certificación. Esta adenda es exclusivamente documental y no autoriza cambios posteriores sin la verificación y el alcance que correspondan.
